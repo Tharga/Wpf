@@ -7,6 +7,7 @@ using System.Reflection;
 using Quilt4Net.Ioc;
 using Tharga.Wpf.Framework.Exception;
 using Tharga.Wpf.Framework;
+using Tharga.Wpf.Features.ApplicationUpdate;
 
 namespace Tharga.Wpf;
 
@@ -29,12 +30,15 @@ public class ThargaWpfOptions
 
 public static class ThargaWpfExtensions
 {
-    public static void RegisterServiceProvider(this IContainerRegistry containerRegistry, Action<ThargaWpfOptions> options)
+    public static void RegisterServiceProvider(this IContainerRegistry containerRegistry, Action<ThargaWpfOptions> options = default)
     {
         var o = new ThargaWpfOptions();
         options?.Invoke(o);
 
+        containerRegistry.RegisterSingleton<IApplicationUpdateStateService, ApplicationUpdateStateService>();
+        containerRegistry.RegisterSingleton<IWindowLocationService, WindowLocationService>();
         containerRegistry.RegisterSingleton<ServiceControl>(ServiceControl.GetServiceControl);
+
         containerRegistry.RegisterSingleton<IHttpClientFactory>(provider =>
         {
             var serviceControl = provider.Resolve<ServiceControl>();

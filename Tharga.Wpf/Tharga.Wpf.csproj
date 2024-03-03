@@ -37,7 +37,4 @@
 		<InternalsVisibleTo Include="Tharga.Wpf.Tests" />
 		<InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
 	</ItemGroup>
-	<ItemGroup>
-	  <Folder Include="Features\" />
-	</ItemGroup>
 </Project>
