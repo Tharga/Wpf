@@ -15,7 +15,7 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
     private readonly System.Timers.Timer _timer;
     private readonly string _environmentName;
     private readonly string _version;
-    private Splash _splash;
+    private ISplash _splash;
     private Window _mainWindow;
     private int _checkCounter;
 
@@ -123,7 +123,15 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
     private void ShowSplash(bool firstRun, string entryMessage = null)
     {
         if (_splash != null) return;
-        _splash = new Splash(_mainWindow, firstRun, _environmentName, _version, entryMessage);
+        var splashData = new SplashData
+        {
+            MainWindow = _mainWindow,
+            FirstRun = firstRun,
+            EnvironmentName = _environmentName,
+            Version = _version,
+            EntryMessage = entryMessage,
+        };
+        _splash = _options.SplashCreator?.Invoke(splashData) ?? new Splash(splashData);
         UpdateInfoEvent += (_, args) => _splash?.UpdateInfo(args.Message);
         _splash.Show();
     }

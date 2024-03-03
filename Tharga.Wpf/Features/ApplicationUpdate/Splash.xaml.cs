@@ -2,11 +2,11 @@
 
 namespace Tharga.Wpf.Features.ApplicationUpdate;
 
-public partial class Splash
+public partial class Splash : ISplash
 {
-    public Splash(Window mainWindow, bool firstRun, string environmentName, string version, string entryMessage)
+    public Splash(SplashData splashData)
     {
-        Owner = mainWindow;
+        Owner = splashData.MainWindow;
         Topmost = true;
 
         MouseDown += (s, e) =>
@@ -18,9 +18,9 @@ public partial class Splash
 
         Messages.Items.MoveCurrentToLast();
         //FirstRun.Visibility = firstRun ? Visibility.Visible : Visibility.Collapsed;
-        if (!string.IsNullOrEmpty(entryMessage)) Messages.Items.Add(entryMessage);
-        if (!string.IsNullOrEmpty(environmentName)) Environment.Text = environmentName;
-        if (!string.IsNullOrEmpty(environmentName)) Version.Text = version;
+        if (!string.IsNullOrEmpty(splashData.EntryMessage)) Messages.Items.Add(splashData.EntryMessage);
+        if (!string.IsNullOrEmpty(splashData.EnvironmentName)) Environment.Text = splashData.EnvironmentName;
+        if (!string.IsNullOrEmpty(splashData.Version)) Version.Text = splashData.Version;
     }
 
     public void UpdateInfo(string message)

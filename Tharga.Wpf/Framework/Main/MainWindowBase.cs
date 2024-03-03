@@ -24,7 +24,7 @@ public abstract class MainWindowBase : Fluent.RibbonWindow
             _configuration = configuration;
             //    _apiHealthService = apiHealthService;
             //    _tabNavigationService = tabNavigationService;
-            //    _applicationUpdateService = applicationUpdateService;
+            _applicationUpdateService = applicationUpdateService;
             //    _authenticationStateService = authenticationStateService;
 
             //    //TODO: Replace with check. If the application was closed with this window opened, then open it here. (Save with same mechanism as the windows size position and column width)
