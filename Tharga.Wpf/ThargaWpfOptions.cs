@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using Microsoft.Extensions.DependencyInjection;
 using Tharga.Wpf.Features.ApplicationUpdate;
 using Tharga.Wpf.Framework.Exception;
 
@@ -11,6 +12,12 @@ public class ThargaWpfOptions
     public Func<SplashData, ISplash> SplashCreator { get; set; }
 
     private readonly ConcurrentDictionary<Type, Type> _exceptionTypes = new();
+    //private readonly IList<Action<IServiceCollection>> _serviceRegistrations = new List<Action<IServiceCollection>>();
+
+    //public void RegisterService(Action<IServiceCollection> serviceCollection)
+    //{
+    //    _serviceRegistrations.Add(serviceCollection);
+    //}
 
     public void RegisterExceptionHandler<THandler, TException>()
         where THandler : IExceptionHandler<TException>
@@ -19,8 +26,6 @@ public class ThargaWpfOptions
         _exceptionTypes.TryAdd(typeof(TException), typeof(THandler));
     }
 
-    public IDictionary<Type, Type> GetExceptionTypes()
-    {
-        return _exceptionTypes;
-    }
+    internal IDictionary<Type, Type> GetExceptionTypes() => _exceptionTypes;
+    //internal IEnumerable<Action<IServiceCollection>> GetServiceRegistrations() => _serviceRegistrations;
 }

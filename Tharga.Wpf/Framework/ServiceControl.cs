@@ -8,6 +8,7 @@ namespace Tharga.Wpf.Framework;
 public class ServiceControl
 {
     public ServiceProvider ServiceProvider { get; }
+    public IEnumerable<object> Services => ServiceProvider.GetServices<object>();
 
     private ServiceControl(ServiceProvider serviceProvider)
     {
@@ -26,13 +27,14 @@ public class ServiceControl
             return builder.Build();
         });
 
+        //TODO: Make this custom, since the config section might differ for different projects
         services.AddHttpClient<HttpClient>("Api", (serviceProvider, httpClient) =>
         {
             var configuration = serviceProvider.GetService<IConfiguration>();
             httpClient.BaseAddress = Uri.TryCreate(configuration.GetSection("ApiUri").Value, UriKind.Absolute, out var apiAdr) ? apiAdr : throw new InvalidOperationException();
         });
-        var serviceProvider = services.BuildServiceProvider();
 
+        var serviceProvider = services.BuildServiceProvider();
         return new ServiceControl(serviceProvider);
     }
 }
