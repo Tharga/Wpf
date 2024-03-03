@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net8.0</TargetFramework>
+		<TargetFramework>net8.0-windows</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Version>1.0.0</Version>
 		<Authors>Daniel Bohlin</Authors>
@@ -26,10 +26,18 @@
 		</None>
 	</ItemGroup>
 	<ItemGroup>
+		<PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" />
+		<PackageReference Include="Fluent.Ribbon" Version="10.0.4" />
+		<PackageReference Include="Prism.Unity" Version="8.1.97" />
 		<PackageReference Include="System.Linq.Async" Version="6.0.1" />
+		<PackageReference Include="Quilt4Net.Logger" Version="3.2.9" />
 	</ItemGroup>
 	<ItemGroup>
 		<InternalsVisibleTo Include="Tharga.Wpf.Tests" />
 		<InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Folder Include="Features\" />
 	</ItemGroup>
 </Project>
