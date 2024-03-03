@@ -58,11 +58,20 @@ public abstract class MainWindowBase : Fluent.RibbonWindow
 
         //var statusBarModel = UpdateClientInfo(_dataContext);
         //statusBarModel = await UpdateServerInfo(_dataContext, statusBarModel);
-        //await CheckForClientUpdate(_dataContext, statusBarModel);
+        await CheckForClientUpdate(); //_dataContext, statusBarModel);
         //_dataContext.LoginCommand.Execute(null);
 
         //_windowLocationService.AttachProperty(nameof(MainWindow), _dataContext, nameof(MainWindowViewModel.UiScale));
         //_windowLocationService.AttachProperty(nameof(MainWindow), _dataContext, nameof(MainWindowViewModel.TabUiScale));
+    }
+
+    private async Task CheckForClientUpdate() //MainWindowViewModel dataContext, StatusBarModel statusBarModel)
+    {
+        //_applicationUpdateService.UpdateInfoEvent += (_, e) =>
+        //{
+        //    dataContext.OnStatusBar(statusBarModel with { ClientUpdateInfo = e.Message });
+        //};
+        await _applicationUpdateService.StartUpdateLoop();
     }
 
     private async void OnClosing(object sender, System.ComponentModel.CancelEventArgs e)

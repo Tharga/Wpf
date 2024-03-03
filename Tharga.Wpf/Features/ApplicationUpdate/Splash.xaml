@@ -1,0 +1,28 @@
+﻿<Window x:Class="Tharga.Wpf.Features.ApplicationUpdate.Splash"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Tharga.Wpf.Features.ApplicationUpdate"
+        mc:Ignorable="d"
+        Title="Splash"
+        Height="250" Width="400"
+        WindowStyle="None" ShowInTaskbar="false" AllowsTransparency="True"
+        Background="White"
+        WindowStartupLocation="CenterScreen" Topmost="false"
+        BorderThickness="1" BorderBrush="Gray"
+        >
+    <Grid>
+        <ListBox x:Name="Messages" Background="White" Margin="85,90,85,55" Opacity=".8" FontWeight="Bold">
+            <ListBox.ItemContainerStyle>
+                <Style TargetType="ListBoxItem">
+                    <Setter Property="Height" Value="22" />
+                </Style>
+            </ListBox.ItemContainerStyle>
+        </ListBox>
+        <TextBlock x:Name="Environment" FontSize="12" Margin="10,20,0,0" d:Text="Environment" />
+        <TextBlock x:Name="Version" FontSize="12" Margin="10,34,0,0" d:Text="1.0.0.0" />
+        <TextBox x:Name="ErrorMessage" FontSize="10" Margin="5,155,5,5" d:Text="Error message" d:Visibility="Visible" Visibility="Collapsed" IsReadOnly="true" />
+        <Button x:Name="CloseButton" Click="ButtonBase_OnClick" Visibility="Collapsed" MinWidth="80" HorizontalAlignment="Right" VerticalAlignment="Bottom" d:Visibility="Visible" Margin="0,0,10,10" Opacity=".3">Close</Button>
+    </Grid>
+</Window>

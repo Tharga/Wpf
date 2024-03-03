@@ -1,37 +1,32 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
+﻿using System.Diagnostics;
+using System.IO;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Squirrel;
 
 namespace Tharga.Wpf.Features.ApplicationUpdate;
 
 internal class ApplicationUpdateStateService : IApplicationUpdateStateService
 {
-//    private readonly ICommunicationService _communicationService;
-//    private readonly ITabNavigationStateService _tabNavigationService;
+    private readonly ThargaWpfOptions _options;
     private readonly ILogger _logger;
     private readonly System.Timers.Timer _timer;
     private readonly string _environmentName;
-//    private readonly string _version;
-//    private Splash _splash;
+    private readonly string _version;
+    private Splash _splash;
     private Window _mainWindow;
-//    private int _checkCounter;
+    private int _checkCounter;
 
-    public ApplicationUpdateStateService(IConfiguration configuration, ILogger logger) //, ICommunicationService communicationService, ITabNavigationStateService tabNavigationService)
+    public ApplicationUpdateStateService(IConfiguration configuration, ThargaWpfOptions options, ILogger logger)
     {
-//        _communicationService = communicationService;
-//        _tabNavigationService = tabNavigationService;
+        _options = options;
         _logger = logger;
         _environmentName = configuration.GetSection("Environment").Value;
-//        _version = Assembly.GetExecutingAssembly().GetName().Version?.ToString();
+        _version = Assembly.GetExecutingAssembly().GetName().Version?.ToString();
 
-//        SquirrelAwareApp.HandleEvents(OnInitialInstall, OnAppInstall, OnAppObsoleted, OnAppUninstall, OnEveryRun);
+        SquirrelAwareApp.HandleEvents(OnInitialInstall, OnAppInstall, OnAppObsoleted, OnAppUninstall, OnEveryRun);
 
         var interval = _environmentName == "Production" ? TimeSpan.FromHours(1) : TimeSpan.FromMinutes(1);
         _timer = new System.Timers.Timer { AutoReset = true, Enabled = false, Interval = interval.TotalMilliseconds };
@@ -50,153 +45,152 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
 
     public event EventHandler<UpdateInfoEventArgs> UpdateInfoEvent;
 
-    //    //NOTE: Initial Install
-    //    private void OnInitialInstall(SemanticVersion version, IAppTools tools)
-    //    {
-    //        try
-    //        {
-    //            var name = GetShortcutName();
+    //NOTE: Initial Install
+    private void OnInitialInstall(SemanticVersion version, IAppTools tools)
+    {
+        try
+        {
+            var name = GetShortcutName();
 
-    //            CreateShortcut();
+            CreateShortcut();
 
-    //            ShowSplash(false, $"Installerar {name}.");
-    //        }
-    //        catch (Exception e)
-    //        {
-    //            _logger.LogError(e, e.Message);
-    //            MessageBox.Show(e.Message, "Initial Install", MessageBoxButton.OK, MessageBoxImage.Error);
-    //        }
-    //    }
+            ShowSplash(false, $"Installerar {name}.");
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, e.Message);
+            MessageBox.Show(e.Message, "Initial Install", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
 
-    //    //NOTE: Updated to new version
-    //    private void OnAppInstall(SemanticVersion version, IAppTools tools)
-    //    {
-    //        try
-    //        {
-    //            var name = GetShortcutName();
-    //        }
-    //        catch (Exception e)
-    //        {
-    //            _logger.LogError(e, e.Message);
-    //        }
-    //    }
+    //NOTE: Updated to new version
+    private void OnAppInstall(SemanticVersion version, IAppTools tools)
+    {
+        try
+        {
+            var name = GetShortcutName();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, e.Message);
+        }
+    }
 
-    //    //NOTE: Called when the app is no longer the latest version (A new version is installed)
-    //    private void OnAppObsoleted(SemanticVersion version, IAppTools tools)
-    //    {
-    //        try
-    //        {
-    //            var name = GetShortcutName();
-    //        }
-    //        catch (Exception e)
-    //        {
-    //            _logger.LogError(e, e.Message);
-    //        }
-    //    }
+    //NOTE: Called when the app is no longer the latest version (A new version is installed)
+    private void OnAppObsoleted(SemanticVersion version, IAppTools tools)
+    {
+        try
+        {
+            var name = GetShortcutName();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, e.Message);
+        }
+    }
 
-    //    //NOTE: Called when the app in uninstalled
-    //    private void OnAppUninstall(SemanticVersion version, IAppTools tools)
-    //    {
-    //        try
-    //        {
-    //            var name = GetShortcutName();
+    //NOTE: Called when the app in uninstalled
+    private void OnAppUninstall(SemanticVersion version, IAppTools tools)
+    {
+        try
+        {
+            var name = GetShortcutName();
 
-    //            RemoveShortcut(name);
+            ShortcutHelper.RemoveShortcut(name);
 
-    //            ShowSplash(false, $"Avinstallerar {name}.");
-    //        }
-    //        catch (Exception e)
-    //        {
-    //            _logger.LogError(e, e.Message);
-    //        }
-    //    }
+            ShowSplash(false, $"Avinstallerar {name}.");
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, e.Message);
+        }
+    }
 
-    //    //NOTE: Starts on every run
-    //    private void OnEveryRun(SemanticVersion version, IAppTools tools, bool firstRun)
-    //    {
-    //        try
-    //        {
-    //            tools.SetProcessAppUserModelId();
-    //            ShowSplash(firstRun);
-    //        }
-    //        catch (Exception e)
-    //        {
-    //            _logger.LogError(e, e.Message);
-    //        }
-    //    }
+    //NOTE: Starts on every run
+    private void OnEveryRun(SemanticVersion version, IAppTools tools, bool firstRun)
+    {
+        try
+        {
+            tools.SetProcessAppUserModelId();
+            ShowSplash(firstRun);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, e.Message);
+        }
+    }
 
-    //    private void ShowSplash(bool firstRun, string entryMessage = null)
-    //    {
-    //        if (_splash != null) return;
-    //        _splash = new Splash(_mainWindow, firstRun, _environmentName, _version, entryMessage);
-    //        UpdateInfoEvent += (_, args) => _splash?.UpdateInfo(args.Message);
-    //        _splash.Show();
-    //    }
+    private void ShowSplash(bool firstRun, string entryMessage = null)
+    {
+        if (_splash != null) return;
+        _splash = new Splash(_mainWindow, firstRun, _environmentName, _version, entryMessage);
+        UpdateInfoEvent += (_, args) => _splash?.UpdateInfo(args.Message);
+        _splash.Show();
+    }
 
     private async Task UpdateClientApplication()
     {
-        //        var splashDelay = TimeSpan.FromSeconds(2);
-        //        string clientLocation = null;
-        //        _checkCounter++;
+        var splashDelay = TimeSpan.FromSeconds(2);
+        string clientLocation = null;
+        _checkCounter++;
 
-        //        try
-        //        {
-        //            UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs("Letar efter uppdatering."));
+        try
+        {
+            UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs("Letar efter uppdatering."));
 
-        //            var response = await _communicationService.GetAsync<HealthCheck>(EController.HealthCheck);
-        //            clientLocation = response.ClientLocation;
+            //var response = await _communicationService.GetAsync<HealthCheck>(EController.HealthCheck);
+            //clientLocation = response.ClientLocation;
 
-        //            using var mgr = new UpdateManager(clientLocation);
-        //            if (!mgr.IsInstalledApp)
-        //            {
-        //                var message = Debugger.IsAttached ? $"Florida körs i debuggläge ({_checkCounter})." : $"Florida är inte installerat ({_checkCounter}).";
-        //                //TODO: Start fast when developing... splashDelay = TimeSpan.Zero;
-        //                //splashDelay = TimeSpan.FromSeconds(10);
-        //                UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs(message));
-        //                return;
-        //            }
+            using var mgr = new UpdateManager(clientLocation);
+            if (!mgr.IsInstalledApp)
+            {
+                var message = Debugger.IsAttached ? $"Florida körs i debuggläge ({_checkCounter})." : $"Florida är inte installerat ({_checkCounter}).";
+                //TODO: Start fast when developing... splashDelay = TimeSpan.Zero;
+                //splashDelay = TimeSpan.FromSeconds(10);
+                UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs(message));
+                return;
+            }
 
-        //            var updateInfo = await mgr.CheckForUpdate();
-        //            if (updateInfo.CurrentlyInstalledVersion.Version == updateInfo.FutureReleaseEntry.Version)
-        //            {
-        //                UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs($"Senaste versionen är installerad ({_checkCounter})."));
-        //                return;
-        //            }
+            var updateInfo = await mgr.CheckForUpdate();
+            if (updateInfo.CurrentlyInstalledVersion.Version == updateInfo.FutureReleaseEntry.Version)
+            {
+                UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs($"Senaste versionen är installerad ({_checkCounter})."));
+                return;
+            }
 
-        //            ShowSplash(false);
+            ShowSplash(false);
 
-        //            UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs($"Uppdaterar till version {updateInfo.FutureReleaseEntry.Version}."));
+            UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs($"Uppdaterar till version {updateInfo.FutureReleaseEntry.Version}."));
 
-        //            var newVersion = await mgr.UpdateApp();
-        //            if (newVersion != null)
-        //            {
-        //                await _tabNavigationService.CloseAllTabsAsync(true);
+            var newVersion = await mgr.UpdateApp();
+            if (newVersion != null)
+            {
+                //TODO: Force termination
+                //await _tabNavigationService.CloseAllTabsAsync(true);
 
-        //                UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs("Startar om."));
-        //                UpdateManager.RestartApp();
-        //            }
-        //        }
-        //        catch (Exception e)
-        //        {
-        //            _logger.LogError(e, e.Message);
-        //            var message = $"Uppdateringen misslyckades ({_checkCounter}).";
-        //            UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs(message));
-        //            _splash?.SetErrorMessage($"{e.Message}\n{clientLocation}\n@{e.StackTrace})");
+                UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs("Startar om."));
+                UpdateManager.RestartApp();
+            }
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, e.Message);
+            var message = $"Uppdateringen misslyckades ({_checkCounter}).";
+            UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs(message));
+            _splash?.SetErrorMessage($"{e.Message}\n{clientLocation}\n@{e.StackTrace})");
+            _splash?.ShowCloseButton();
+            splashDelay = TimeSpan.FromMinutes(5);
+        }
+        finally
+        {
+            if (_splash != null)
+            {
+                await Task.Delay(splashDelay);
+                _splash?.Close();
+            }
 
-        //            _splash?.ShowCloseButton();
-        //            splashDelay = TimeSpan.FromMinutes(5);
-        //        }
-        //        finally
-        //        {
-        //            if (_splash != null)
-        //            {
-        //                await Task.Delay(splashDelay);
-        //                _splash?.Close();
-        //            }
-        //            _splash = null;
-        //        }
-        Debugger.Break();
-        throw new NotImplementedException();
+            _splash = null;
+        }
     }
 
     public async Task StartUpdateLoop()
@@ -211,30 +205,36 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
     public void AttachMainWindow(Window mainWindow)
     {
         _mainWindow = mainWindow;
-        //_splash?.SetOwner(_mainWindow); //TODO: Implement
+        _splash?.SetOwner(_mainWindow);
     }
 
-    //    private void CreateShortcut()
-    //    {
-    //        var baseDirectory = GetDirectory();
-    //        var path = Path.Combine(baseDirectory, "Tharga.Florida.Client.exe");
-    //        var iconPath = Path.Combine(baseDirectory, "app.ico");
+    private void CreateShortcut()
+    {
+        var entryAssembly = Assembly.GetEntryAssembly();
+        var assemblyLocation = entryAssembly?.Location ?? throw new InvalidOperationException("Cannot find entry assembly.");
+        var pos = assemblyLocation.LastIndexOf("\\", StringComparison.Ordinal);
+        var exeName = assemblyLocation?.Substring(pos + 1).Replace(".dll", ".exe");
 
-    //        var iconInfo = new IconInfo { Path = iconPath };
-    //        var name = GetShortcutName();
-    //        ShortcutHelper.CreateShortcut(path, name, "Florida kassa", iconInfo);
-    //    }
+        var baseDirectory = GetDirectory();
+        var path = Path.Combine(baseDirectory, exeName);
+        var iconPath = Path.Combine(baseDirectory, "app.ico");
 
-    //    private static string GetDirectory()
-    //    {
-    //        var baseDirectory = SquirrelRuntimeInfo.BaseDirectory;
-    //        var pos = baseDirectory.TrimEnd('\\').LastIndexOf("\\", StringComparison.Ordinal);
-    //        baseDirectory = baseDirectory.Substring(0, pos);
-    //        return baseDirectory;
-    //    }
+        var iconInfo = new ShortcutHelper.IconInfo { Path = iconPath };
+        var name = GetShortcutName();
+        ShortcutHelper.CreateShortcut(path, name, _options.ApplicationFullName, iconInfo);
+    }
 
-    //    private string GetShortcutName()
-    //    {
-    //        return _environmentName == "Production" ? "Florida" : $"Florida {_environmentName}";
-    //    }
+    private static string GetDirectory()
+    {
+        var baseDirectory = SquirrelRuntimeInfo.BaseDirectory;
+        var pos = baseDirectory.TrimEnd('\\').LastIndexOf("\\", StringComparison.Ordinal);
+        baseDirectory = baseDirectory.Substring(0, pos);
+        return baseDirectory;
+    }
+
+    private string GetShortcutName()
+    {
+        var name = _options.ApplicationShortName;
+        return _environmentName == "Production" ? name : $"{name} {_environmentName}";
+    }
 }

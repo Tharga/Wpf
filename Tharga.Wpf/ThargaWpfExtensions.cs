@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+﻿using System.Net.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -11,31 +11,23 @@ using Tharga.Wpf.Features.ApplicationUpdate;
 
 namespace Tharga.Wpf;
 
-public class ThargaWpfOptions
-{
-    private readonly ConcurrentDictionary<Type, Type> _exceptionTypes = new();
-
-    public void RegisterExceptionHandler<THandler, TException>()
-        where THandler : IExceptionHandler<TException>
-        where TException : Exception
-    {
-        _exceptionTypes.TryAdd(typeof(TException), typeof(THandler));
-    }
-
-    public IDictionary<Type, Type> GetExceptionTypes()
-    {
-        return _exceptionTypes;
-    }
-}
-
 public static class ThargaWpfExtensions
 {
     public static void RegisterServiceProvider(this IContainerRegistry containerRegistry, Action<ThargaWpfOptions> options = default)
     {
-        var o = new ThargaWpfOptions();
+        var o = new ThargaWpfOptions
+        {
+            ApplicationFullName = Assembly.GetEntryAssembly()?.GetName().Name ?? throw new InvalidOperationException($"Cannot find name from entry assembly. Provide the option {nameof(ThargaWpfOptions.ApplicationFullName)} to set the full name of the application."),
+            ApplicationShortName = Assembly.GetEntryAssembly()?.GetName().Name ?? throw new InvalidOperationException($"Cannot find name from entry assembly. Provide the option {nameof(ThargaWpfOptions.ApplicationShortName)} to set the short name of the application.")
+        };
         options?.Invoke(o);
 
-        containerRegistry.RegisterSingleton<IApplicationUpdateStateService, ApplicationUpdateStateService>();
+        containerRegistry.RegisterSingleton<IApplicationUpdateStateService>(c =>
+        {
+            var configuration = c.Resolve<IConfiguration>();
+            var logger = c.Resolve<ILogger>();
+            return new ApplicationUpdateStateService(configuration, o, logger);
+        });
         containerRegistry.RegisterSingleton<IWindowLocationService, WindowLocationService>();
         containerRegistry.RegisterSingleton<ServiceControl>(ServiceControl.GetServiceControl);
 

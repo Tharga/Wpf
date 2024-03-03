@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Timers;
 using System.Windows;
 using Microsoft.Extensions.Logging;
