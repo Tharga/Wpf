@@ -27,7 +27,7 @@ public class RelayCommand : ICommand
         }
         catch (System.Exception exception)
         {
-            exception.FallbackHandler(GetType());
+            exception.FallbackHandler(this);
         }
     }
 

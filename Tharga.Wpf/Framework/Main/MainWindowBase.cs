@@ -38,7 +38,7 @@ public abstract class MainWindowBase : Fluent.RibbonWindow
         }
         catch (System.Exception e)
         {
-            exceptionStateService.FallbackHandler(e);
+            e.FallbackHandler(this);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System.Collections.Concurrent;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Prism.Ioc;
@@ -9,10 +10,30 @@ using Tharga.Wpf.Framework;
 
 namespace Tharga.Wpf;
 
+public class ThargaWpfOptions
+{
+    private readonly ConcurrentDictionary<Type, Type> _exceptionTypes = new();
+
+    public void RegisterExceptionHandler<THandler, TException>()
+        where THandler : IExceptionHandler<TException>
+        where TException : Exception
+    {
+        _exceptionTypes.TryAdd(typeof(TException), typeof(THandler));
+    }
+
+    public IDictionary<Type, Type> GetExceptionTypes()
+    {
+        return _exceptionTypes;
+    }
+}
+
 public static class ThargaWpfExtensions
 {
-    public static void RegisterServiceProvider(this IContainerRegistry containerRegistry)
+    public static void RegisterServiceProvider(this IContainerRegistry containerRegistry, Action<ThargaWpfOptions> options)
     {
+        var o = new ThargaWpfOptions();
+        options?.Invoke(o);
+
         containerRegistry.RegisterSingleton<ServiceControl>(ServiceControl.GetServiceControl);
         containerRegistry.RegisterSingleton<IHttpClientFactory>(provider =>
         {
@@ -27,7 +48,16 @@ public static class ThargaWpfExtensions
             return configuration;
         });
 
-        containerRegistry.RegisterSingleton<IExceptionStateService, ExceptionStateService>();
+        foreach (var exceptionType in o.GetExceptionTypes())
+        {
+            containerRegistry.Register(exceptionType.Value);
+        }
+
+        containerRegistry.RegisterSingleton<IExceptionStateService>(c =>
+        {
+            var logger = c.Resolve < ILogger>();
+            return new ExceptionStateService(c, logger, o.GetExceptionTypes());
+        });
 
         containerRegistry.RegisterSingleton<ILoggerProvider>(c =>
         {

@@ -1,28 +1,50 @@
 ﻿using System.Diagnostics;
 using System.Windows;
 using Microsoft.Extensions.Logging;
+using Prism.Ioc;
 
 namespace Tharga.Wpf.Framework.Exception;
 
 internal class ExceptionStateService : IExceptionStateService
 {
+    private readonly IContainerProvider _containerProvider;
     private readonly ILogger _logger;
+    private readonly IDictionary<Type, Type> _exceptionHandlers;
     private Window _mainWindow;
 
-    public ExceptionStateService(ILogger logger)
+    public ExceptionStateService(IContainerProvider containerProvider, ILogger logger, IDictionary<Type, Type> exceptionHandlers)
     {
+        _containerProvider = containerProvider;
         _logger = logger;
+        _exceptionHandlers = exceptionHandlers;
     }
 
     private static event EventHandler<HandleExceptionEventArgs> HandleExceptionEvent;
 
-    public static void FallbackHandler(object sender, System.Exception exception)
+    public void AttachMainWindow(Window mainWindow)
+    {
+        if (_mainWindow != null) throw new InvalidOperationException("The main window has already been attached.");
+
+        HandleExceptionEvent += (_, e) => { FallbackHandlerInternal(e.Exception); };
+
+        _mainWindow = mainWindow;
+    }
+
+    internal static void FallbackHandler(object sender, System.Exception exception)
     {
         HandleExceptionEvent?.Invoke(sender, new HandleExceptionEventArgs(exception));
     }
 
-    public void FallbackHandler(System.Exception exception)
+    private void FallbackHandlerInternal(System.Exception exception)
     {
+        if (_exceptionHandlers.TryGetValue(exception.GetType(), out var handlerType))
+        {
+            var handler = _containerProvider.Resolve(handlerType);
+            var method = handler.GetType().GetMethod(nameof(IExceptionHandler<System.Exception>.Handle));
+            method?.Invoke(handler, [_mainWindow, exception]);
+            return;
+        }
+
         var exceptionTypeName = exception.GetType().Name;
         var message = exception.InnerException?.Message.NullIfEmpty() ?? exception.Message.NullIfEmpty() ?? exceptionTypeName;
         if (_mainWindow != null)
@@ -33,14 +55,6 @@ internal class ExceptionStateService : IExceptionStateService
                 case nameof(InvalidOperationException):
                     MessageBox.Show(_mainWindow, message, "Oups", MessageBoxButton.OK, MessageBoxImage.Error);
                     break;
-                //TODO: Must be able to implement different cases here in local application here
-                //case nameof(FortnoxException):
-                //    var fortnoxException = exception as FortnoxException;
-                //    //TODO: If fortnoxException is of type 'RefreshFortnoxLinkException', then help the user to create the connection
-                //    message = message.Replace("Request failed: ", "");
-                //    Debugger.Break();
-                //    MessageBox.Show(_mainWindow, message, "Fortnox", MessageBoxButton.OK, MessageBoxImage.Error);
-                //    break;
                 default:
                     Debugger.Break();
                     MessageBox.Show(_mainWindow, $"{message}\n\n@{exception.StackTrace}", $"Unhandled ({exceptionTypeName})", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -57,14 +71,5 @@ internal class ExceptionStateService : IExceptionStateService
         }
 
         _logger?.LogError(exception, exception.Message);
-    }
-
-    public void AttachMainWindow(Window mainWindow)
-    {
-        if (_mainWindow != null) throw new InvalidOperationException("The main window has already been attached.");
-
-        HandleExceptionEvent += (_, e) => { FallbackHandler(e.Exception); };
-
-        _mainWindow = mainWindow;
     }
 }
