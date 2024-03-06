@@ -7,7 +7,7 @@ using System.Windows;
 using Microsoft.Extensions.Logging;
 using Timer = System.Timers.Timer;
 
-namespace Tharga.Wpf.Framework;
+namespace Tharga.Wpf.Features.WindowLocation;
 
 internal class WindowLocationService : IWindowLocationService
 {
@@ -75,7 +75,7 @@ internal class WindowLocationService : IWindowLocationService
                 var metadata = string.Join("|", _lastLocation.Metadata.Select(x => $"{x.Key}:{x.Value}"));
                 File.WriteAllText(_fileLocation, $"{_name};{_lastLocation.WindowState};{_lastLocation.Left};{_lastLocation.Top};{_lastLocation.Width};{_lastLocation.Height};{metadata}");
             }
-            catch (System.Exception exception)
+            catch (Exception exception)
             {
                 _logger?.LogError(exception, exception.Message);
                 Debugger.Break();
@@ -117,7 +117,7 @@ internal class WindowLocationService : IWindowLocationService
 
                 return location;
             }
-            catch (System.Exception exception)
+            catch (Exception exception)
             {
                 _logger?.LogError(exception, exception.Message);
                 Debugger.Break();
@@ -174,7 +174,7 @@ internal class WindowLocationService : IWindowLocationService
                         _timer.Start();
                     }
                 }
-                catch (System.Exception exception)
+                catch (Exception exception)
                 {
                     _logger?.LogError(exception, exception.Message);
                     Debugger.Break();
@@ -199,7 +199,7 @@ internal class WindowLocationService : IWindowLocationService
                 {
                 }
             }
-            catch (System.Exception exception)
+            catch (Exception exception)
             {
                 _logger?.LogError(exception, exception.Message);
                 Debugger.Break();

@@ -1,6 +1,6 @@
-﻿namespace Tharga.Wpf;
+﻿namespace Tharga.Wpf.Framework;
 
-public static class StringExtensions
+internal static class StringExtensions
 {
     public static string NullIfEmpty(this string item)
     {

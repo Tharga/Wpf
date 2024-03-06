@@ -1,20 +1,19 @@
 ﻿using System.Diagnostics;
 using System.Windows;
 using Microsoft.Extensions.Logging;
-using Prism.Ioc;
 
 namespace Tharga.Wpf.Framework.Exception;
 
 internal class ExceptionStateService : IExceptionStateService
 {
-    private readonly IContainerProvider _containerProvider;
+    private readonly IServiceProvider _serviceProvider;
     private readonly ILogger _logger;
     private readonly IDictionary<Type, Type> _exceptionHandlers;
     private Window _mainWindow;
 
-    public ExceptionStateService(IContainerProvider containerProvider, ILogger logger, IDictionary<Type, Type> exceptionHandlers)
+    public ExceptionStateService(IServiceProvider serviceProvider, ILogger logger, IDictionary<Type, Type> exceptionHandlers)
     {
-        _containerProvider = containerProvider;
+        _serviceProvider = serviceProvider;
         _logger = logger;
         _exceptionHandlers = exceptionHandlers;
     }
@@ -39,7 +38,7 @@ internal class ExceptionStateService : IExceptionStateService
     {
         if (_exceptionHandlers.TryGetValue(exception.GetType(), out var handlerType))
         {
-            var handler = _containerProvider.Resolve(handlerType);
+            var handler = _serviceProvider.GetService(handlerType);
             var method = handler.GetType().GetMethod(nameof(IExceptionHandler<System.Exception>.Handle));
             method?.Invoke(handler, [_mainWindow, exception]);
             return;
