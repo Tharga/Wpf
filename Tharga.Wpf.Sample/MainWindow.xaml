@@ -63,7 +63,7 @@
             <fluent:RibbonTabItem Header="Home">
                 <fluent:RibbonGroupBox Header="Group">
                     <fluent:Button Header="Green"/>
-                    <fluent:Button Header="Grey"/>
+                    <fluent:Button Header="Throw Exception" Command="{Binding ThrowExceptionCommand}"/>
                 </fluent:RibbonGroupBox>
             </fluent:RibbonTabItem>
         </fluent:Ribbon>

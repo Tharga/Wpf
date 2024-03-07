@@ -1,8 +1,6 @@
-﻿using System.Windows;
+﻿namespace Tharga.Wpf.Framework.Exception;
 
-namespace Tharga.Wpf.Framework.Exception;
-
-public interface IExceptionStateService
+internal interface IExceptionStateService
 {
-    void AttachMainWindow(Window mainWindow);
+    void FallbackHandlerInternal(System.Exception exception);
 }
