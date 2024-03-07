@@ -11,10 +11,10 @@ namespace Tharga.Wpf.Features.WindowLocation;
 
 internal class WindowLocationService : IWindowLocationService
 {
-    private readonly ILogger _logger;
+    private readonly ILogger<WindowLocationService> _logger;
     private readonly ConcurrentDictionary<string, MonitorEngine> _monitors = new();
 
-    public WindowLocationService(ILogger logger)
+    public WindowLocationService(ILogger<WindowLocationService> logger)
     {
         _logger = logger;
     }

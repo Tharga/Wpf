@@ -11,7 +11,7 @@ namespace Tharga.Wpf.Features.ApplicationUpdate;
 internal class ApplicationUpdateStateService : IApplicationUpdateStateService
 {
     private readonly ThargaWpfOptions _options;
-    private readonly ILogger _logger;
+    private readonly ILogger<ApplicationUpdateStateService> _logger;
     private readonly System.Timers.Timer _timer;
     private readonly string _environmentName;
     private readonly string _version;
@@ -19,7 +19,7 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
     private Window _mainWindow;
     private int _checkCounter;
 
-    public ApplicationUpdateStateService(IConfiguration configuration, ThargaWpfOptions options, ILogger logger)
+    public ApplicationUpdateStateService(IConfiguration configuration, ThargaWpfOptions options, ILogger<ApplicationUpdateStateService> logger)
     {
         _options = options;
         _logger = logger;
@@ -138,7 +138,7 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
 
     private async Task UpdateClientApplication()
     {
-        var splashDelay = TimeSpan.FromSeconds(2);
+        var splashDelay = Debugger.IsAttached ? TimeSpan.FromSeconds(4) : TimeSpan.FromSeconds(2);
         string clientLocation = null;
         _checkCounter++;
 

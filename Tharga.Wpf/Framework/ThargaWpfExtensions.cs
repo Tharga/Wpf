@@ -1,12 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
-using System.Reflection;
-using Quilt4Net.Ioc;
-using Tharga.Wpf.Framework.Exception;
-using Tharga.Wpf.Features.ApplicationUpdate;
-using System.IO;
-using System.Net.Http;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 
 namespace Tharga.Wpf.Framework;
 
@@ -14,21 +6,6 @@ internal static class ThargaWpfExtensions
 {
     public static void RegisterServiceProvider(this IServiceCollection services, Action<ThargaWpfOptions> options = default)
     {
-        //var o = new ThargaWpfOptions
-        //{
-        //    ApplicationFullName = Assembly.GetEntryAssembly()?.GetName().Name ?? throw new InvalidOperationException($"Cannot find name from entry assembly. Provide the option {nameof(ThargaWpfOptions.ApplicationFullName)} to set the full name of the application."),
-        //    ApplicationShortName = Assembly.GetEntryAssembly()?.GetName().Name ?? throw new InvalidOperationException($"Cannot find name from entry assembly. Provide the option {nameof(ThargaWpfOptions.ApplicationShortName)} to set the short name of the application.")
-        //};
-        //options?.Invoke(o);
-
-        //services.AddSingleton<IApplicationUpdateStateService>(c =>
-        //{
-        //    var configuration = c.GetService<IConfiguration>();
-        //    var logger = c.GetService<ILogger>();
-        //    return new ApplicationUpdateStateService(configuration, o, logger);
-        //});
-        //services.AddSingleton<IWindowLocationService, WindowLocationService>();
-
         //var serviceConstrol = ServiceControl.GetServiceControl();
         //services.AddSingleton<ServiceControl>(_ => serviceConstrol);
 
@@ -49,12 +26,6 @@ internal static class ThargaWpfExtensions
         //{
         //    services.AddTransient(exceptionType.Value);
         //}
-
-        //services.AddSingleton<IExceptionStateService>(c =>
-        //{
-        //    var logger = c.GetService<ILogger>();
-        //    return new ExceptionStateService(c, logger, o.GetExceptionTypes());
-        //});
 
         //services.AddSingleton<ILoggerProvider>(c =>
         //{

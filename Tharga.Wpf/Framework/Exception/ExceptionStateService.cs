@@ -7,11 +7,11 @@ namespace Tharga.Wpf.Framework.Exception;
 internal class ExceptionStateService : IExceptionStateService
 {
     private readonly IServiceProvider _serviceProvider;
-    private readonly ILogger _logger;
+    private readonly ILogger<ExceptionStateService> _logger;
     private readonly IDictionary<Type, Type> _exceptionHandlers;
     private Window _mainWindow;
 
-    public ExceptionStateService(IServiceProvider serviceProvider, ILogger logger, IDictionary<Type, Type> exceptionHandlers)
+    public ExceptionStateService(IServiceProvider serviceProvider, ILogger<ExceptionStateService> logger, IDictionary<Type, Type> exceptionHandlers)
     {
         _serviceProvider = serviceProvider;
         _logger = logger;
@@ -36,39 +36,49 @@ internal class ExceptionStateService : IExceptionStateService
 
     private void FallbackHandlerInternal(System.Exception exception)
     {
-        if (_exceptionHandlers.TryGetValue(exception.GetType(), out var handlerType))
+        try
         {
-            var handler = _serviceProvider.GetService(handlerType);
-            var method = handler.GetType().GetMethod(nameof(IExceptionHandler<System.Exception>.Handle));
-            method?.Invoke(handler, [_mainWindow, exception]);
-            return;
-        }
-
-        var exceptionTypeName = exception.GetType().Name;
-        var message = exception.InnerException?.Message.NullIfEmpty() ?? exception.Message.NullIfEmpty() ?? exceptionTypeName;
-        if (_mainWindow != null)
-        {
-            switch (exceptionTypeName)
+            if (_exceptionHandlers.TryGetValue(exception.GetType(), out var handlerType))
             {
-                case nameof(NotImplementedException):
-                case nameof(InvalidOperationException):
-                    MessageBox.Show(_mainWindow, message, "Oups", MessageBoxButton.OK, MessageBoxImage.Error);
-                    break;
-                default:
-                    Debugger.Break();
-                    MessageBox.Show(_mainWindow, $"{message}\n\n@{exception.StackTrace}", $"Unhandled ({exceptionTypeName})", MessageBoxButton.OK, MessageBoxImage.Error);
-                    break;
+                var handler = _serviceProvider.GetService(handlerType) ?? throw new NullReferenceException($"Cannot find error handler type '{handlerType.Name}'.");
+                var method = handler.GetType().GetMethod(nameof(IExceptionHandler<System.Exception>.Handle));
+                method?.Invoke(handler, [_mainWindow, exception]);
+                return;
             }
-        }
-        else if (Application.Current.MainWindow != null)
-        {
-            MessageBox.Show(Application.Current.MainWindow, message, "Fatal", MessageBoxButton.OK, MessageBoxImage.Error);
-        }
-        else
-        {
-            MessageBox.Show(message, "Fatal (No Main Window)", MessageBoxButton.OK, MessageBoxImage.Error);
-        }
 
-        _logger?.LogError(exception, exception.Message);
+            var exceptionTypeName = exception.GetType().Name;
+            var message = exception.InnerException?.Message.NullIfEmpty() ?? exception.Message.NullIfEmpty() ?? exceptionTypeName;
+            if (_mainWindow != null)
+            {
+                switch (exceptionTypeName)
+                {
+                    case nameof(NotImplementedException):
+                    case nameof(InvalidOperationException):
+                    case nameof(NotSupportedException):
+                        MessageBox.Show(_mainWindow, message, exceptionTypeName, MessageBoxButton.OK, MessageBoxImage.Error);
+                        break;
+                    default:
+                        Debugger.Break();
+                        MessageBox.Show(_mainWindow, $"{message}\n\n@{exception.StackTrace}", $"Unexpected {exceptionTypeName}.", MessageBoxButton.OK, MessageBoxImage.Error);
+                        break;
+                }
+            }
+            else if (Application.Current.MainWindow != null)
+            {
+                MessageBox.Show(Application.Current.MainWindow, message, "Fatal", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            else
+            {
+                MessageBox.Show(message, "Fatal (No Main Window)", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
+            _logger?.LogError(exception, exception.Message);
+        }
+        catch (System.Exception e)
+        {
+            _logger?.LogCritical(e, e.Message);
+            Debugger.Break();
+            MessageBox.Show($"Error in the error handler. {e.Message}", e.GetType().Name, MessageBoxButton.OK, MessageBoxImage.Stop);
+        }
     }
 }
