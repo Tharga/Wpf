@@ -16,7 +16,7 @@
         <fluent:Ribbon Grid.Row="0">
             <!--StartScreen-->
             <fluent:Ribbon.StartScreen>
-                <fluent:StartScreen IsOpen="true">
+                <fluent:StartScreen IsOpen="false">
                     <fluent:StartScreenTabControl>
                         <fluent:StartScreenTabControl.LeftContent>
                             <StackPanel Orientation="Vertical">
