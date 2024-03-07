@@ -10,6 +10,7 @@ namespace Tharga.Wpf.Features.ApplicationUpdate;
 
 internal class ApplicationUpdateStateService : IApplicationUpdateStateService
 {
+    private readonly IApplicationDownloadService _applicationDownloadService;
     private readonly ThargaWpfOptions _options;
     private readonly ILogger<ApplicationUpdateStateService> _logger;
     private readonly System.Timers.Timer _timer;
@@ -19,8 +20,9 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
     private Window _mainWindow;
     private int _checkCounter;
 
-    public ApplicationUpdateStateService(IConfiguration configuration, ThargaWpfOptions options, ILogger<ApplicationUpdateStateService> logger)
+    public ApplicationUpdateStateService(IConfiguration configuration, IApplicationDownloadService applicationDownloadService, ThargaWpfOptions options, ILogger<ApplicationUpdateStateService> logger)
     {
+        _applicationDownloadService = applicationDownloadService;
         _options = options;
         _logger = logger;
         _environmentName = configuration.GetSection("Environment").Value;
@@ -146,38 +148,46 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
         {
             UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs("Letar efter uppdatering."));
 
-            //var response = await _communicationService.GetAsync<HealthCheck>(EController.HealthCheck);
-            //clientLocation = response.ClientLocation;
-
-            using var mgr = new UpdateManager(clientLocation);
-            if (!mgr.IsInstalledApp)
+            clientLocation = await _applicationDownloadService.GetApplicationLocationAsync();
+            if (string.IsNullOrEmpty(clientLocation))
             {
-                var message = Debugger.IsAttached ? $"Florida körs i debuggläge ({_checkCounter})." : $"Florida är inte installerat ({_checkCounter}).";
-                //TODO: Start fast when developing... splashDelay = TimeSpan.Zero;
-                //splashDelay = TimeSpan.FromSeconds(10);
+                var message = $"No application download location configured in options under {nameof(IApplicationDownloadService.GetApplicationLocationAsync)}.";
+                _logger.LogWarning(message);
                 UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs(message));
-                return;
+                await Task.Delay(TimeSpan.FromSeconds(5));
             }
-
-            var updateInfo = await mgr.CheckForUpdate();
-            if (updateInfo.CurrentlyInstalledVersion.Version == updateInfo.FutureReleaseEntry.Version)
+            else
             {
-                UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs($"Senaste versionen är installerad ({_checkCounter})."));
-                return;
-            }
+                using var mgr = new UpdateManager(clientLocation);
+                if (!mgr.IsInstalledApp)
+                {
+                    var message = Debugger.IsAttached ? $"Florida körs i debuggläge." : $"Florida är inte installerat.";
+                    //TODO: Start fast when developing... splashDelay = TimeSpan.Zero;
+                    //splashDelay = TimeSpan.FromSeconds(10);
+                    UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs(message));
+                    return;
+                }
 
-            ShowSplash(false);
+                var updateInfo = await mgr.CheckForUpdate();
+                if (updateInfo.CurrentlyInstalledVersion.Version == updateInfo.FutureReleaseEntry.Version)
+                {
+                    UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs($"Senaste versionen är installerad."));
+                    return;
+                }
 
-            UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs($"Uppdaterar till version {updateInfo.FutureReleaseEntry.Version}."));
+                ShowSplash(false);
 
-            var newVersion = await mgr.UpdateApp();
-            if (newVersion != null)
-            {
-                //TODO: Force termination
-                //await _tabNavigationService.CloseAllTabsAsync(true);
+                UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs($"Uppdaterar till version {updateInfo.FutureReleaseEntry.Version}."));
 
-                UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs("Startar om."));
-                UpdateManager.RestartApp();
+                var newVersion = await mgr.UpdateApp();
+                if (newVersion != null)
+                {
+                    //TODO: Force termination
+                    //await _tabNavigationService.CloseAllTabsAsync(true);
+
+                    UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs("Startar om."));
+                    UpdateManager.RestartApp();
+                }
             }
         }
         catch (Exception e)

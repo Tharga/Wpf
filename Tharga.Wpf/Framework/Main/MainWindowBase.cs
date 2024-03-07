@@ -23,8 +23,11 @@ public abstract class MainWindowBase : Fluent.RibbonWindow
             Closing += OnClosing;
             Activated += (_, _) =>
             {
-                if (!_activated) _applicationUpdateService.AttachMainWindow(this);
-                _ = CheckForClientUpdate();
+                if (!_activated)
+                {
+                    _applicationUpdateService.AttachMainWindow(this);
+                    _ = CheckForClientUpdate();
+                }
                 _activated = true;
             };
 

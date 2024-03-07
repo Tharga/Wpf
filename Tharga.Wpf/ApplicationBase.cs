@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Net.Http;
+using System.Reflection;
 using System.Windows;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,7 +22,7 @@ public abstract class ApplicationBase : Application
         };
 
         var assemblyName = Assembly.GetEntryAssembly()?.GetName();
-        var thargaWpfOptions = new ThargaWpfOptions
+        var options = new ThargaWpfOptions
         {
             ApplicationFullName = assemblyName?.Name ?? "Unknown Application",
             ApplicationShortName = assemblyName?.Name ?? "Unknown",
@@ -33,8 +34,8 @@ public abstract class ApplicationBase : Application
             //.ConfigureAppConfiguration(c => { c.SetBasePath(Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)!); })
             .ConfigureServices((context, services) =>
             {
-                Options(thargaWpfOptions);
-                var exceptionHandlers = thargaWpfOptions.GetExceptionTypes();
+                Options(options);
+                var exceptionHandlers = options.GetExceptionTypes();
                 foreach (var exceptionHandler in exceptionHandlers)
                 {
                     services.AddTransient(exceptionHandler.Value);
@@ -44,7 +45,8 @@ public abstract class ApplicationBase : Application
                 {
                     var configuration = s.GetService<IConfiguration>();
                     var logger = s.GetService<ILogger<ApplicationUpdateStateService>>();
-                    return new ApplicationUpdateStateService(configuration, thargaWpfOptions, logger);
+                    var something = s.GetService<IApplicationDownloadService>();
+                    return new ApplicationUpdateStateService(configuration, something, options, logger);
                 });
                 services.AddSingleton<IWindowLocationService, WindowLocationService>();
                 services.AddSingleton<IExceptionStateService>(s =>
@@ -52,6 +54,13 @@ public abstract class ApplicationBase : Application
                     var logger = s.GetService<ILogger<ExceptionStateService>>();
                     return new ExceptionStateService(s, logger, exceptionHandlers);
                 });
+                services.AddTransient<IApplicationDownloadService>(s =>
+                {
+                    var configuration = s.GetService<IConfiguration>();
+                    var httpClientFactory = s.GetService<IHttpClientFactory>();
+                    return new ApplicationDownloadService(configuration, httpClientFactory, options);
+                });
+
                 Register(context, services);
             })
             .Build();
