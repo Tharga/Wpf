@@ -7,4 +7,12 @@
     <UseWPF>true</UseWPF>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Tharga.Wpf\Tharga.Wpf.csproj" />
+  </ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Fluent.Ribbon" Version="10.0.4" />
+	</ItemGroup>
+
 </Project>
