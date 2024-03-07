@@ -3,6 +3,7 @@ using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Tharga.Wpf.Features.WindowLocation;
 using Tharga.Wpf.Framework.Exception;
 
 namespace Tharga.Wpf;
@@ -32,6 +33,12 @@ public abstract class ApplicationBase : Application
                 Options(options);
                 RegisterExceptionHandler(options, services);
 
+                services.AddSingleton<IWindowLocationService>(s =>
+                {
+                    var logger = s.GetService<ILogger<WindowLocationService>>();
+                    return new WindowLocationService(options, logger);
+                });
+
                 //services.AddSingleton<IApplicationUpdateStateService>(s =>
                 //{
                 //    var configuration = s.GetService<IConfiguration>();
@@ -45,7 +52,6 @@ public abstract class ApplicationBase : Application
                 //    var httpClientFactory = s.GetService<IHttpClientFactory>();
                 //    return new ApplicationDownloadService(configuration, httpClientFactory, options);
                 //});
-                //services.AddSingleton<IWindowLocationService, WindowLocationService>();
                 Register(context, services);
             })
             .Build();

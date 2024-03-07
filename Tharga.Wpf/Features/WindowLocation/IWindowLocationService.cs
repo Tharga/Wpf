@@ -1,10 +1,10 @@
-﻿//using System.ComponentModel;
-//using System.Windows;
+﻿using System.ComponentModel;
+using System.Windows;
 
-//namespace Tharga.Wpf.Features.WindowLocation;
+namespace Tharga.Wpf.Features.WindowLocation;
 
-//public interface IWindowLocationService
-//{
-//    void Monitor(string name, Window window);
-//    void AttachProperty(string name, INotifyPropertyChanged container, string propertyName);
-//}
+public interface IWindowLocationService
+{
+    void Monitor(Window window, string name = default);
+    void AttachProperty(string name, INotifyPropertyChanged container, string propertyName);
+}

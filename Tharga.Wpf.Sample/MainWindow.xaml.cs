@@ -1,10 +1,14 @@
-﻿namespace Tharga.Wpf.Sample;
+﻿using Tharga.Wpf.Features.WindowLocation;
+
+namespace Tharga.Wpf.Sample;
 
 public partial class MainWindow
 {
     public MainWindow()
     {
-        var myService = App.GetService<MyService>();
+        var myService = ApplicationBase.GetService<MyService>();
+        ApplicationBase.GetService<IWindowLocationService>().Monitor(this, nameof(MainWindow));
+
         InitializeComponent();
     }
 }

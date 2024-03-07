@@ -1,6 +1,5 @@
 ﻿using System.Collections.Concurrent;
 using Microsoft.Extensions.Configuration;
-using Tharga.Wpf.Features.ApplicationUpdate;
 using Tharga.Wpf.Framework.Exception;
 
 namespace Tharga.Wpf;
@@ -12,7 +11,7 @@ public class ThargaWpfOptions
     public string ApplicationShortName { get; set; }
     public string ApplicationFullName { get; set; }
     //public Func<SplashData, ISplash> SplashCreator { get; set; }
-    public Func<IConfiguration, Uri> ApplicationDownloadLocationLoader { get; set; }
+    //public Func<IConfiguration, Uri> ApplicationDownloadLocationLoader { get; set; }
 
     public void RegisterExceptionHandler<THandler, TException>()
         where THandler : IExceptionHandler<TException>
