@@ -1,16 +1,16 @@
-﻿namespace Tharga.Wpf.Framework;
+﻿//namespace Tharga.Wpf.Framework;
 
-public class AbstractFactory<T> : IAbstractFactory<T>
-{
-    private readonly Func<T> _factory;
+//public class AbstractFactory<T> : IAbstractFactory<T>
+//{
+//    private readonly Func<T> _factory;
 
-    public AbstractFactory(Func<T> factory)
-    {
-        _factory = factory;
-    }
+//    public AbstractFactory(Func<T> factory)
+//    {
+//        _factory = factory;
+//    }
 
-    public T Create()
-    {
-        return _factory();
-    }
-}
+//    public T Create()
+//    {
+//        return _factory();
+//    }
+//}

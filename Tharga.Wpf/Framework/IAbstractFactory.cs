@@ -1,6 +1,6 @@
-﻿namespace Tharga.Wpf.Framework;
+﻿//namespace Tharga.Wpf.Framework;
 
-public interface IAbstractFactory<out T>
-{
-    T Create();
-}
+//public interface IAbstractFactory<out T>
+//{
+//    T Create();
+//}
