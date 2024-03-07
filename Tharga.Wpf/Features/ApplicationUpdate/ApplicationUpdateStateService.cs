@@ -161,7 +161,7 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
                 using var mgr = new UpdateManager(clientLocation);
                 if (!mgr.IsInstalledApp)
                 {
-                    var message = Debugger.IsAttached ? $"Florida körs i debuggläge." : $"Florida är inte installerat.";
+                    var message = Debugger.IsAttached ? "Florida körs i debuggläge." : "Florida är inte installerat.";
                     //TODO: Start fast when developing... splashDelay = TimeSpan.Zero;
                     //splashDelay = TimeSpan.FromSeconds(10);
                     UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs(message));
@@ -171,7 +171,7 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
                 var updateInfo = await mgr.CheckForUpdate();
                 if (updateInfo.CurrentlyInstalledVersion.Version == updateInfo.FutureReleaseEntry.Version)
                 {
-                    UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs($"Senaste versionen är installerad."));
+                    UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs("Senaste versionen är installerad."));
                     return;
                 }
 
@@ -193,7 +193,7 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
         catch (Exception e)
         {
             _logger.LogError(e, e.Message);
-            var message = $"Uppdateringen misslyckades ({_checkCounter}).";
+            var message = "Uppdateringen misslyckades.";
             UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs(message));
             _splash?.SetErrorMessage($"{e.Message}\n{clientLocation}\n@{e.StackTrace})");
             _splash?.ShowCloseButton();
