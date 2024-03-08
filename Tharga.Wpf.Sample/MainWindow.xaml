@@ -62,7 +62,7 @@
             <!--Tabs-->
             <fluent:RibbonTabItem Header="Home">
                 <fluent:RibbonGroupBox Header="Group">
-                    <fluent:Button Header="Green"/>
+                    <fluent:Button Header="Splash" Command="{Binding ShowSplashCommand}"/>
                     <fluent:Button Header="Throw Exception" Command="{Binding ThrowExceptionCommand}"/>
                 </fluent:RibbonGroupBox>
             </fluent:RibbonTabItem>

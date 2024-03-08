@@ -21,6 +21,10 @@
 		<NoWarn>1701;1702;CS1591</NoWarn>
 	</PropertyGroup>
 	<ItemGroup>
+	  <None Remove="Images\Application\blue.png" />
+	  <None Remove="Images\Application\green.png" />
+	</ItemGroup>
+	<ItemGroup>
 		<None Include="README.md">
 			<Pack>True</Pack>
 			<PackagePath>\</PackagePath>
@@ -35,5 +39,9 @@
 	<ItemGroup>
 		<InternalsVisibleTo Include="Tharga.Wpf.Tests" />
 		<InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Resource Include="Images\Application\blue.png" />
+	  <Resource Include="Images\Application\green.png" />
 	</ItemGroup>
 </Project>
