@@ -6,10 +6,11 @@
                      xmlns:local="clr-namespace:Tharga.Wpf.Sample"
                      xmlns:fluent="urn:fluent-ribbon"
                      xmlns:wpf="clr-namespace:Tharga.Wpf;assembly=Tharga.Wpf"
+                     xmlns:tabNavigator1="clr-namespace:Tharga.Wpf.Features.TabNavigator;assembly=Tharga.Wpf"
                      mc:Ignorable="d"
                      Title="MainWindow"
-                     Height="450" Width="800"
-                     DataContext="{wpf:ViewModelProvider local:MainWindowModel}">
+                     DataContext="{wpf:ViewModelProvider local:MainWindowModel}"
+                     Height="450" Width="800">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -65,11 +66,12 @@
                 <fluent:RibbonGroupBox Header="Group">
                     <fluent:Button Header="Splash" Command="{Binding ShowSplashCommand}"/>
                     <fluent:Button Header="Throw Exception" Command="{Binding ThrowExceptionCommand}"/>
+                    <fluent:Button Header="Open tab" Command="{Binding NewTabCommand}"/>
                 </fluent:RibbonGroupBox>
             </fluent:RibbonTabItem>
         </fluent:Ribbon>
         <DockPanel Grid.Row="1" Margin="3" >
-            <TextBlock>Sample</TextBlock>
+            <tabNavigator1:TabNavigatorView />
         </DockPanel>
         <fluent:StatusBar Grid.Row="2" Focusable="false">
             <fluent:StatusBarItem Value="AAA" d:Value="Connected" HorizontalAlignment="Left" />

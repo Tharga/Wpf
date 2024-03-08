@@ -1,9 +1,7 @@
 ﻿using System.Windows;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Tharga.Wpf.Framework.Exception;
-using ControlzEx.Theming;
 
 namespace Tharga.Wpf.Sample;
 
@@ -20,6 +18,9 @@ public partial class App
     {
         //TODO: AAA: Auto register view models
         services.AddTransient<MainWindowModel>();
+
+        //TODO: AAA: Auto register tab views (and their viewModel)
+        services.AddTransient<MyTabView>();
 
         services.AddTransient<MyService>();
     }

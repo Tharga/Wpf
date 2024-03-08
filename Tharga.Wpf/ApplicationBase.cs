@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Tharga.Wpf.Features.ApplicationUpdate;
+using Tharga.Wpf.Features.TabNavigator;
 using Tharga.Wpf.Features.WindowLocation;
 using Tharga.Wpf.Framework.Exception;
 
@@ -39,6 +40,10 @@ public abstract class ApplicationBase : Application
                 services.AddHttpClient();
 
                 RegisterExceptionHandler(options, services);
+
+                //NOTE: Tab navigation
+                services.AddTransient<TabNavigatorViewModel>();
+                services.AddSingleton<ITabNavigationStateService, TabNavigationStateService>();
 
                 services.AddSingleton<IWindowLocationService>(s =>
                 {

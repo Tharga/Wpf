@@ -14,8 +14,9 @@ public class ViewModelProvider : MarkupExtension
 
     public override object ProvideValue(IServiceProvider serviceProvider)
     {
-        var viewModel = ((ApplicationBase)Application.Current).AppHost.Services.GetService(ViewModelType);
-        if (viewModel == null) throw new InvalidOperationException($"Cannot find view model of type '{ViewModelType?.GetType().Name}'. Prehaps it is not registered in the IOC.");
+        var viewModel = (Application.Current as ApplicationBase)?.AppHost.Services.GetService(ViewModelType);
+        //var viewModel = ((ApplicationBase)Application.Current).AppHost.Services.GetService(ViewModelType);
+        //if (viewModel == null) throw new InvalidOperationException($"Cannot find view model of type '{ViewModelType?.GetType().Name}'. Prehaps it is not registered in the IOC.");
         return viewModel;
     }
 }

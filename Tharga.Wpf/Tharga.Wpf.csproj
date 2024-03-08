@@ -46,4 +46,7 @@
 	  <Resource Include="Images\Application\blue.png" />
 	  <Resource Include="Images\Application\green.png" />
 	</ItemGroup>
+	<ItemGroup>
+	  <Folder Include="Features\TabNavigator\" />
+	</ItemGroup>
 </Project>
