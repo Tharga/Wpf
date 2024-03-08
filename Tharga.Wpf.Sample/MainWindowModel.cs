@@ -1,4 +1,5 @@
-﻿using System.Windows.Input;
+﻿using System.Windows;
+using System.Windows.Input;
 using Tharga.Wpf.Features.ApplicationUpdate;
 using Tharga.Wpf.Framework;
 
@@ -13,9 +14,7 @@ public class MainWindowModel
         _applicationUpdateStateService = applicationUpdateStateService;
     }
 
-    public ICommand ShowSplashCommand => new RelayCommand(_ =>
-    {
-        _applicationUpdateStateService.ShowSplash();
-    }, _ => true);
+    public ICommand ShowSplashCommand => new RelayCommand(_ => { _applicationUpdateStateService.ShowSplash(); }, _ => true);
     public ICommand ThrowExceptionCommand => new RelayCommand(_ => throw new InvalidOperationException("Some error"), _ => true);
+    public ICommand ExitCommand => new RelayCommand(_ => { Application.Current?.MainWindow?.Close(); }, _ => true);
 }

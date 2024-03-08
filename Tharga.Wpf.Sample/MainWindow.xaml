@@ -53,9 +53,9 @@
             <fluent:Ribbon.Menu>
                 <fluent:Backstage>
                     <fluent:BackstageTabControl>
-                        <fluent:BackstageTabItem Header="New" />
-                        <fluent:BackstageTabItem Header="Print" />
-                        <fluent:Button Header="Blue" />
+                        <fluent:Button Header="Exit" Command="{Binding ExitCommand}" />
+                        <!--<fluent:BackstageTabItem Header="Print" />
+                        <fluent:Button Header="Blue" />-->
                     </fluent:BackstageTabControl>
                 </fluent:Backstage>
             </fluent:Ribbon.Menu>
