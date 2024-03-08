@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Tharga.Wpf.Framework.Exception;
@@ -22,12 +23,13 @@ public partial class App
 
         thargaWpfOptions.RegisterExceptionHandler<InvalidOperationExceptionHandler, InvalidOperationException>();
 
-        //thargaWpfOptions.ApplicationDownloadLocationLoader += (c) =>
-        //{
-        //    var baseUri = new Uri(c.GetSection("AggregatorUri").Get<string>());
-        //    Uri.TryCreate(baseUri, "api/Agent", out var uri);
-        //    return uri;
-        //};
+        thargaWpfOptions.ApplicationDownloadLocationLoader += (c) =>
+        {
+            //var baseUri = new Uri(c.GetSection("AggregatorUri").Get<string>());
+            //Uri.TryCreate(baseUri, "api/Agent", out var uri);
+            //return uri;
+            return new Uri("https://app-eplicta-aggregator-ci.azurewebsites.net/api/Agent");
+        };
     }
 }
 

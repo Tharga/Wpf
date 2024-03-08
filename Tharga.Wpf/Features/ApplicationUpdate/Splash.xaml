@@ -9,21 +9,21 @@
         Height="250" Width="400"
         WindowStyle="None" ShowInTaskbar="false" AllowsTransparency="True"
         Background="Transparent"
-        WindowStartupLocation="CenterScreen" Topmost="false"
+        WindowStartupLocation="CenterOwner" Topmost="false"
         BorderThickness="1" BorderBrush="Gray"
         >
     <Grid>
         <Image Source="../../Images/Application/green.png" Stretch="Fill"/>
-        <TextBlock x:Name="FullName" d:Text="Some Name" Margin="10,10,10,10" FontSize="20" />
-        <ListBox x:Name="Messages" Background="Transparent" Margin="180,34,10,100" FontWeight="Bold">
+        <TextBlock x:Name="FullName" d:Text="Some Name" Margin="10,10,10,210" FontSize="20" />
+        <ListBox x:Name="Messages" Background="Transparent" Margin="100,34,10,100" FontWeight="Bold" BorderBrush="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
             <ListBox.ItemContainerStyle>
                 <Style TargetType="ListBoxItem">
                     <Setter Property="Height" Value="22" />
                 </Style>
             </ListBox.ItemContainerStyle>
         </ListBox>
-        <TextBlock x:Name="Environment" FontSize="12" Margin="10,34,10,10" d:Text="Environment" />
-        <TextBlock x:Name="Version" FontSize="12" Margin="10,48,10,10" d:Text="1.0.0.0" />
+        <TextBlock x:Name="Environment" FontSize="12" Margin="10,34,200,195" d:Text="Environment" />
+        <TextBlock x:Name="Version" FontSize="12" Margin="10,48,200,180" d:Text="1.0.0.0" />
         <TextBox x:Name="ErrorMessage" FontSize="10" Margin="5,155,5,5" d:Text="Error message" d:Visibility="Visible" Visibility="Collapsed" IsReadOnly="true" Background="AliceBlue" />
         <Button x:Name="CloseButton" Click="ButtonBase_OnClick" Visibility="Collapsed" MinWidth="80" HorizontalAlignment="Right" VerticalAlignment="Bottom" d:Visibility="Visible" Margin="0,0,10,10">Close</Button>
     </Grid>

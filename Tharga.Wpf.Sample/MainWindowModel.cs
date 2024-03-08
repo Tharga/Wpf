@@ -6,22 +6,16 @@ namespace Tharga.Wpf.Sample;
 
 public class MainWindowModel
 {
-    public MainWindowModel(MyService myService)
+    private readonly IApplicationUpdateStateService _applicationUpdateStateService;
+
+    public MainWindowModel(MyService myService, IApplicationUpdateStateService applicationUpdateStateService)
     {
+        _applicationUpdateStateService = applicationUpdateStateService;
     }
 
     public ICommand ShowSplashCommand => new RelayCommand(_ =>
     {
-        //Use a specific "ShowSplash" function that populates this automatically
-        var splash = new Splash(new SplashData
-        {
-            FullName = "A",
-            EntryMessage = "yeee",
-            EnvironmentName = "Something",
-            FirstRun = false,
-            Version = "1.2.3.4"
-        });
-        splash.Show();
+        _applicationUpdateStateService.ShowSplash();
     }, _ => true);
     public ICommand ThrowExceptionCommand => new RelayCommand(_ => throw new InvalidOperationException("Some error"), _ => true);
 }

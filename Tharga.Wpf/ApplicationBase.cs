@@ -1,8 +1,11 @@
-﻿using System.Reflection;
+﻿using System.Net.Http;
+using System.Reflection;
 using System.Windows;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Tharga.Wpf.Features.ApplicationUpdate;
 using Tharga.Wpf.Features.WindowLocation;
 using Tharga.Wpf.Framework.Exception;
 
@@ -33,25 +36,29 @@ public abstract class ApplicationBase : Application
                 Options(options);
                 RegisterExceptionHandler(options, services);
 
+                services.AddHttpClient();
+
                 services.AddSingleton<IWindowLocationService>(s =>
                 {
                     var logger = s.GetService<ILogger<WindowLocationService>>();
                     return new WindowLocationService(options, logger);
                 });
 
-                //services.AddSingleton<IApplicationUpdateStateService>(s =>
-                //{
-                //    var configuration = s.GetService<IConfiguration>();
-                //    var logger = s.GetService<ILogger<ApplicationUpdateStateService>>();
-                //    var something = s.GetService<IApplicationDownloadService>();
-                //    return new ApplicationUpdateStateService(configuration, something, options, logger);
-                //});
-                //services.AddTransient<IApplicationDownloadService>(s =>
-                //{
-                //    var configuration = s.GetService<IConfiguration>();
-                //    var httpClientFactory = s.GetService<IHttpClientFactory>();
-                //    return new ApplicationDownloadService(configuration, httpClientFactory, options);
-                //});
+                services.AddSingleton<IApplicationUpdateStateService>(s =>
+                {
+                    var configuration = s.GetService<IConfiguration>();
+                    var applicationDownloadService = s.GetService<IApplicationDownloadService>();
+                    var mainWindow = ((ApplicationBase)Current).MainWindow;
+                    var logger = s.GetService<ILogger<ApplicationUpdateStateService>>();
+                    return new ApplicationUpdateStateService(configuration, applicationDownloadService, options, mainWindow, logger);
+                });
+                services.AddTransient<IApplicationDownloadService>(s =>
+                {
+                    var configuration = s.GetService<IConfiguration>();
+                    var httpClientFactory = s.GetService<IHttpClientFactory>();
+                    return new ApplicationDownloadService(configuration, httpClientFactory, options);
+                });
+
                 Register(context, services);
             })
             .Build();

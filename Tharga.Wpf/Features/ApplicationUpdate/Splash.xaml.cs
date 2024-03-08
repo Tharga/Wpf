@@ -2,7 +2,7 @@
 
 namespace Tharga.Wpf.Features.ApplicationUpdate;
 
-public partial class Splash //: ISplash
+public partial class Splash : ISplash
 {
     public Splash(SplashData splashData)
     {
