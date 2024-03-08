@@ -7,7 +7,8 @@
                      xmlns:fluent="urn:fluent-ribbon"
                      xmlns:wpf="clr-namespace:Tharga.Wpf;assembly=Tharga.Wpf"
                      mc:Ignorable="d"
-                     Title="MainWindow" Height="450" Width="800"
+                     Title="MainWindow"
+                     Height="450" Width="800"
                      DataContext="{wpf:ViewModelProvider local:MainWindowModel}">
     <Grid>
         <Grid.RowDefinitions>

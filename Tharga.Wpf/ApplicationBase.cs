@@ -34,9 +34,11 @@ public abstract class ApplicationBase : Application
             .ConfigureServices((context, services) =>
             {
                 Options(options);
-                RegisterExceptionHandler(options, services);
 
+                services.AddSingleton(_ => options);
                 services.AddHttpClient();
+
+                RegisterExceptionHandler(options, services);
 
                 services.AddSingleton<IWindowLocationService>(s =>
                 {
@@ -64,6 +66,8 @@ public abstract class ApplicationBase : Application
             .Build();
     }
 
+    public IHost AppHost { get; protected init; }
+
     private static void RegisterExceptionHandler(ThargaWpfOptions options, IServiceCollection services)
     {
         var exceptionHandlers = options.GetExceptionTypes();
@@ -79,9 +83,8 @@ public abstract class ApplicationBase : Application
         });
     }
 
-    protected abstract void Register(HostBuilderContext context, IServiceCollection services);
-
-    public IHost AppHost { get; protected init; }
+    protected virtual void Register(HostBuilderContext context, IServiceCollection services) { }
+    protected virtual void Options(ThargaWpfOptions thargaWpfOptions) { }
 
     protected override async void OnStartup(StartupEventArgs e)
     {
@@ -101,9 +104,5 @@ public abstract class ApplicationBase : Application
         var service = ((ApplicationBase)Current).AppHost.Services.GetService<T>();
         if (service == null) throw new InvalidOperationException($"Cannot find service '{typeof(T).Name}'. Perhaps it has not been registered in the IOC.");
         return service;
-    }
-
-    protected virtual void Options(ThargaWpfOptions thargaWpfOptions)
-    {
     }
 }
