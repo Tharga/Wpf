@@ -3,11 +3,19 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Tharga.Wpf.Framework.Exception;
+using ControlzEx.Theming;
 
 namespace Tharga.Wpf.Sample;
 
 public partial class App
 {
+    protected override void OnStartup(StartupEventArgs e)
+    {
+        //TODO: now set the Green color scheme and dark base color
+        //ThemeManager.Current.ChangeTheme(Application.Current, "Dark.Green");
+        base.OnStartup(e);
+    }
+
     protected override void Register(HostBuilderContext context, IServiceCollection services)
     {
         //TODO: AAA: Auto register view models
