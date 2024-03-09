@@ -16,11 +16,12 @@ public partial class App
 
     protected override void Register(HostBuilderContext context, IServiceCollection services)
     {
-        //TODO: AAA: Auto register view models
-        services.AddTransient<MainWindowModel>();
-
         //TODO: AAA: Auto register tab views (and their viewModel)
         services.AddTransient<MyTabView>();
+
+        //TODO: AAA: Auto register view models
+        services.AddTransient<MainWindowModel>();
+        services.AddTransient<MyTabViewModel>();
 
         services.AddTransient<MyService>();
     }

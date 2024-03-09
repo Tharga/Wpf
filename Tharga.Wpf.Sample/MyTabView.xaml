@@ -5,9 +5,13 @@
          xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
          xmlns:local="clr-namespace:Tharga.Wpf.Sample"
          xmlns:tabNavigator1="clr-namespace:Tharga.Wpf.Features.TabNavigator;assembly=Tharga.Wpf"
+         xmlns:wpf="clr-namespace:Tharga.Wpf;assembly=Tharga.Wpf"
          mc:Ignorable="d"
+         DataContext="{wpf:ViewModelProvider local:MyTabViewModel}"
          d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
-        <Label>My Tab</Label>
+        <StackPanel>
+            <Label>This tab will allow close after 3 seconds.</Label>
+        </StackPanel>
     </Grid>
 </tabNavigator1:TabView>

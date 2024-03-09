@@ -20,9 +20,9 @@
         <Label Focusable="false" x:Name="Title" Content="Label" Grid.Column="1" FontWeight="Bold" IsTabStop="False" Margin="0 0 5 0" />
 
         <Button IsTabStop="False" x:Name="CloseButton" Content="" Width="19" Height="19" Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="4" BorderThickness="0" Click="CloseButton_Click">
-            <!--<Button.Background>
-                <ImageBrush ImageSource="../../Images/Application/Close-tab_16x16.png" Stretch="Uniform"/>
-            </Button.Background>-->
+            <Button.Background>
+                <ImageBrush ImageSource="../../Images/Close.png" Stretch="Uniform"/>
+            </Button.Background>
             <Button.Style>
                 <Style TargetType="{x:Type Button}">
                     <Setter Property="Background" Value="Green"/>
@@ -37,7 +37,12 @@
                     </Setter>
                     <Style.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="LightGreen"/>
+                            <Setter Property="Opacity" Value="0.8"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Background" Value="Red"/>
+                            <Setter Property="Opacity" Value="0.1"/>
                         </Trigger>
                     </Style.Triggers>
                 </Style>

@@ -8,7 +8,20 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Close.svg" />
+    <None Remove="Exit.svg" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Exit.svg" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Tharga.Wpf\Tharga.Wpf.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Close.svg" />
   </ItemGroup>
 
 </Project>

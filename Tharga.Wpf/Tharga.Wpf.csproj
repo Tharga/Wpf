@@ -21,8 +21,14 @@
 		<NoWarn>1701;1702;CS1591</NoWarn>
 	</PropertyGroup>
 	<ItemGroup>
-	  <None Remove="Images\Application\blue.png" />
-	  <None Remove="Images\Application\green.png" />
+		<None Remove="Images\Application\blue.png" />
+		<None Remove="Images\Application\green.png" />
+		<None Remove="Images\Close.png" />
+	</ItemGroup>
+	<ItemGroup>
+		<Resource Include="Images\Application\blue.png" />
+		<Resource Include="Images\Application\green.png" />
+		<Resource Include="Images\Close.png" />
 	</ItemGroup>
 	<ItemGroup>
 		<None Include="README.md">
@@ -43,10 +49,6 @@
 		<InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
 	</ItemGroup>
 	<ItemGroup>
-	  <Resource Include="Images\Application\blue.png" />
-	  <Resource Include="Images\Application\green.png" />
-	</ItemGroup>
-	<ItemGroup>
-	  <Folder Include="Features\TabNavigator\" />
+		<Folder Include="Features\TabNavigator\" />
 	</ItemGroup>
 </Project>
