@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Input;
 using Tharga.Wpf.Features.ApplicationUpdate;
 using Tharga.Wpf.Features.TabNavigator;

@@ -74,7 +74,7 @@
             <tabNavigator1:TabNavigatorView />
         </DockPanel>
         <fluent:StatusBar Grid.Row="2" Focusable="false">
-            <fluent:StatusBarItem Value="AAA" d:Value="Connected" HorizontalAlignment="Left" />
+            <fluent:StatusBarItem Value="Offline" d:Value="Connected" HorizontalAlignment="Left" />
         </fluent:StatusBar>
     </Grid>
 </fluent:RibbonWindow>

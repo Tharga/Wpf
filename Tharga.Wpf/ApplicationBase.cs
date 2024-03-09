@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using System.Diagnostics;
+using System.Net.Http;
 using System.Reflection;
 using System.Windows;
 using Microsoft.Extensions.Configuration;
@@ -9,6 +10,7 @@ using Tharga.Wpf.Features.ApplicationUpdate;
 using Tharga.Wpf.Features.TabNavigator;
 using Tharga.Wpf.Features.WindowLocation;
 using Tharga.Wpf.Framework.Exception;
+using Tharga.Wpf.Framework.TypeRegistration;
 
 namespace Tharga.Wpf;
 
@@ -40,10 +42,7 @@ public abstract class ApplicationBase : Application
                 services.AddHttpClient();
 
                 RegisterExceptionHandler(options, services);
-
-                //NOTE: Tab navigation
-                services.AddTransient<TabNavigatorViewModel>();
-                services.AddSingleton<ITabNavigationStateService, TabNavigationStateService>();
+                RegisterTabNavigation(services);
 
                 services.AddSingleton<IWindowLocationService>(s =>
                 {
@@ -86,6 +85,17 @@ public abstract class ApplicationBase : Application
             var mainWindow = ((ApplicationBase)Current).MainWindow;
             return new ExceptionStateService(s, mainWindow, logger, exceptionHandlers);
         });
+    }
+
+    private static void RegisterTabNavigation(IServiceCollection services)
+    {
+        services.AddTransient<TabNavigatorViewModel>();
+        services.AddSingleton<ITabNavigationStateService, TabNavigationStateService>();
+        var tabViewTypes = TypeHelper.GetTypesBasedOn<TabView>().ToArray();
+        foreach (var tabViewTab in tabViewTypes)
+        {
+            services.AddTransient(tabViewTab);
+        }
     }
 
     protected virtual void Register(HostBuilderContext context, IServiceCollection services) { }
