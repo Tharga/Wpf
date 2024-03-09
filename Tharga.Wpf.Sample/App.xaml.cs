@@ -1,7 +1,7 @@
 ﻿using System.Windows;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using Tharga.Wpf.Framework.Exception;
+using Tharga.Wpf.Features.ExceptionHandling;
 
 namespace Tharga.Wpf.Sample;
 
@@ -16,10 +16,6 @@ public partial class App
 
     protected override void Register(HostBuilderContext context, IServiceCollection services)
     {
-        //TODO: AAA: Auto register view models
-        services.AddTransient<MainWindowModel>();
-        services.AddTransient<MyTabViewModel>();
-
         services.AddTransient<MyService>();
     }
 

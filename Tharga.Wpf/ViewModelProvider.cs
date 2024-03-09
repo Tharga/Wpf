@@ -10,13 +10,21 @@ public class ViewModelProvider : MarkupExtension
         ViewModelType = viewModelType;
     }
 
-    public Type ViewModelType { get; set; }
+    private Type ViewModelType { get; set; }
 
     public override object ProvideValue(IServiceProvider serviceProvider)
     {
-        var viewModel = (Application.Current as ApplicationBase)?.AppHost.Services.GetService(ViewModelType);
-        //var viewModel = ((ApplicationBase)Application.Current).AppHost.Services.GetService(ViewModelType);
-        //if (viewModel == null) throw new InvalidOperationException($"Cannot find view model of type '{ViewModelType?.GetType().Name}'. Prehaps it is not registered in the IOC.");
+        var applicationBase = (Application.Current as ApplicationBase);
+        var viewModel = applicationBase?.AppHost.Services.GetService(ViewModelType);
+        if (viewModel == null) throw new TypeNotRegisteredException(ViewModelType, applicationBase == null ? $" Application.Current is '{Application.Current.GetType().FullName}', it needs to be of type {nameof(ApplicationBase)}." : null);
         return viewModel;
+    }
+}
+
+internal class TypeNotRegisteredException : Exception
+{
+    public TypeNotRegisteredException(Type type, string extraMessage)
+    : base($"Cannot find tyoe '{type.Name}'. Perhaps it has not been registered in the IOC. Types that implements the interface '{nameof(IViewModel)}' is automatically registered.{extraMessage}")
+    {
     }
 }

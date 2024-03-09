@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Tharga.Wpf.Features.TabNavigator;
 
-public class TabNavigationStateService : ITabNavigationStateService
+internal class TabNavigationStateService : ITabNavigationStateService
 {
     private readonly IServiceProvider _serviceProvider;
     private TabView _activeTab;

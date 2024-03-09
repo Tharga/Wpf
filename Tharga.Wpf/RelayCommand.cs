@@ -1,6 +1,6 @@
 ﻿using System.Windows.Input;
 
-namespace Tharga.Wpf.Framework;
+namespace Tharga.Wpf;
 
 public class RelayCommand : ICommand
 {

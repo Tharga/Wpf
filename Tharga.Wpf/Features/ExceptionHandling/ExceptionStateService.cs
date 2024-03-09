@@ -1,8 +1,10 @@
 ﻿using System.Diagnostics;
 using System.Windows;
+using System.Windows.Markup;
 using Microsoft.Extensions.Logging;
+using Tharga.Wpf.Framework;
 
-namespace Tharga.Wpf.Framework.Exception;
+namespace Tharga.Wpf.Features.ExceptionHandling;
 
 internal class ExceptionStateService : IExceptionStateService
 {
@@ -35,14 +37,16 @@ internal class ExceptionStateService : IExceptionStateService
     //    HandleExceptionEvent?.Invoke(sender, new HandleExceptionEventArgs(exception));
     //}
 
-    public void FallbackHandlerInternal(System.Exception exception)
+    public void FallbackHandlerInternal(Exception exception)
     {
         try
         {
+            if (exception is XamlParseException && exception.InnerException != null) exception = exception.InnerException;
+
             if (_exceptionHandlers.TryGetValue(exception.GetType(), out var handlerType))
             {
                 var handler = _serviceProvider.GetService(handlerType) ?? throw new NullReferenceException($"Cannot find error handler type '{handlerType.Name}'.");
-                var method = handler.GetType().GetMethod(nameof(IExceptionHandler<System.Exception>.Handle));
+                var method = handler.GetType().GetMethod(nameof(IExceptionHandler<Exception>.Handle));
                 method?.Invoke(handler, [_mainWindow, exception]);
                 return;
             }
@@ -56,6 +60,7 @@ internal class ExceptionStateService : IExceptionStateService
                     case nameof(NotImplementedException):
                     case nameof(InvalidOperationException):
                     case nameof(NotSupportedException):
+                    case nameof(TypeNotRegisteredException):
                         MessageBox.Show(_mainWindow, message, exceptionTypeName, MessageBoxButton.OK, MessageBoxImage.Error);
                         break;
                     default:
@@ -75,7 +80,7 @@ internal class ExceptionStateService : IExceptionStateService
 
             _logger?.LogError(exception, exception.Message);
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
             _logger?.LogCritical(e, e.Message);
             Debugger.Break();

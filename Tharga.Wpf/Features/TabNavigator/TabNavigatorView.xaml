@@ -13,7 +13,7 @@
              Background="Transparent">
 
     <Grid>
-        <TabControl ItemsSource="{Binding TabItems, UpdateSourceTrigger=PropertyChanged}" Visibility="{Binding Visibility}" Background="Transparent">
+        <TabControl ItemsSource="{Binding TabItems, UpdateSourceTrigger=PropertyChanged}" Background="Transparent">
         </TabControl>
     </Grid>
 </UserControl>

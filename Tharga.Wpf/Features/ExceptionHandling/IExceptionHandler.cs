@@ -1,9 +1,9 @@
 ﻿using System.Windows;
 
-namespace Tharga.Wpf.Framework.Exception;
+namespace Tharga.Wpf.Features.ExceptionHandling;
 
 public interface IExceptionHandler<in T>
-    where T : System.Exception
+    where T : Exception
 {
     public void Handle(Window mainWindow, T exception);
 }

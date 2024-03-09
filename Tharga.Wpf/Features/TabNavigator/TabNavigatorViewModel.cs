@@ -7,7 +7,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace Tharga.Wpf.Features.TabNavigator;
 
-public class TabNavigatorViewModel : INotifyPropertyChanged
+internal class TabNavigatorViewModel : INotifyPropertyChanged
 {
     private readonly ITabNavigationStateService _tabNavigationService;
 
@@ -17,7 +17,6 @@ public class TabNavigatorViewModel : INotifyPropertyChanged
     }
 
     public ObservableCollection<TabItem> TabItems => _tabNavigationService.TabItems;
-    public Visibility Visibility => TabItems.Any() ? Visibility.Visible : Visibility.Hidden;
 
     public event PropertyChangedEventHandler PropertyChanged;
 

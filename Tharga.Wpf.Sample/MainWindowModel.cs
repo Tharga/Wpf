@@ -2,11 +2,10 @@
 using System.Windows.Input;
 using Tharga.Wpf.Features.ApplicationUpdate;
 using Tharga.Wpf.Features.TabNavigator;
-using Tharga.Wpf.Framework;
 
 namespace Tharga.Wpf.Sample;
 
-public class MainWindowModel
+public class MainWindowModel : IViewModel
 {
     private readonly IApplicationUpdateStateService _applicationUpdateStateService;
     private readonly ITabNavigationStateService _tabNavigationStateService;

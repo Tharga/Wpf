@@ -1,7 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using Microsoft.Extensions.Configuration;
 using Tharga.Wpf.Features.ApplicationUpdate;
-using Tharga.Wpf.Framework.Exception;
+using Tharga.Wpf.Features.ExceptionHandling;
 
 namespace Tharga.Wpf;
 

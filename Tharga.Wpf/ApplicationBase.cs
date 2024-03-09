@@ -7,10 +7,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Tharga.Wpf.Features.ApplicationUpdate;
+using Tharga.Wpf.Features.ExceptionHandling;
 using Tharga.Wpf.Features.TabNavigator;
 using Tharga.Wpf.Features.WindowLocation;
 using Tharga.Wpf.Framework;
-using Tharga.Wpf.Framework.Exception;
 
 namespace Tharga.Wpf;
 
@@ -43,6 +43,11 @@ public abstract class ApplicationBase : Application
 
                 RegisterExceptionHandler(options, services);
                 RegisterTabNavigation(services);
+
+                foreach (var viewModel in TypeHelper.GetTypesBasedOn<IViewModel>())
+                {
+                    services.AddTransient(viewModel);
+                }
 
                 services.AddSingleton<IWindowLocationService>(s =>
                 {
@@ -91,8 +96,7 @@ public abstract class ApplicationBase : Application
     {
         services.AddTransient<TabNavigatorViewModel>();
         services.AddSingleton<ITabNavigationStateService, TabNavigationStateService>();
-        var tabViewTypes = TypeHelper.GetTypesBasedOn<TabView>().ToArray();
-        foreach (var tabViewTab in tabViewTypes)
+        foreach (var tabViewTab in TypeHelper.GetTypesBasedOn<TabView>())
         {
             services.AddTransient(tabViewTab);
         }
