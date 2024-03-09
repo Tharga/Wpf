@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace Tharga.Wpf.Framework.TypeRegistration;
+namespace Tharga.Wpf.Framework;
 
 /// <summary>
 /// This code is copied from Tharga.Toolkit.TypeService.AssemblyService since we do not want any direct references there.

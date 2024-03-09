@@ -6,10 +6,7 @@ public partial class TabNavigatorView
 
     public TabNavigatorView()
     {
-        DataContextChanged += (_, _) =>
-        {
-            _dataContext = (TabNavigatorViewModel)DataContext;
-        };
+        DataContextChanged += (_, _) => _dataContext = (TabNavigatorViewModel)DataContext;
 
         InitializeComponent();
     }

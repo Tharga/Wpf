@@ -18,7 +18,7 @@ public class MainWindowModel
     }
 
     public ICommand ShowSplashCommand => new RelayCommand(_ => { _applicationUpdateStateService.ShowSplash(); }, _ => true);
-    public ICommand ThrowExceptionCommand => new RelayCommand(_ => throw new InvalidOperationException("Some error"), _ => true);
+    public ICommand ThrowExceptionCommand => new RelayCommand(_ => throw new InvalidOperationException("Some error."), _ => true);
     public ICommand NewTabCommand => new OpenTabComamnd<MyTabView>(_tabNavigationStateService /*, _authenticationStateService*/);
     public ICommand ExitCommand => new RelayCommand(_ => { Application.Current?.MainWindow?.Close(); }, _ => true);
 }

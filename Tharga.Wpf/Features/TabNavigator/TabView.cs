@@ -25,6 +25,6 @@ public abstract class TabView : UserControl
 
     public virtual Task<bool> OnCloseAsync()
     {
-        return Task.FromResult(true);
+        return Task.FromResult(CanClose);
     }
 }

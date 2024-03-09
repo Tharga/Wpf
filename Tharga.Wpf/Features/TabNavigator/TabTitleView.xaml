@@ -50,33 +50,4 @@
         </Button>
 
     </Grid>
-    <!--<Grid>
-        <StackPanel Orientation="Horizontal">
-            <TextBlock x:Name="Title"  d:Text="Some title here" />
-            <Button IsTabStop="False" x:Name="CloseButton" Content="" Width="19" Height="19" BorderThickness="0" Margin="4" Click="CloseButton_Click" >
-                <Button.Background>
-                    <ImageBrush ImageSource="../../Images/Application/Close-all-tabs_16x16.png" Stretch="Uniform"/>
-                </Button.Background>
-                <Button.Style>
-                    <Style TargetType="{x:Type Button}">
-                        <Setter Property="Background" Value="Green"/>
-                        <Setter Property="Template">
-                            <Setter.Value>
-                                <ControlTemplate TargetType="{x:Type Button}">
-                                    <Border Background="{TemplateBinding Background}">
-                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                    </Border>
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
-                        <Style.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="Red"/>
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </Button.Style>
-            </Button>
-        </StackPanel>
-    </Grid>-->
 </UserControl>

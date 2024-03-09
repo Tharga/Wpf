@@ -9,8 +9,8 @@ using Microsoft.Extensions.Logging;
 using Tharga.Wpf.Features.ApplicationUpdate;
 using Tharga.Wpf.Features.TabNavigator;
 using Tharga.Wpf.Features.WindowLocation;
+using Tharga.Wpf.Framework;
 using Tharga.Wpf.Framework.Exception;
-using Tharga.Wpf.Framework.TypeRegistration;
 
 namespace Tharga.Wpf;
 

@@ -9,26 +9,12 @@ namespace Tharga.Wpf.Features.TabNavigator;
 public class TabNavigationStateService : ITabNavigationStateService
 {
     private readonly IServiceProvider _serviceProvider;
-    private double _uiScale = TabNavigatorViewModel.DefaultUiScale;
     private TabView _activeTab;
 
     public TabNavigationStateService(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
     }
-
-    //public event EventHandler<UiScaleChangedEventArgs> UiScaleChangedEvent;
-
-    //public double UiScale
-    //{
-    //    get => _uiScale;
-    //    set
-    //    {
-    //        if (Math.Abs(_uiScale - value) < 0.01) return;
-    //        _uiScale = value;
-    //        UiScaleChangedEvent?.Invoke(this, new UiScaleChangedEventArgs());
-    //    }
-    //}
 
     public ObservableCollection<TabItem> TabItems { get; } = new ();
 
@@ -84,7 +70,7 @@ public class TabNavigationStateService : ITabNavigationStateService
         return allowClose;
     }
 
-    public TabView GetActiveTab()
+    public TabView GetActiveTabView()
     {
         return _activeTab;
     }
@@ -102,10 +88,9 @@ public class TabNavigationStateService : ITabNavigationStateService
 
     private async Task<bool> CloseTabAsync(TabView tabView, bool forceClose)
     {
-        var result = await tabView.OnCloseAsync();
-        if (!result && !forceClose)
+        if (!forceClose && !await tabView.OnCloseAsync())
         {
-            MessageBox.Show($"Kan inte stänga '{tabView.Title}'. Åtgärda och försök igen.", "Stängning avbrutning", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show($"Cannot close tab '{tabView.Title}'.", "Close aborted", MessageBoxButton.OK, MessageBoxImage.Warning);
             return false;
         }
 

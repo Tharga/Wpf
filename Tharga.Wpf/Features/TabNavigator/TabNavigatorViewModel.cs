@@ -9,42 +9,15 @@ namespace Tharga.Wpf.Features.TabNavigator;
 
 public class TabNavigatorViewModel : INotifyPropertyChanged
 {
-    public static readonly double DefaultUiScale = 1;
-
     private readonly ITabNavigationStateService _tabNavigationService;
 
     public TabNavigatorViewModel(ITabNavigationStateService tabNavigationService, IConfiguration configuration)
     {
         _tabNavigationService = tabNavigationService;
-        //_tabNavigationService.UiScaleChangedEvent += (_, _) => { RaisePropertyChanged(nameof(UiScale)); };
-
-        //_floridaUri = configuration.GetSection("ApiUri").Value;
-
-        TabItems.CollectionChanged += (_, _) =>
-        {
-            //RaisePropertyChanged(nameof(Visibility));
-        };
-
-        _tabNavigationService.TabItems.CollectionChanged += (_, _) =>
-        {
-
-        };
     }
 
     public ObservableCollection<TabItem> TabItems => _tabNavigationService.TabItems;
-    //public Visibility Visibility => TabItems.Any() ? Visibility.Visible : Visibility.Hidden;
-    public Visibility Visibility => Visibility.Visible;
-
-    //public double UiScale
-    //{
-    //    get => _tabNavigationService.UiScale;
-    //    set
-    //    {
-    //        if (value.Equals(_tabNavigationService.UiScale)) return;
-    //        _tabNavigationService.UiScale = value;
-    //        //RaisePropertyChanged();
-    //    }
-    //}
+    public Visibility Visibility => TabItems.Any() ? Visibility.Visible : Visibility.Hidden;
 
     public event PropertyChangedEventHandler PropertyChanged;
 
