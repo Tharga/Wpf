@@ -2,7 +2,7 @@
 
 //using Tharga.Florida.Client.Framework.Authentication;
 
-namespace Tharga.Wpf.Features.TabNavigator;
+namespace Tharga.Wpf.TabNavigator;
 
 public class OpenTabComamnd<TTabView> : ICommand
     where TTabView : TabView

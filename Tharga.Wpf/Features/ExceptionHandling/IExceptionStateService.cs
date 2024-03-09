@@ -1,4 +1,4 @@
-﻿namespace Tharga.Wpf.Features.ExceptionHandling;
+﻿namespace Tharga.Wpf.ExceptionHandling;
 
 internal interface IExceptionStateService
 {

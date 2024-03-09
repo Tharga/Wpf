@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace Tharga.Wpf.Features.ApplicationUpdate;
+namespace Tharga.Wpf.ApplicationUpdate;
 
 public partial class Splash : ISplash
 {

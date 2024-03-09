@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 using Tharga.Wpf.Framework;
 using Timer = System.Timers.Timer;
 
-namespace Tharga.Wpf.Features.WindowLocation;
+namespace Tharga.Wpf.WindowLocation;
 
 internal class WindowLocationService : IWindowLocationService
 {

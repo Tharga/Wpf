@@ -1,7 +1,7 @@
 ﻿using System.Net.Http;
 using Microsoft.Extensions.Configuration;
 
-namespace Tharga.Wpf.Features.ApplicationUpdate;
+namespace Tharga.Wpf.ApplicationUpdate;
 
 internal class ApplicationDownloadService : IApplicationDownloadService
 {

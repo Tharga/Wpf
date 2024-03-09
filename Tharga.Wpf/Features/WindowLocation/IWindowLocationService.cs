@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Windows;
 
-namespace Tharga.Wpf.Features.WindowLocation;
+namespace Tharga.Wpf.WindowLocation;
 
 public interface IWindowLocationService
 {

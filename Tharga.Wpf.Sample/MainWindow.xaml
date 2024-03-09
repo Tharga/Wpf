@@ -6,7 +6,7 @@
                      xmlns:local="clr-namespace:Tharga.Wpf.Sample"
                      xmlns:fluent="urn:fluent-ribbon"
                      xmlns:wpf="clr-namespace:Tharga.Wpf;assembly=Tharga.Wpf"
-                     xmlns:tabNavigator1="clr-namespace:Tharga.Wpf.Features.TabNavigator;assembly=Tharga.Wpf"
+                     xmlns:tabNavigator="clr-namespace:Tharga.Wpf.TabNavigator;assembly=Tharga.Wpf"
                      mc:Ignorable="d"
                      Title="MainWindow"
                      DataContext="{wpf:ViewModelProvider local:MainWindowModel}"
@@ -71,7 +71,7 @@
             </fluent:RibbonTabItem>
         </fluent:Ribbon>
         <DockPanel Grid.Row="1" Margin="3" >
-            <tabNavigator1:TabNavigatorView />
+            <tabNavigator:TabNavigatorView />
         </DockPanel>
         <fluent:StatusBar Grid.Row="2" Focusable="false">
             <fluent:StatusBarItem Value="Offline" d:Value="Connected" HorizontalAlignment="Left" />

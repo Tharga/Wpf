@@ -1,6 +1,7 @@
 ﻿using System.Windows;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
 
-namespace Tharga.Wpf.Features.TabNavigator;
+namespace Tharga.Wpf.TabNavigator;
 
 public partial class TabTitleView
 {
@@ -12,6 +13,11 @@ public partial class TabTitleView
         tabView.CanCloseChangedEvent += (s, e) =>
         {
             if (CloseButton != null) Application.Current.Dispatcher.Invoke(() => CloseButton.IsEnabled = tabView.CanClose );
+        };
+
+        tabView.TitleChangedEvent += (_, _) =>
+        {
+            Application.Current.Dispatcher.Invoke(() => Title.Content = tabView.Title);
         };
 
         _tabView = tabView;

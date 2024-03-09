@@ -11,13 +11,14 @@ public partial class MyTabView
         timer.Elapsed += (_, _) =>
         {
             CanClose = true;
+            Title = "Yeee";
         };
         timer.Start();
 
         InitializeComponent();
     }
 
-    public override string Title => "Some title";
+    public override string DefaultTitle => "Some title";
     public override bool AllowMultiple => true;
     public override bool AllowClose => true;
 }

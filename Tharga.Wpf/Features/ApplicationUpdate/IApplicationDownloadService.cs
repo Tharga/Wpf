@@ -1,4 +1,4 @@
-﻿namespace Tharga.Wpf.Features.ApplicationUpdate;
+﻿namespace Tharga.Wpf.ApplicationUpdate;
 
 public interface IApplicationDownloadService
 {

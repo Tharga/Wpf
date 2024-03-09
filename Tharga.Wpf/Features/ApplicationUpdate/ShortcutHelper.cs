@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 
-namespace Tharga.Wpf.Features.ApplicationUpdate;
+namespace Tharga.Wpf.ApplicationUpdate;
 
 internal class ShortcutHelper
 {

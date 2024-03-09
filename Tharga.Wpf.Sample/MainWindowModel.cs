@@ -1,7 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Input;
-using Tharga.Wpf.Features.ApplicationUpdate;
-using Tharga.Wpf.Features.TabNavigator;
+using Tharga.Wpf.ApplicationUpdate;
+using Tharga.Wpf.TabNavigator;
 
 namespace Tharga.Wpf.Sample;
 

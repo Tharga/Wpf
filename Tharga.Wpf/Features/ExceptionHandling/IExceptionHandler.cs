@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace Tharga.Wpf.Features.ExceptionHandling;
+namespace Tharga.Wpf.ExceptionHandling;
 
 public interface IExceptionHandler<in T>
     where T : Exception

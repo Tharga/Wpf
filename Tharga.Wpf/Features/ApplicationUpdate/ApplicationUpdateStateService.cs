@@ -6,7 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Squirrel;
 
-namespace Tharga.Wpf.Features.ApplicationUpdate;
+namespace Tharga.Wpf.ApplicationUpdate;
 
 internal class ApplicationUpdateStateService : IApplicationUpdateStateService
 {

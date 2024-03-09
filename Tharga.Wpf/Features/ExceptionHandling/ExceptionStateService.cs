@@ -4,7 +4,7 @@ using System.Windows.Markup;
 using Microsoft.Extensions.Logging;
 using Tharga.Wpf.Framework;
 
-namespace Tharga.Wpf.Features.ExceptionHandling;
+namespace Tharga.Wpf.ExceptionHandling;
 
 internal class ExceptionStateService : IExceptionStateService
 {

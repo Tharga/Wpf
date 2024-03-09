@@ -1,4 +1,4 @@
-﻿namespace Tharga.Wpf.Features.TabNavigator;
+﻿namespace Tharga.Wpf.TabNavigator;
 
 public partial class TabNavigatorView
 {

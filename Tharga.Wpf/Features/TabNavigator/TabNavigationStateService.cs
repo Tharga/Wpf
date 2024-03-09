@@ -4,7 +4,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Tharga.Wpf.Features.TabNavigator;
+namespace Tharga.Wpf.TabNavigator;
 
 internal class TabNavigationStateService : ITabNavigationStateService
 {
@@ -18,7 +18,7 @@ internal class TabNavigationStateService : ITabNavigationStateService
 
     public ObservableCollection<TabItem> TabItems { get; } = new ();
 
-    public void OpenTab<TTabView>()
+    public void OpenTab<TTabView>(string title)
         where TTabView : TabView
     {
         var existing = TabItems.FirstOrDefault(x => x.Content.GetType() == typeof(TTabView));
@@ -33,6 +33,7 @@ internal class TabNavigationStateService : ITabNavigationStateService
         }
 
         var tabContent = _serviceProvider.GetService<TTabView>();
+        tabContent.Title = title;
 
         var tabItem = new TabItem
         {
@@ -90,6 +91,7 @@ internal class TabNavigationStateService : ITabNavigationStateService
     {
         if (!forceClose && !await tabView.OnCloseAsync())
         {
+            //TODO: AAA: Get the title from the TabTitleView, sine the title can be overridden.
             MessageBox.Show($"Cannot close tab '{tabView.Title}'.", "Close aborted", MessageBoxButton.OK, MessageBoxImage.Warning);
             return false;
         }

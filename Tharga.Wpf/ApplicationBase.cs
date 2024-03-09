@@ -6,11 +6,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Tharga.Wpf.Features.ApplicationUpdate;
-using Tharga.Wpf.Features.ExceptionHandling;
-using Tharga.Wpf.Features.TabNavigator;
-using Tharga.Wpf.Features.WindowLocation;
+using Tharga.Wpf.ApplicationUpdate;
+using Tharga.Wpf.ExceptionHandling;
 using Tharga.Wpf.Framework;
+using Tharga.Wpf.TabNavigator;
+using Tharga.Wpf.WindowLocation;
 
 namespace Tharga.Wpf;
 

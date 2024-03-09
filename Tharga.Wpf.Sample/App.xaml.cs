@@ -1,7 +1,7 @@
 ﻿using System.Windows;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using Tharga.Wpf.Features.ExceptionHandling;
+using Tharga.Wpf.ExceptionHandling;
 
 namespace Tharga.Wpf.Sample;
 

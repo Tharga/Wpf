@@ -1,4 +1,4 @@
-﻿using Tharga.Wpf.Features.WindowLocation;
+﻿using Tharga.Wpf.WindowLocation;
 
 namespace Tharga.Wpf.Sample;
 
