@@ -42,7 +42,7 @@ public abstract class ApplicationBase : Application
                 services.AddHttpClient();
 
                 RegisterExceptionHandler(options, services);
-                RegisterTabNavigation(services);
+                RegisterTabNavigation(options, services);
 
                 foreach (var viewModel in TypeHelper.GetTypesBasedOn<IViewModel>())
                 {
@@ -92,10 +92,10 @@ public abstract class ApplicationBase : Application
         });
     }
 
-    private static void RegisterTabNavigation(IServiceCollection services)
+    private static void RegisterTabNavigation(ThargaWpfOptions options, IServiceCollection services)
     {
         services.AddTransient<TabNavigatorViewModel>();
-        services.AddSingleton<ITabNavigationStateService, TabNavigationStateService>();
+        services.AddSingleton<ITabNavigationStateService>(s => new TabNavigationStateService(options, s));
         foreach (var tabViewTab in TypeHelper.GetTypesBasedOn<TabView>())
         {
             services.AddTransient(tabViewTab);

@@ -8,27 +8,40 @@ namespace Tharga.Wpf.TabNavigator;
 
 internal class TabNavigationStateService : ITabNavigationStateService
 {
+    private readonly ThargaWpfOptions _options;
     private readonly IServiceProvider _serviceProvider;
     private TabView _activeTab;
 
-    public TabNavigationStateService(IServiceProvider serviceProvider)
+    public TabNavigationStateService(ThargaWpfOptions options, IServiceProvider serviceProvider)
     {
+        _options = options;
         _serviceProvider = serviceProvider;
     }
 
     public ObservableCollection<TabItem> TabItems { get; } = new ();
 
-    public void OpenTab<TTabView>(string title)
+    public (TTabView TabView, TabAction TabAction) OpenTab<TTabView>(string title)
         where TTabView : TabView
     {
-        var existing = TabItems.FirstOrDefault(x => x.Content.GetType() == typeof(TTabView));
-        if (existing != null)
+        var existing = TabItems.Where(x => x.Content.GetType() == typeof(TTabView)).ToArray();
+        if (existing.Any())
         {
-            var existingTabContent = (TTabView)existing.Content;
-            if (!existingTabContent.AllowMultiple)
+            foreach (var item in existing)
             {
-                existing.Focus();
-                return;
+                var existingTabContent = (TTabView)item.Content;
+
+                //NOTE: This setting is per type.
+                if (!existingTabContent.AllowMultiple)
+                {
+                    item.Focus();
+                    return (existingTabContent, TabAction.Focused);
+                }
+
+                if (!_options.AllowTabsWithSameTitles && existingTabContent.Title == title)
+                {
+                    item.Focus();
+                    return (existingTabContent, TabAction.Focused);
+                }
             }
         }
 
@@ -41,21 +54,22 @@ internal class TabNavigationStateService : ITabNavigationStateService
             Content = tabContent
         };
 
-        var ctx = (TTabView)tabItem.Content;
-        ctx.GotFocus += (_, _) =>
+        var tabView = (TTabView)tabItem.Content;
+        tabView.GotFocus += (_, _) =>
         {
-            _activeTab = ctx;
+            _activeTab = tabView;
             CommandManager.InvalidateRequerySuggested();
         };
 
         tabItem.GotFocus += (s, e) =>
         {
-            _activeTab = ctx;
+            _activeTab = tabView;
             CommandManager.InvalidateRequerySuggested();
         };
 
         TabItems.Add(tabItem);
         tabItem.Focus();
+        return (tabView, TabAction.Created);
     }
 
     public async Task<bool> CloseAllTabsAsync(bool forceClose)

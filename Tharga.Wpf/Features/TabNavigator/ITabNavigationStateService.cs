@@ -6,7 +6,7 @@ namespace Tharga.Wpf.TabNavigator;
 public interface ITabNavigationStateService
 {
     ObservableCollection<TabItem> TabItems { get; }
-    void OpenTab<TTabView>(string title = default) where TTabView : TabView;
+    (TTabView TabView, TabAction TabAction) OpenTab<TTabView>(string title = default) where TTabView : TabView;
     Task<bool> CloseAllTabsAsync(bool forceClose = false);
     TabView GetActiveTabView();
 }
