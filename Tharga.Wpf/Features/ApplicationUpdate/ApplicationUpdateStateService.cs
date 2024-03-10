@@ -124,6 +124,8 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
     {
         try
         {
+            CreateShortcut();
+
             tools.SetProcessAppUserModelId();
             ShowSplashWithRetry(firstRun);
             _ = StartUpdateLoop();
@@ -263,8 +265,9 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
 
         var baseDirectory = GetDirectory();
         var path = Path.Combine(baseDirectory, exeName);
-        _logger.LogInformation($"Create shortcut with path '{path}' a combination of '{baseDirectory}' and '{exeName}'.");
+        _logger.LogWarning("Create shortcut with path '{path}' a combination of '{baseDirectory}' and '{exeName}'.", path, baseDirectory, exeName);
         var iconPath = Path.Combine(baseDirectory, "app.ico");
+        _logger.LogWarning("Create shortcut with path '{iconPath}' a combination of '{baseDirectory}' and '{icoName}'.", path, baseDirectory, "app.ico");
 
         var iconInfo = new ShortcutHelper.IconInfo { Path = iconPath };
         var name = GetShortcutName();

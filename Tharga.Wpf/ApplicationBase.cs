@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Net.Http;
+﻿using System.Net.Http;
 using System.Reflection;
 using System.Windows;
 using Microsoft.Extensions.Configuration;

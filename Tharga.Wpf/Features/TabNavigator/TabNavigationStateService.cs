@@ -105,7 +105,6 @@ internal class TabNavigationStateService : ITabNavigationStateService
     {
         if (!forceClose && !await tabView.OnCloseAsync())
         {
-            //TODO: AAA: Get the title from the TabTitleView, sine the title can be overridden.
             MessageBox.Show($"Cannot close tab '{tabView.Title}'.", "Close aborted", MessageBoxButton.OK, MessageBoxImage.Warning);
             return false;
         }
