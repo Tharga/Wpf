@@ -124,8 +124,6 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
     {
         try
         {
-            CreateShortcut();
-
             tools.SetProcessAppUserModelId();
             ShowSplashWithRetry(firstRun);
             _ = StartUpdateLoop();
@@ -258,16 +256,17 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
 
     private void CreateShortcut()
     {
-        var entryAssembly = Assembly.GetEntryAssembly();
-        var assemblyLocation = entryAssembly?.Location ?? throw new InvalidOperationException("Cannot find entry assembly.");
-        var pos = assemblyLocation.LastIndexOf("\\", StringComparison.Ordinal);
-        var exeName = assemblyLocation?.Substring(pos + 1).Replace(".dll", ".exe");
+        //var entryAssembly = Assembly.GetEntryAssembly();
+        //var assemblyLocation = entryAssembly?.Location ?? throw new InvalidOperationException("Cannot find entry assembly.");
+        //var pos = assemblyLocation.LastIndexOf("\\", StringComparison.Ordinal);
+        //var exeName = assemblyLocation?.Substring(pos + 1).Replace(".dll", ".exe");
 
         var baseDirectory = GetDirectory();
-        var path = Path.Combine(baseDirectory, exeName);
-        _logger.LogWarning("Create shortcut with path '{path}' a combination of '{baseDirectory}' and '{exeName}'.", path, baseDirectory, exeName);
+        //var path = Path.Combine(baseDirectory, exeName);
+        var path = Path.GetFileName(SquirrelRuntimeInfo.EntryExePath);
+        //_logger.LogWarning("Create shortcut with path '{path}' a combination of '{baseDirectory}' and '{exeName}'.", path, baseDirectory, exeName);
         var iconPath = Path.Combine(baseDirectory, "app.ico");
-        _logger.LogWarning("Create shortcut with path '{iconPath}' a combination of '{baseDirectory}' and '{icoName}'.", path, baseDirectory, "app.ico");
+        //_logger.LogWarning("Create shortcut with path '{iconPath}' a combination of '{baseDirectory}' and '{icoName}'.", path, baseDirectory, "app.ico");
 
         var iconInfo = new ShortcutHelper.IconInfo { Path = iconPath };
         var name = GetShortcutName();
