@@ -24,7 +24,7 @@ public class OpenTabComamnd<TTabView> : ICommand
 
     public void Execute(object parameter)
     {
-        _tabNavigationService.OpenTab<TTabView>("TEST");
+        _tabNavigationService.OpenTab<TTabView>();
     }
 
     public event EventHandler CanExecuteChanged
