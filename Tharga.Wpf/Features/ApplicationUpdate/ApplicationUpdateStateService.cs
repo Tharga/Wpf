@@ -26,7 +26,7 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
         _mainWindow = mainWindow;
         _logger = logger;
         _environmentName = configuration.GetSection("Environment").Value;
-        _version = Assembly.GetExecutingAssembly().GetName().Version?.ToString();
+        _version = Assembly.GetEntryAssembly()?.GetName().Version?.ToString();
 
         var interval = _environmentName == "Production" ? TimeSpan.FromHours(1) : TimeSpan.FromMinutes(1);
         _timer = new System.Timers.Timer { AutoReset = true, Enabled = false, Interval = interval.TotalMilliseconds };
