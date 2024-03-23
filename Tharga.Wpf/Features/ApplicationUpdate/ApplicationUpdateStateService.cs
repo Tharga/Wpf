@@ -31,19 +31,22 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
         var version = Assembly.GetEntryAssembly()?.GetName().Version?.ToString();
         _version = version == "1.0.0.0" ? null : version;
 
-        var interval = _environmentName == "Production" ? TimeSpan.FromHours(1) : TimeSpan.FromMinutes(1);
-        _timer = new System.Timers.Timer { AutoReset = true, Enabled = false, Interval = interval.TotalMilliseconds };
-        _timer.Elapsed += async (_, _) =>
+        var interval = options.CheckForUpdateInterval;
+        if (interval != null && interval > TimeSpan.Zero)
         {
-            try
+            _timer = new System.Timers.Timer { AutoReset = true, Enabled = false, Interval = interval.Value.TotalMilliseconds };
+            _timer.Elapsed += async (_, _) =>
             {
-                await UpdateClientApplication();
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e, e.Message);
-            }
-        };
+                try
+                {
+                    await UpdateClientApplication();
+                }
+                catch (Exception e)
+                {
+                    _logger.LogError(e, e.Message);
+                }
+            };
+        }
 
         if (options.Debug)
         {
@@ -55,17 +58,20 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
             });
         }
 
-        if (_mainWindow.Visibility == Visibility.Visible)
+        if (interval != null)
         {
-            SquirrelAwareApp.HandleEvents(OnInitialInstall, OnAppInstall, OnAppObsoleted, OnAppUninstall, OnEveryRun);
-        }
-        else
-        {
-            _mainWindow.IsVisibleChanged += async (s, e) =>
+            if (_mainWindow.Visibility == Visibility.Visible)
             {
-                await Task.Delay(400);
                 SquirrelAwareApp.HandleEvents(OnInitialInstall, OnAppInstall, OnAppObsoleted, OnAppUninstall, OnEveryRun);
-            };
+            }
+            else
+            {
+                _mainWindow.IsVisibleChanged += async (_, _) =>
+                {
+                    await Task.Delay(400);
+                    SquirrelAwareApp.HandleEvents(OnInitialInstall, OnAppInstall, OnAppObsoleted, OnAppUninstall, OnEveryRun);
+                };
+            }
         }
     }
 
@@ -186,7 +192,7 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
         _splash.Show();
     }
 
-    public async Task UpdateClientApplication()
+    private async Task UpdateClientApplication()
     {
         var splashDelay = Debugger.IsAttached ? TimeSpan.FromSeconds(4) : TimeSpan.FromSeconds(2);
         string clientLocation = null;
@@ -201,7 +207,8 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
             {
                 var message = $"No application download location configured in options under {nameof(IApplicationDownloadService.GetApplicationLocationAsync)}.";
                 _logger.LogWarning(message);
-                _splash.SetErrorMessage(message);
+                _splash?.SetErrorMessage(message);
+                UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs(message));
                 await Task.Delay(TimeSpan.FromSeconds(5));
             }
             else
@@ -264,12 +271,24 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
         ShowSplashWithRetry(false, null, true);
     }
 
-    public async Task StartUpdateLoop()
+    public Task CheckForUpdateAsync()
     {
-        if (!_timer.Enabled)
+        return UpdateClientApplication();
+    }
+
+    private async Task StartUpdateLoop()
+    {
+        if (_timer != null)
+        {
+            if (!_timer.Enabled)
+            {
+                await UpdateClientApplication();
+                _timer.Start();
+            }
+        }
+        else
         {
             await UpdateClientApplication();
-            _timer.Start();
         }
     }
 

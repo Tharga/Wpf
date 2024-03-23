@@ -1,27 +1,29 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0-windows</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <UseWPF>true</UseWPF>
-  </PropertyGroup>
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net8.0-windows</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<UseWPF>true</UseWPF>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <None Remove="Close.svg" />
-    <None Remove="Exit.svg" />
-  </ItemGroup>
+	<ItemGroup>
+		<None Remove="Close.svg" />
+		<None Remove="Exit.svg" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <EmbeddedResource Include="Exit.svg" />
-  </ItemGroup>
+	<ItemGroup>
+		<Resource Include="Exit.svg" />
+		<Resource Include="Close.svg" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Tharga.Wpf\Tharga.Wpf.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Fluent.Ribbon" Version="10.0.4" />
+		<PackageReference Include="SharpVectors" Version="1.8.4" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <Resource Include="Close.svg" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Tharga.Wpf\Tharga.Wpf.csproj" />
+	</ItemGroup>
 
 </Project>

@@ -1,5 +1,4 @@
 ﻿using System.Windows;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
 
 namespace Tharga.Wpf.TabNavigator;
 

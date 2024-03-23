@@ -4,4 +4,5 @@ public interface IApplicationUpdateStateService
 {
     event EventHandler<UpdateInfoEventArgs> UpdateInfoEvent;
     void ShowSplash();
+    Task CheckForUpdateAsync();
 }
