@@ -16,15 +16,15 @@ internal class ApplicationDownloadService : IApplicationDownloadService
         _options = options;
     }
 
-    public async Task<string> GetApplicationLocationAsync()
+    public async Task<(string ApplicationLocation, string ApplicationLocationSource)> GetApplicationLocationAsync()
     {
         var requestUri = _options.ApplicationDownloadLocationLoader?.Invoke(_configuration);
-        if (requestUri == default) return null;
+        if (requestUri == default) return (null, null);
 
         var httpClient = _httpClientFactory.CreateClient("ApplicationUpdate");
         var result = await httpClient.GetAsync(requestUri);
         if (!result.IsSuccessStatusCode) throw new InvalidOperationException($"Failed to get application location at '{requestUri}'.");
         var data = await result.Content.ReadAsStringAsync();
-        return data;
+        return (data, requestUri.OriginalString);
     }
 }

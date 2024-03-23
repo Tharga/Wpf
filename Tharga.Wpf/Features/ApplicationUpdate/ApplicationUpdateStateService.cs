@@ -18,6 +18,8 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
     private readonly string _environmentName;
     private readonly string _version;
     private ISplash _splash;
+    private string _applicationLocation;
+    private string _applicationLocationSource;
 
     public ApplicationUpdateStateService(IConfiguration configuration, IApplicationDownloadService applicationDownloadService, ThargaWpfOptions options, Window mainWindow, ILogger<ApplicationUpdateStateService> logger)
     {
@@ -26,7 +28,8 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
         _mainWindow = mainWindow;
         _logger = logger;
         _environmentName = configuration.GetSection("Environment").Value;
-        _version = Assembly.GetEntryAssembly()?.GetName().Version?.ToString();
+        var version = Assembly.GetEntryAssembly()?.GetName().Version?.ToString();
+        _version = version == "1.0.0.0" ? null : version;
 
         var interval = _environmentName == "Production" ? TimeSpan.FromHours(1) : TimeSpan.FromMinutes(1);
         _timer = new System.Timers.Timer { AutoReset = true, Enabled = false, Interval = interval.TotalMilliseconds };
@@ -41,6 +44,16 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
                 _logger.LogError(e, e.Message);
             }
         };
+
+        if (options.Debug)
+        {
+            Task.Run(async () =>
+            {
+                var result = await _applicationDownloadService.GetApplicationLocationAsync();
+                _applicationLocation = result.ApplicationLocation;
+                _applicationLocationSource = result.ApplicationLocationSource;
+            });
+        }
 
         if (_mainWindow.Visibility == Visibility.Visible)
         {
@@ -151,6 +164,9 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
     {
         if (_splash == null)
         {
+            Uri.TryCreate(_applicationLocation, UriKind.Absolute, out var applicationLocation);
+            Uri.TryCreate(_applicationLocationSource, UriKind.Absolute, out var applicationSourceLocation);
+
             var splashData = new SplashData
             {
                 MainWindow = _mainWindow,
@@ -158,7 +174,9 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
                 EnvironmentName = _environmentName,
                 Version = _version,
                 EntryMessage = entryMessage,
-                FullName = _options.ApplicationFullName
+                FullName = _options.ApplicationFullName,
+                ClientLocation = applicationLocation,
+                ClientSourceLocation = applicationSourceLocation
             };
             _splash = _options.SplashCreator?.Invoke(splashData) ?? new Splash(splashData);
             UpdateInfoEvent += (_, args) => _splash?.UpdateInfo(args.Message);
@@ -177,7 +195,8 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
         {
             UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs("Looking for update."));
 
-            clientLocation = await _applicationDownloadService.GetApplicationLocationAsync();
+            var result = await _applicationDownloadService.GetApplicationLocationAsync();
+            clientLocation = result.ApplicationLocation;
             if (string.IsNullOrEmpty(clientLocation))
             {
                 var message = $"No application download location configured in options under {nameof(IApplicationDownloadService.GetApplicationLocationAsync)}.";

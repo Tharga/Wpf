@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿using System.Diagnostics;
+using System.Windows;
+using System.Windows.Navigation;
 
 namespace Tharga.Wpf.ApplicationUpdate;
 
@@ -9,7 +11,7 @@ public partial class Splash : ISplash
         Owner = splashData.MainWindow;
         Topmost = true;
 
-        MouseDown += (s, e) => DragMove();
+        MouseDown += (_, _) => DragMove();
 
         InitializeComponent();
 
@@ -19,6 +21,24 @@ public partial class Splash : ISplash
         if (!string.IsNullOrEmpty(splashData.EnvironmentName)) Environment.Text = splashData.EnvironmentName;
         if (!string.IsNullOrEmpty(splashData.Version)) Version.Text = splashData.Version;
         if (!string.IsNullOrEmpty(splashData.FullName)) FullName.Text = splashData.FullName;
+
+        if (splashData.ClientLocation != null)
+        {
+            ClientLocation.NavigateUri = splashData.ClientLocation;
+        }
+        else
+        {
+            Client.Visibility = Visibility.Collapsed;
+        }
+
+        if (splashData.ClientSourceLocation != null)
+        {
+            ClientSourceLocation.NavigateUri = splashData.ClientSourceLocation;
+        }
+        else
+        {
+            ClientSource.Visibility = Visibility.Collapsed;
+        }
     }
 
     public void UpdateInfo(string message)
@@ -46,5 +66,17 @@ public partial class Splash : ISplash
     private void ButtonBase_OnClick(object sender, RoutedEventArgs e)
     {
         Close();
+    }
+
+    private void Client_RequestNavigate(object sender, RequestNavigateEventArgs e)
+    {
+        Process.Start(new ProcessStartInfo("cmd", $"/c start {e.Uri.AbsoluteUri}/RELEASES") { CreateNoWindow = true });
+        e.Handled = true;
+    }
+
+    private void ClientSource_RequestNavigate(object sender, RequestNavigateEventArgs e)
+    {
+        Process.Start(new ProcessStartInfo("cmd", $"/c start {e.Uri.AbsoluteUri}") { CreateNoWindow = true });
+        e.Handled = true;
     }
 }

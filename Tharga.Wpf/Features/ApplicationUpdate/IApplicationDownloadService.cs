@@ -2,5 +2,5 @@
 
 public interface IApplicationDownloadService
 {
-    Task<string> GetApplicationLocationAsync();
+    Task<(string ApplicationLocation, string ApplicationLocationSource)> GetApplicationLocationAsync();
 }

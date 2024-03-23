@@ -10,4 +10,6 @@ public record SplashData
     public string EnvironmentName { get; init; }
     public string Version { get; init; }
     public string EntryMessage { get; init; }
+    public required Uri ClientLocation { get; init; }
+    public required Uri ClientSourceLocation { get; init; }
 }

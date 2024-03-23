@@ -23,6 +23,7 @@ public partial class App
     {
         thargaWpfOptions.ApplicationShortName = "Sample";
         thargaWpfOptions.ApplicationFullName = "Tharga Wpf Sample Application";
+        //thargaWpfOptions.Debug = true;
 
         thargaWpfOptions.RegisterExceptionHandler<InvalidOperationExceptionHandler, InvalidOperationException>();
 

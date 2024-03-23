@@ -14,6 +14,7 @@ public class ThargaWpfOptions
     public Func<SplashData, ISplash> SplashCreator { get; set; }
     public Func<IConfiguration, Uri> ApplicationDownloadLocationLoader { get; set; }
     public bool AllowTabsWithSameTitles { get; set; }
+    public bool Debug { get; set; }
 
     public void RegisterExceptionHandler<THandler, TException>()
         where THandler : IExceptionHandler<TException>
