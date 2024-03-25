@@ -16,6 +16,7 @@ public partial class App
         thargaWpfOptions.ApplicationFullName = "Tharga Wpf Sample Application";
         thargaWpfOptions.CheckForUpdateInterval = TimeSpan.Zero;
         thargaWpfOptions.AllowTabsWithSameTitles = false;
+        thargaWpfOptions.AllowMultipleApplications = false;
 
         thargaWpfOptions.RegisterExceptionHandler<InvalidOperationExceptionHandler, InvalidOperationException>();
 

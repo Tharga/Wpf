@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using System.Diagnostics;
+using System.Net.Http;
 using System.Reflection;
 using System.Windows;
 using Microsoft.Extensions.Configuration;
@@ -15,6 +16,9 @@ namespace Tharga.Wpf;
 
 public abstract class ApplicationBase : Application
 {
+    private readonly ThargaWpfOptions _options;
+    private Mutex _mutex;
+
     protected ApplicationBase()
     {
         DispatcherUnhandledException += (_, e) =>
@@ -25,7 +29,7 @@ public abstract class ApplicationBase : Application
         };
 
         var assemblyName = Assembly.GetEntryAssembly()?.GetName();
-        var options = new ThargaWpfOptions
+        _options = new ThargaWpfOptions
         {
             ApplicationFullName = assemblyName?.Name ?? "Unknown Application",
             ApplicationShortName = assemblyName?.Name ?? "Unknown",
@@ -35,13 +39,13 @@ public abstract class ApplicationBase : Application
             .CreateDefaultBuilder()
             .ConfigureServices((context, services) =>
             {
-                Options(options);
+                Options(_options);
 
-                services.AddSingleton(_ => options);
+                services.AddSingleton(_ => _options);
                 services.AddHttpClient();
 
-                RegisterExceptionHandler(options, services);
-                RegisterTabNavigation(options, services);
+                RegisterExceptionHandler(_options, services);
+                RegisterTabNavigation(_options, services);
 
                 foreach (var viewModel in TypeHelper.GetTypesBasedOn<IViewModel>())
                 {
@@ -51,7 +55,7 @@ public abstract class ApplicationBase : Application
                 services.AddSingleton<IWindowLocationService>(s =>
                 {
                     var logger = s.GetService<ILogger<WindowLocationService>>();
-                    return new WindowLocationService(options, logger);
+                    return new WindowLocationService(_options, logger);
                 });
 
                 services.AddSingleton<IApplicationUpdateStateService>(s =>
@@ -60,13 +64,13 @@ public abstract class ApplicationBase : Application
                     var applicationDownloadService = s.GetService<IApplicationDownloadService>();
                     var mainWindow = ((ApplicationBase)Current).MainWindow;
                     var logger = s.GetService<ILogger<ApplicationUpdateStateService>>();
-                    return new ApplicationUpdateStateService(configuration, applicationDownloadService, options, mainWindow, logger);
+                    return new ApplicationUpdateStateService(configuration, applicationDownloadService, _options, mainWindow, logger);
                 });
                 services.AddTransient<IApplicationDownloadService>(s =>
                 {
                     var configuration = s.GetService<IConfiguration>();
                     var httpClientFactory = s.GetService<IHttpClientFactory>();
-                    return new ApplicationDownloadService(configuration, httpClientFactory, options);
+                    return new ApplicationDownloadService(configuration, httpClientFactory, _options);
                 });
 
                 Register(context, services);
@@ -106,12 +110,24 @@ public abstract class ApplicationBase : Application
 
     protected override async void OnStartup(StartupEventArgs e)
     {
+        if (!_options.AllowMultipleApplications)
+        {
+            _mutex = new Mutex(true, _options.ApplicationShortName, out var createdNew);
+            if (!createdNew)
+            {
+                BringExistingInstanceToFront();
+                Shutdown();
+                return;
+            }
+        }
+
         await AppHost.StartAsync();
         base.OnStartup(e);
     }
 
     protected override async void OnExit(ExitEventArgs e)
     {
+        _mutex?.Close();
         await AppHost.StopAsync();
         AppHost.Dispose();
         base.OnExit(e);
@@ -122,5 +138,13 @@ public abstract class ApplicationBase : Application
         var service = ((ApplicationBase)Current).AppHost.Services.GetService<T>();
         if (service == null) throw new InvalidOperationException($"Cannot find service '{typeof(T).Name}'. Perhaps it has not been registered in the IOC.");
         return service;
+    }
+
+    private void BringExistingInstanceToFront()
+    {
+        var currentProcess = Process.GetCurrentProcess();
+        var processes = Process.GetProcessesByName(currentProcess.ProcessName);
+        var process = processes.FirstOrDefault(x => x.Id != currentProcess.Id);
+        if (process != null) WindowHelper.FocusWindowByProcessId(process.Id);
     }
 }

@@ -9,10 +9,29 @@ public class ThargaWpfOptions
 {
     private readonly ConcurrentDictionary<Type, Type> _exceptionTypes = new();
 
+    /// <summary>
+    /// Used for folder names and where a brief name is to be used.
+    /// </summary>
     public string ApplicationShortName { get; set; }
+
+    /// <summary>
+    /// Used on the Splash Screen and as shortcut description.
+    /// </summary>
     public string ApplicationFullName { get; set; }
+
+    /// <summary>
+    /// Invoke a custom splash window. If this method is not implemented the built-in version will be used.
+    /// </summary>
     public Func<SplashData, ISplash> SplashCreator { get; set; }
+
+    /// <summary>
+    /// Loader for providing the location of the application update location.
+    /// </summary>
     public Func<IConfiguration, Uri> ApplicationDownloadLocationLoader { get; set; }
+
+    /// <summary>
+    /// If set to true, multiple tabs with the same title is allowed.
+    /// </summary>
     public bool AllowTabsWithSameTitles { get; set; }
 
     /// <summary>
@@ -28,6 +47,17 @@ public class ThargaWpfOptions
     /// </summary>
     public TimeSpan? CheckForUpdateInterval { get; set; }
 
+    /// <summary>
+    /// True if the application can be started several times. No for single application executions where the running application will be focused instead.
+    /// </summary>
+    public bool AllowMultipleApplications { get; set; } = true;
+
+
+    /// <summary>
+    /// Registration of customer exception handlers.
+    /// </summary>
+    /// <typeparam name="THandler"></typeparam>
+    /// <typeparam name="TException"></typeparam>
     public void RegisterExceptionHandler<THandler, TException>()
         where THandler : IExceptionHandler<TException>
         where TException : Exception
