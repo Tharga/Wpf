@@ -2,11 +2,10 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
-using System.Timers;
 using System.Windows;
+using System.Xml.Linq;
 using Microsoft.Extensions.Logging;
 using Tharga.Wpf.Framework;
-using Timer = System.Timers.Timer;
 
 namespace Tharga.Wpf.WindowLocation;
 
@@ -33,11 +32,11 @@ internal class WindowLocationService : IWindowLocationService
         private readonly Window _window;
         private readonly ILogger _logger;
         private readonly string _name;
-        private readonly Timer _timer;
         private readonly string _fileLocation;
         private readonly Location _loadLocation;
 
         private Location _lastLocation;
+        //private bool _closing;
 
         public MonitorEngine(string name, Window window, ILogger logger)
         {
@@ -48,13 +47,12 @@ internal class WindowLocationService : IWindowLocationService
             _fileLocation = GetFileLocation();
             _loadLocation = LoadLastLocation();
 
-            _window.LocationChanged += OnWindowChanged;
-            _window.SizeChanged += OnWindowChanged;
-            _window.StateChanged += OnWindowChanged;
             _window.Loaded += OnLoaded;
 
-            _timer = new Timer(TimeSpan.FromSeconds(1)) { AutoReset = false };
-            _timer.Elapsed += SaveLocation;
+            if (_loadLocation == null || _loadLocation.Visibility == Visibility.Visible)
+            {
+                _window.Show();
+            }
         }
 
         private void OnLoaded(object sender, RoutedEventArgs e)
@@ -64,26 +62,14 @@ internal class WindowLocationService : IWindowLocationService
             _window.Top = _loadLocation.Top;
             _window.Width = _loadLocation.Width;
             _window.Height = _loadLocation.Height;
-            _window.WindowState = _loadLocation.WindowState;
+            _window.WindowState = _loadLocation.WindowState;    //TODO: Have a configuration start Minimized is allowed
 
-            _lastLocation = _loadLocation;
-        }
-
-        private void SaveLocation(object sender, ElapsedEventArgs e)
-        {
-            if (_lastLocation == null) return;
-
-            try
-            {
-                Debug.WriteLine($"Save window location for {_name}. ({_lastLocation.WindowState}: {_lastLocation.Left}, {_lastLocation.Top}, {_lastLocation.Width}, {_lastLocation.Height})");
-                var metadata = string.Join("|", _lastLocation.Metadata.Select(x => $"{x.Key}:{x.Value}"));
-                File.WriteAllText(_fileLocation, $"{_name};{_lastLocation.WindowState};{_lastLocation.Left};{_lastLocation.Top};{_lastLocation.Width};{_lastLocation.Height};{metadata}");
-            }
-            catch (Exception exception)
-            {
-                _logger?.LogError(exception, exception.Message);
-                Debugger.Break();
-            }
+            _window.LocationChanged += OnWindowChanged;
+            _window.SizeChanged += OnWindowChanged;
+            _window.StateChanged += OnWindowChanged;
+            //_window.IsVisibleChanged += OnIsVisibleChanged;
+            //_window.Closing += OnClosing;
+            //_window.Unloaded += OnUnloaded;
         }
 
         private Location LoadLastLocation()
@@ -95,14 +81,16 @@ internal class WindowLocationService : IWindowLocationService
                 var fileData = File.ReadAllText(_fileLocation);
                 var data = fileData.Split(";");
                 if (data[0] != _name) throw new NotImplementedException("Cannot handle other windows yet.");
+                if (data.Length <= 7) return null;
 
                 var location = new Location
                 {
                     WindowState = Enum.Parse<WindowState>(data[1], false),
-                    Left = int.Parse(data[2]),
-                    Top = int.Parse(data[3]),
-                    Width = int.Parse(data[4]),
-                    Height = int.Parse(data[5]),
+                    Visibility = Enum.Parse<Visibility>(data[2], false),
+                    Left = int.Parse(data[3]),
+                    Top = int.Parse(data[4]),
+                    Width = int.Parse(data[5]),
+                    Height = int.Parse(data[6]),
                 };
 
                 if (data.Length > 6)
@@ -138,28 +126,49 @@ internal class WindowLocationService : IWindowLocationService
             return fileLocation;
         }
 
+        public void SetVisibility(Visibility visibility)
+        {
+            SetLocation();
+        }
+
         private void OnWindowChanged(object sender, EventArgs e)
         {
-            if (_window.WindowState == WindowState.Minimized) return;
-            if (_window.Left < 0 || _window.Top < 0 || _window.Width < 0 || _window.Height < 0) return;
+            SetLocation();
+        }
 
-            _timer.Stop();
-
-            _lastLocation ??= new Location();
-            _lastLocation = _lastLocation with
+        private void SetLocation()
+        {
+            var lastLocation = _lastLocation ?? new Location();
+            lastLocation = lastLocation with
             {
                 WindowState = _window.WindowState,
-                Left = (int)_window.Left,
-                Top = (int)_window.Top,
-                Width = (int)_window.Width,
-                Height = (int)_window.Height
+                Visibility = _window.Visibility,
+                Left = _window.Left >= 0 ? (int)_window.Left : (_lastLocation?.Left ?? 0),
+                Top = _window.Top >= 0 ? (int)_window.Top : (_lastLocation?.Top ?? 0),
+                Width = _window.Width > 0 ? (int)_window.Width : (_lastLocation?.Width ?? -1),
+                Height = _window.Height > 0 ? (int)_window.Height : (_lastLocation?.Height ?? -1)
             };
 
-            _timer.Start();
+            try
+            {
+                if (_lastLocation != lastLocation)
+                {
+                    _lastLocation = lastLocation;
+                    Debug.WriteLine($"Save window location for {_name}. ({_lastLocation.WindowState}, {_lastLocation.Visibility}: {_lastLocation.Left}, {_lastLocation.Top}, {_lastLocation.Width}, {_lastLocation.Height})");
+                    var metadata = string.Join("|", _lastLocation.Metadata.Select(x => $"{x.Key}:{x.Value}"));
+                    File.WriteAllText(_fileLocation, $"{_name};{_lastLocation.WindowState};{_lastLocation.Visibility};{_lastLocation.Left};{_lastLocation.Top};{_lastLocation.Width};{_lastLocation.Height};{metadata}");
+                }
+            }
+            catch (Exception exception)
+            {
+                _logger?.LogError(exception, exception.Message);
+                Debugger.Break();
+            }
         }
 
         public void AttachProperty(INotifyPropertyChanged container, string propertyName)
         {
+            throw new NotImplementedException();
             container.PropertyChanged += (s, e) =>
             {
                 if (e.PropertyName != propertyName) return;
@@ -175,7 +184,7 @@ internal class WindowLocationService : IWindowLocationService
                         {
                             _lastLocation.Metadata[propertyName] = val.ToString();
                         }
-                        _timer.Start();
+                        //_timer.Start();
                     }
                 }
                 catch (Exception exception)
@@ -211,30 +220,26 @@ internal class WindowLocationService : IWindowLocationService
         }
     }
 
+    public void AttachProperty(string name, INotifyPropertyChanged container, string propertyName)
+    {
+        if (!_monitors.TryGetValue(name, out var monitor)) throw new InvalidOperationException($"Monitor for '{name}' must be created first.");
+        monitor.AttachProperty(container, propertyName);
+    }
+
+    public void SetVisibility(string name, Visibility visibility)
+    {
+        if (!_monitors.TryGetValue(name, out var monitor)) throw new InvalidOperationException($"Monitor for '{name}' must be created first.");
+        monitor.SetVisibility(visibility);
+    }
+
     private record Location
     {
         public WindowState WindowState { get; init; }
+        public Visibility Visibility { get; init; }
         public int Left { get; init; }
         public int Top { get; init; }
         public int Width { get; init; }
         public int Height { get; init; }
         public readonly Dictionary<string, string> Metadata = new();
-
-        //public string GetMetadata(string propertyName)
-        //{
-        //    Metadata.TryGetValue(propertyName, out var val);
-        //    return val;
-        //}
-
-        //public void SetMetadata(string propertyName, string val)
-        //{
-        //    Metadata.TryAdd(propertyName, val);
-        //}
-    }
-
-    public void AttachProperty(string name, INotifyPropertyChanged container, string propertyName)
-    {
-        if (!_monitors.TryGetValue(name, out var monitor)) throw new InvalidOperationException($"Monitor for '{name}' must be created first.");
-        monitor.AttachProperty(container, propertyName);
     }
 }

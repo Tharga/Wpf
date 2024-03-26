@@ -24,6 +24,10 @@
 		<None Remove="Images\Application\blue.png" />
 		<None Remove="Images\Application\green.png" />
 		<None Remove="Images\Close.png" />
+		<None Remove="Images\thargelion.ico" />
+	</ItemGroup>
+	<ItemGroup>
+	  <EmbeddedResource Include="Images\thargelion.ico" />
 	</ItemGroup>
 	<ItemGroup>
 		<Resource Include="Images\Application\blue.png" />
@@ -37,6 +41,7 @@
 		</None>
 	</ItemGroup>
 	<ItemGroup>
+		<PackageReference Include="Fluent.Ribbon" Version="10.0.4" />
 		<PackageReference Include="System.Linq.Async" Version="6.0.1" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
@@ -46,5 +51,18 @@
 	<ItemGroup>
 		<InternalsVisibleTo Include="Tharga.Wpf.Tests" />
 		<InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Compile Update="Properties\Resources.Designer.cs">
+	    <DesignTime>True</DesignTime>
+	    <AutoGen>True</AutoGen>
+	    <DependentUpon>Resources.resx</DependentUpon>
+	  </Compile>
+	</ItemGroup>
+	<ItemGroup>
+	  <EmbeddedResource Update="Properties\Resources.resx">
+	    <Generator>ResXFileCodeGenerator</Generator>
+	    <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+	  </EmbeddedResource>
 	</ItemGroup>
 </Project>

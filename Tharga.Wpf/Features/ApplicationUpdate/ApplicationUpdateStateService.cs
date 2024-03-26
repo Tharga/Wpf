@@ -60,18 +60,12 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
 
         if (interval != null)
         {
-            if (_mainWindow.Visibility == Visibility.Visible)
+            SquirrelAwareApp.HandleEvents(OnInitialInstall, OnAppInstall, OnAppObsoleted, OnAppUninstall, OnEveryRun);
+
+            _mainWindow.IsVisibleChanged += (_, _) =>
             {
-                SquirrelAwareApp.HandleEvents(OnInitialInstall, OnAppInstall, OnAppObsoleted, OnAppUninstall, OnEveryRun);
-            }
-            else
-            {
-                _mainWindow.IsVisibleChanged += async (_, _) =>
-                {
-                    await Task.Delay(400);
-                    SquirrelAwareApp.HandleEvents(OnInitialInstall, OnAppInstall, OnAppObsoleted, OnAppUninstall, OnEveryRun);
-                };
-            }
+                if (_mainWindow.Visibility != Visibility.Visible) _splash?.Hide();
+            };
         }
     }
 

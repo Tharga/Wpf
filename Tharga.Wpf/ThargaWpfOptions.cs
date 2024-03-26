@@ -1,4 +1,6 @@
-﻿using System.Collections.Concurrent;
+﻿using System.Collections;
+using System.Collections.Concurrent;
+using System.Drawing;
 using Microsoft.Extensions.Configuration;
 using Tharga.Wpf.ApplicationUpdate;
 using Tharga.Wpf.ExceptionHandling;
@@ -52,6 +54,10 @@ public class ThargaWpfOptions
     /// </summary>
     public bool AllowMultipleApplications { get; set; } = true;
 
+    /// <summary>
+    /// Set this object to specify the behaviour of the icon tray when using INotifyIconService.
+    /// </summary>
+    public IconTrayData IconTray {get; set;}
 
     /// <summary>
     /// Registration of customer exception handlers.
@@ -66,4 +72,17 @@ public class ThargaWpfOptions
     }
 
     internal IDictionary<Type, Type> GetExceptionTypes() => _exceptionTypes;
+}
+
+public record IconTrayData
+{
+    public Icon Icon { get; init; }
+    public TrayMenuItem[] Menu { get; init; }
+}
+
+public record TrayMenuItem
+{
+    public string Text { get; init; }
+    public Image Image { get; init; }
+    public Action<object, EventArgs> Action { get; init; }
 }

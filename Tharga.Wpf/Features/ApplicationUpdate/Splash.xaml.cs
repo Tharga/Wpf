@@ -8,7 +8,7 @@ public partial class Splash : ISplash
 {
     public Splash(SplashData splashData)
     {
-        Owner = splashData.MainWindow;
+        if (splashData.MainWindow.Visibility == Visibility.Visible) Owner = splashData.MainWindow;
         Topmost = true;
 
         MouseDown += (_, _) => DragMove();
@@ -57,11 +57,11 @@ public partial class Splash : ISplash
         CloseButton.Visibility = Visibility.Visible;
     }
 
-    public void SetOwner(Window mainWindow)
-    {
-        Owner = mainWindow;
-        Topmost = false;
-    }
+    //public void SetOwner(Window mainWindow)
+    //{
+    //    Owner = mainWindow;
+    //    Topmost = false;
+    //}
 
     private void ButtonBase_OnClick(object sender, RoutedEventArgs e)
     {

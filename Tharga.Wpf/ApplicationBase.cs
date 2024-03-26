@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Tharga.Wpf.ApplicationUpdate;
 using Tharga.Wpf.ExceptionHandling;
 using Tharga.Wpf.Framework;
+using Tharga.Wpf.IconTray;
 using Tharga.Wpf.TabNavigator;
 using Tharga.Wpf.WindowLocation;
 
@@ -46,6 +47,7 @@ public abstract class ApplicationBase : Application
 
                 RegisterExceptionHandler(_options, services);
                 RegisterTabNavigation(_options, services);
+                RegisterIconTray(_options, services);
 
                 foreach (var viewModel in TypeHelper.GetTypesBasedOn<IViewModel>())
                 {
@@ -105,6 +107,11 @@ public abstract class ApplicationBase : Application
         }
     }
 
+    private static void RegisterIconTray(ThargaWpfOptions options, IServiceCollection services)
+    {
+        services.AddSingleton<INotifyIconService>(s => new NotifyIconService(options));
+    }
+
     protected virtual void Register(HostBuilderContext context, IServiceCollection services) { }
     protected virtual void Options(ThargaWpfOptions thargaWpfOptions) { }
 
@@ -140,6 +147,42 @@ public abstract class ApplicationBase : Application
         return service;
     }
 
+    public static void Close(CloseMode closeMode = CloseMode.Default)
+    {
+        try
+        {
+            CloseMode = closeMode;
+
+            //TODO: When closing after an application update, it should be the "Force" mode.
+
+            switch (closeMode)
+            {
+                case CloseMode.Default:
+                case CloseMode.Soft:
+                    //TODO: Try to close tabs, if it does not work, abort closing of the application.
+                    //TODO: Not that the application could be hidden (icontray) when this happens. Is should be made visible when failed to close.
+                    Current?.MainWindow?.Close();
+                    break;
+                case CloseMode.Force:
+                    //TODO: Try to close tabs gently, if it does not work, terminate the application anyway.
+                    Current?.MainWindow?.Close();
+                    //Current.Shutdown();
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(closeMode), closeMode, null);
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+        finally
+        {
+            CloseMode = CloseMode.Default;
+        }
+    }
+
     private void BringExistingInstanceToFront()
     {
         var currentProcess = Process.GetCurrentProcess();
@@ -147,4 +190,6 @@ public abstract class ApplicationBase : Application
         var process = processes.FirstOrDefault(x => x.Id != currentProcess.Id);
         if (process != null) WindowHelper.FocusWindowByProcessId(process.Id);
     }
+
+    public static CloseMode CloseMode { get; private set; }
 }

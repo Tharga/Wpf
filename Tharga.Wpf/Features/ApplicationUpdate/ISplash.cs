@@ -6,8 +6,9 @@ public interface ISplash
 {
     void UpdateInfo(string message);
     void Show();
+    void Hide();
     void SetErrorMessage(string message);
     void ShowCloseButton();
     void Close();
-    void SetOwner(Window mainWindow);
+    //void SetOwner(Window mainWindow);
 }
