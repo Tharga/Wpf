@@ -14,6 +14,7 @@ public partial class App
     protected override void Register(HostBuilderContext context, IServiceCollection services)
     {
         services.AddTransient<MyService>();
+        services.AddTransient<FixedTabView>();
     }
 
     protected override void Options(ThargaWpfOptions thargaWpfOptions)

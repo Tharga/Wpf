@@ -64,9 +64,10 @@ public abstract class ApplicationBase : Application
                 {
                     var configuration = s.GetService<IConfiguration>();
                     var applicationDownloadService = s.GetService<IApplicationDownloadService>();
+                    var tabNavigationStateService = s.GetService<ITabNavigationStateService>();
                     var mainWindow = ((ApplicationBase)Current).MainWindow;
                     var logger = s.GetService<ILogger<ApplicationUpdateStateService>>();
-                    return new ApplicationUpdateStateService(configuration, applicationDownloadService, _options, mainWindow, logger);
+                    return new ApplicationUpdateStateService(configuration, applicationDownloadService, tabNavigationStateService, _options, mainWindow, logger);
                 });
                 services.AddTransient<IApplicationDownloadService>(s =>
                 {

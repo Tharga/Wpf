@@ -1,5 +1,4 @@
-﻿using System.Drawing;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Forms;
 using Tharga.Wpf.Properties;
 using Tharga.Wpf.WindowLocation;

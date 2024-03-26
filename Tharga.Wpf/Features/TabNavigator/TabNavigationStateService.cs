@@ -46,6 +46,7 @@ internal class TabNavigationStateService : ITabNavigationStateService
         }
 
         var tabContent = _serviceProvider.GetService<TTabView>();
+        if (tabContent == null) throw new NullReferenceException($"Cannot create tab view of type {typeof(TTabView).Name}");
         tabContent.Title = title;
 
         var tabItem = new TabItem
@@ -61,7 +62,7 @@ internal class TabNavigationStateService : ITabNavigationStateService
             CommandManager.InvalidateRequerySuggested();
         };
 
-        tabItem.GotFocus += (s, e) =>
+        tabItem.GotFocus += (_, _) =>
         {
             _activeTab = tabView;
             CommandManager.InvalidateRequerySuggested();
@@ -101,9 +102,10 @@ internal class TabNavigationStateService : ITabNavigationStateService
         return CloseTabAsync(tabView, false);
     }
 
-    private async Task<bool> CloseTabAsync(TabView tabView, bool forceClose)
+    public async Task<bool> CloseTabAsync(TabView tabView, bool forceClose)
     {
-        if (!forceClose && !await tabView.OnCloseAsync())
+        var closeResult = await tabView.OnCloseAsync();
+        if (!forceClose && !closeResult)
         {
             MessageBox.Show($"Cannot close tab '{tabView.Title}'.", "Close aborted", MessageBoxButton.OK, MessageBoxImage.Warning);
             return false;

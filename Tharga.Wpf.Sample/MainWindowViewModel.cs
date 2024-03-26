@@ -30,6 +30,7 @@ public class MainWindowViewModel : IViewModel, INotifyPropertyChanged
     public ICommand ThrowExceptionCommand => new RelayCommand(_ => throw new InvalidOperationException("Some error."), _ => true);
     public ICommand NewTabCommand => new OpenTabComamnd<MyTabView>(_tabNavigationStateService /*, _authenticationStateService*/);
     public ICommand NewTabCommand2 => new RelayCommand(_ => _tabNavigationStateService.OpenTab<MyTabView>("My Tab"), _ => true);
+    public ICommand NewTabCommand3 => new RelayCommand(_ => _tabNavigationStateService.OpenTab<FixedTabView>(), _ => true);
     public ICommand ExitCommand => new RelayCommand(_ => { ApplicationBase.Close(CloseMode.Soft); }, _ => true);
 
     public string Message

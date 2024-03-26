@@ -70,6 +70,7 @@
                     <fluent:Button Header="Throw Exception" Command="{Binding ThrowExceptionCommand}"/>
                     <fluent:Button Header="Open tab" Command="{Binding NewTabCommand}"/>
                     <fluent:Button Header="Open tab 2" Command="{Binding NewTabCommand2}"/>
+                    <fluent:Button Header="Open tab that cannot be closed" Command="{Binding NewTabCommand3}"/>
                 </fluent:RibbonGroupBox>
             </fluent:RibbonTabItem>
         </fluent:Ribbon>

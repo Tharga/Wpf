@@ -5,6 +5,7 @@ public partial class MyTabView
     public MyTabView()
     {
         CanClose = false;
+
         var timer = new System.Timers.Timer();
         timer.Interval = 3000;
         timer.Elapsed += (_, _) =>

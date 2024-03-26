@@ -1,9 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Concurrent;
-using System.Drawing;
 using Microsoft.Extensions.Configuration;
 using Tharga.Wpf.ApplicationUpdate;
 using Tharga.Wpf.ExceptionHandling;
+using Tharga.Wpf.IconTray;
 
 namespace Tharga.Wpf;
 
@@ -72,17 +72,4 @@ public class ThargaWpfOptions
     }
 
     internal IDictionary<Type, Type> GetExceptionTypes() => _exceptionTypes;
-}
-
-public record IconTrayData
-{
-    public Icon Icon { get; init; }
-    public TrayMenuItem[] Menu { get; init; }
-}
-
-public record TrayMenuItem
-{
-    public string Text { get; init; }
-    public Image Image { get; init; }
-    public Action<object, EventArgs> Action { get; init; }
 }

@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using Tharga.Wpf.IconTray;
+using Tharga.Wpf.TabNavigator;
 using Tharga.Wpf.WindowLocation;
 
 namespace Tharga.Wpf.Sample;
@@ -21,13 +22,22 @@ public partial class MainWindow
         ApplicationBase.GetService<INotifyIconService>().Create(this, nameof(MainWindow), _windowLocationService);
     }
 
-    protected override void OnClosing(CancelEventArgs e)
+    protected override async void OnClosing(CancelEventArgs e)
     {
         //NOTE: Interceot the 'default' close (pressing of 'x') and hide the application.
         if (ApplicationBase.CloseMode == CloseMode.Default)
         {
             Hide();
             _windowLocationService.SetVisibility(nameof(MainWindow), Visibility);
+            e.Cancel = true;
+            return;
+        }
+
+        //NOTE: Close down tabs, before closing the application.
+        var tabNavigationStateService = ApplicationBase.GetService<ITabNavigationStateService>();
+        if (!await tabNavigationStateService.CloseAllTabsAsync(ApplicationBase.CloseMode == CloseMode.Force))
+        {
+            //if (Visibility != Visibility.Visible) Show();
             e.Cancel = true;
             return;
         }

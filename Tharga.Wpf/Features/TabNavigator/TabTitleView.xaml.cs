@@ -9,14 +9,17 @@ public partial class TabTitleView
 
     public TabTitleView(TabView tabView, Func<TabView, Task> close)
     {
-        tabView.CanCloseChangedEvent += (s, e) =>
+        tabView.CanCloseChangedEvent += (_, _) =>
         {
             if (CloseButton != null) Application.Current.Dispatcher.Invoke(() => CloseButton.IsEnabled = tabView.CanClose );
         };
 
         tabView.TitleChangedEvent += (_, _) =>
         {
-            Application.Current.Dispatcher.Invoke(() => Title.Content = tabView.Title);
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                if (Title != null) Title.Content = tabView.Title;
+            });
         };
 
         _tabView = tabView;

@@ -5,12 +5,14 @@ using System.Windows;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Squirrel;
+using Tharga.Wpf.TabNavigator;
 
 namespace Tharga.Wpf.ApplicationUpdate;
 
 internal class ApplicationUpdateStateService : IApplicationUpdateStateService
 {
     private readonly IApplicationDownloadService _applicationDownloadService;
+    private readonly ITabNavigationStateService _tabNavigationStateService;
     private readonly ThargaWpfOptions _options;
     private readonly Window _mainWindow;
     private readonly ILogger<ApplicationUpdateStateService> _logger;
@@ -21,9 +23,10 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
     private string _applicationLocation;
     private string _applicationLocationSource;
 
-    public ApplicationUpdateStateService(IConfiguration configuration, IApplicationDownloadService applicationDownloadService, ThargaWpfOptions options, Window mainWindow, ILogger<ApplicationUpdateStateService> logger)
+    public ApplicationUpdateStateService(IConfiguration configuration, IApplicationDownloadService applicationDownloadService, ITabNavigationStateService tabNavigationStateService, ThargaWpfOptions options, Window mainWindow, ILogger<ApplicationUpdateStateService> logger)
     {
         _applicationDownloadService = applicationDownloadService;
+        _tabNavigationStateService = tabNavigationStateService;
         _options = options;
         _mainWindow = mainWindow;
         _logger = logger;
@@ -94,7 +97,7 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
     {
         try
         {
-            var name = GetShortcutName();
+            //var name = GetShortcutName();
         }
         catch (Exception e)
         {
@@ -107,7 +110,7 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
     {
         try
         {
-            var name = GetShortcutName();
+            //var name = GetShortcutName();
         }
         catch (Exception e)
         {
@@ -153,7 +156,7 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
         {
             ShowSplash(firstRun, entryMessage, showCloseButton);
         }
-        catch (InvalidOperationException e)
+        catch (InvalidOperationException)
         {
             _splash = null;
             ShowSplash(firstRun, entryMessage, showCloseButton);
@@ -231,8 +234,7 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
                 var newVersion = await mgr.UpdateApp();
                 if (newVersion != null)
                 {
-                    //TODO: Force termination
-                    //await _tabNavigationService.CloseAllTabsAsync(true);
+                    await _tabNavigationStateService.CloseAllTabsAsync(true);
 
                     UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs("Restarting."));
                     UpdateManager.RestartApp();
