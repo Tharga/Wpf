@@ -33,8 +33,9 @@ public class ThargaWpfOptions
 
     /// <summary>
     /// If set to true, multiple tabs with the same title is allowed.
+    /// The property AllowTabsWithSameTitles that can be overridden on tab-level controls if tabs of the same type can be opened multiple times.
     /// </summary>
-    public bool AllowTabsWithSameTitles { get; set; }
+    public bool AllowTabsWithSameTitles { get; set; } = true;
 
     /// <summary>
     /// If debug is true, the splash will show links to the update location.

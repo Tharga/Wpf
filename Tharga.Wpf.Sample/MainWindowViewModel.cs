@@ -1,12 +1,10 @@
-﻿using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using System.Windows.Input;
+﻿using System.Windows.Input;
 using Tharga.Wpf.ApplicationUpdate;
 using Tharga.Wpf.TabNavigator;
 
 namespace Tharga.Wpf.Sample;
 
-public class MainWindowViewModel : IViewModel, INotifyPropertyChanged
+public class MainWindowViewModel : ViewModelBase
 {
     private readonly IApplicationUpdateStateService _applicationUpdateStateService;
     private readonly ITabNavigationStateService _tabNavigationStateService;
@@ -17,7 +15,7 @@ public class MainWindowViewModel : IViewModel, INotifyPropertyChanged
         _applicationUpdateStateService = applicationUpdateStateService;
         _tabNavigationStateService = tabNavigationStateService;
 
-        _applicationUpdateStateService.UpdateInfoEvent += (s, e) =>
+        _applicationUpdateStateService.UpdateInfoEvent += (_, e) =>
         {
             Message = e.Message;
         };
@@ -37,20 +35,5 @@ public class MainWindowViewModel : IViewModel, INotifyPropertyChanged
     {
         get => _message;
         set => SetField(ref _message, value);
-    }
-
-    public event PropertyChangedEventHandler PropertyChanged;
-
-    protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
-
-    protected bool SetField<T>(ref T field, T value, [CallerMemberName] string propertyName = null)
-    {
-        if (EqualityComparer<T>.Default.Equals(field, value)) return false;
-        field = value;
-        OnPropertyChanged(propertyName);
-        return true;
     }
 }

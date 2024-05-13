@@ -9,7 +9,8 @@ This package is a basic toolset for WPF applications.
 - [*ClickOnce* application update](#clickonce-application-update)
 - [Custom Exception handling](#custom-exception-handling)
 
-The sample uses *Fluent.Ribbon* but any package can be used since MainWindow does not need any base class.
+This packages works well with [Fluent.Ribbon](https://www.nuget.org/packages/Fluent.Ribbon) which is used in the sample.
+The MainWindow does not need any base class.
 
 ## Get started
 Set App.xaml to inherit from `ApplicationBase`.
@@ -47,11 +48,14 @@ To bind a *View* with a *ViewModel* add this section in the View.xaml.
 
 `DataContext="{wpf:ViewModelProvider local:MyViewModel}"`
 
+Read more about this under [View Model dependency injection](#view-model-dependency-injection).
+
 ## Built in .NET IOC
 Tharga.WPF uses the built in .NET IOC with IServiceCollection and IServiceProvider.
 
 ### View Model dependency injection
-Injection can be done in the ViewModel constructor for all registered service. To have the ViewModel it self registered, do it manually in the *Register* in *App.xaml.cs* or by adding the interface *Tharga.Wpf.IViewModel*.
+Injection can be done in the ViewModel constructor for all registered service. To have the ViewModel it self registered, do it manually in the *Register* in *App.xaml.cs* or by implementing the interface *Tharga.Wpf.IViewModel*.
+You can also use *ViewModelBase* if you want a basic *NotifyPropertyChanged* implementation.
 
 ### View dependency injection
 There is no support for injecting services into the View directly. To use resources this method can be used.
@@ -63,6 +67,8 @@ To remember the location of any window, simply add this statement in the constru
 `ApplicationBase.GetService<IWindowLocationService>().Monitor(this, nameof(MyWindow));`
 
 The state and location of the window will be saved and restored when the window is reopened.
+
+To trach the location, files are saved in the folder *C:\Users\[UserName]\AppData\Roaming\[ApplicationShortName]*.
 
 ## TabNavigator
 The *TabNavigatorView* is a container view that holds tab view items. It is built for the main window to easily display tab views, handle *title*, *CanClose* and manage rules for multiple tabs of the same types.
