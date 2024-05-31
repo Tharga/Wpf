@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Navigation;
 
 namespace Tharga.Wpf.ApplicationUpdate;
@@ -20,6 +21,12 @@ public partial class Splash : ISplash
         if (!string.IsNullOrEmpty(splashData.EntryMessage)) Messages.Items.Add(splashData.EntryMessage);
         if (!string.IsNullOrEmpty(splashData.EnvironmentName)) Environment.Text = splashData.EnvironmentName;
         if (!string.IsNullOrEmpty(splashData.Version)) Version.Text = splashData.Version;
+        if (!string.IsNullOrEmpty(splashData.ExeLocation))
+        {
+            ExeLocation.Text = System.IO.Path.GetFileName(splashData.ExeLocation);
+            ExeLocation.ToolTip = splashData.ExeLocation;
+            ExeLocation.Tag = splashData.ExeLocation;
+        }
         if (!string.IsNullOrEmpty(splashData.FullName)) FullName.Text = splashData.FullName;
 
         if (splashData.ClientLocation != null)
@@ -57,11 +64,13 @@ public partial class Splash : ISplash
         CloseButton.Visibility = Visibility.Visible;
     }
 
-    //public void SetOwner(Window mainWindow)
-    //{
-    //    Owner = mainWindow;
-    //    Topmost = false;
-    //}
+    public bool IsCloseButtonVisible => CloseButton.Visibility == Visibility.Visible;
+
+    public void ClearMessages()
+    {
+        Messages.Items.Clear();
+        ErrorMessage.Visibility = Visibility.Collapsed;
+    }
 
     private void ButtonBase_OnClick(object sender, RoutedEventArgs e)
     {
@@ -78,5 +87,10 @@ public partial class Splash : ISplash
     {
         Process.Start(new ProcessStartInfo("cmd", $"/c start {e.Uri.AbsoluteUri}") { CreateNoWindow = true });
         e.Handled = true;
+    }
+
+    private void ExeLocation_OnMouseDown(object sender, MouseButtonEventArgs e)
+    {
+        System.Windows.Clipboard.SetText($"{ExeLocation.ToolTip}");
     }
 }

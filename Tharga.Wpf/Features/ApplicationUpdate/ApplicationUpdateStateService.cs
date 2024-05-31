@@ -19,6 +19,7 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
     private readonly System.Timers.Timer _timer;
     private readonly string _environmentName;
     private readonly string _version;
+    private readonly string _exeLocation;
     private ISplash _splash;
     private string _applicationLocation;
     private string _applicationLocationSource;
@@ -31,8 +32,12 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
         _mainWindow = mainWindow;
         _logger = logger;
         _environmentName = configuration.GetSection("Environment").Value;
-        var version = Assembly.GetEntryAssembly()?.GetName().Version?.ToString();
+
+        var entryAssembly = Assembly.GetEntryAssembly();
+        var assemblyName = entryAssembly?.GetName();
+        var version = assemblyName?.Version?.ToString();
         _version = version == "1.0.0.0" ? null : version;
+        _exeLocation = SquirrelRuntimeInfo.EntryExePath; //entryAssembly?.Location;
 
         var interval = options.CheckForUpdateInterval;
         if (interval != null && interval > TimeSpan.Zero)
@@ -156,9 +161,11 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
         {
             ShowSplash(firstRun, entryMessage, showCloseButton);
         }
-        catch (InvalidOperationException)
+        catch (InvalidOperationException e)
         {
+            Debugger.Break();
             _splash = null;
+            UpdateInfoEvent -= ApplicationUpdateStateService_UpdateInfoEvent;
             ShowSplash(firstRun, entryMessage, showCloseButton);
         }
     }
@@ -176,17 +183,25 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
                 FirstRun = firstRun,
                 EnvironmentName = _environmentName,
                 Version = _version,
+                ExeLocation = _exeLocation,
                 EntryMessage = entryMessage,
                 FullName = _options.ApplicationFullName,
                 ClientLocation = applicationLocation,
                 ClientSourceLocation = applicationSourceLocation
             };
             _splash = _options.SplashCreator?.Invoke(splashData) ?? new Splash(splashData);
-            UpdateInfoEvent += (_, args) => _splash?.UpdateInfo(args.Message);
+            //UpdateInfoEvent += (_, args) => _splash?.UpdateInfo(args.Message);
+            UpdateInfoEvent += ApplicationUpdateStateService_UpdateInfoEvent;
         }
 
+        _splash.ClearMessages();
         if (showCloseButton) _splash.ShowCloseButton();
         _splash.Show();
+    }
+
+    private void ApplicationUpdateStateService_UpdateInfoEvent(object sender, UpdateInfoEventArgs e)
+    {
+        _splash?.UpdateInfo(e.Message);
     }
 
     private async Task UpdateClientApplication()
@@ -244,27 +259,42 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
         catch (Exception e)
         {
             _logger.LogError(e, e.Message);
-            var message = "Update failed.";
+            var message = "Update failed. ";
             UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs(message));
             _splash?.SetErrorMessage($"{e.Message}\n{clientLocation}\n@{e.StackTrace})");
             _splash?.ShowCloseButton();
-            splashDelay = TimeSpan.FromMinutes(5);
+            //splashDelay = TimeSpan.FromMinutes(5);
         }
         finally
         {
             if (_splash != null)
             {
-                await Task.Delay(splashDelay);
-                _splash?.Close();
+                if (!_splash.IsCloseButtonVisible)
+                {
+                    await Task.Delay(splashDelay);
+                    _splash?.Close();
+                }
             }
 
             _splash = null;
+            UpdateInfoEvent -= ApplicationUpdateStateService_UpdateInfoEvent;
         }
     }
 
-    public void ShowSplash()
+    public void ShowSplash(bool checkForUpdates)
     {
         ShowSplashWithRetry(false, null, true);
+
+        if (checkForUpdates)
+        {
+            Task.Run(async () =>
+            {
+                await Application.Current.Dispatcher.Invoke(async () =>
+                {
+                    await UpdateClientApplication();
+                });
+            });
+        }
     }
 
     public Task CheckForUpdateAsync()
