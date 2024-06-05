@@ -25,6 +25,7 @@
 		<None Remove="Images\Application\green.png" />
 		<None Remove="Images\Close.png" />
 		<None Remove="Images\thargelion.ico" />
+		<None Remove="Tharga.Wpf.csproj.DotSettings" />
 	</ItemGroup>
 	<ItemGroup>
 	  <EmbeddedResource Include="Images\thargelion.ico" />

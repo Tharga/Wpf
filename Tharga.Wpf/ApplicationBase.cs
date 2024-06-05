@@ -15,10 +15,17 @@ using Tharga.Wpf.WindowLocation;
 
 namespace Tharga.Wpf;
 
+public class BeforeCloseEventArgs : EventArgs
+{
+    public bool Cancel { get; set; }
+}
+
 public abstract class ApplicationBase : Application
 {
     private readonly ThargaWpfOptions _options;
     private Mutex _mutex;
+
+    public static event EventHandler<BeforeCloseEventArgs> BeforeCloseEvent;
 
     protected ApplicationBase()
     {
@@ -148,11 +155,15 @@ public abstract class ApplicationBase : Application
         return service;
     }
 
-    public static void Close(CloseMode closeMode = CloseMode.Default)
+    public static bool Close(CloseMode closeMode = CloseMode.Default)
     {
         try
         {
             CloseMode = closeMode;
+
+            var beforeCloseEventArgs = new BeforeCloseEventArgs();
+            BeforeCloseEvent?.Invoke(null, beforeCloseEventArgs);
+            if (beforeCloseEventArgs.Cancel) return false;
 
             //TODO: When closing after an application update, it should be the "Force" mode.
 
@@ -161,7 +172,7 @@ public abstract class ApplicationBase : Application
                 case CloseMode.Default:
                 case CloseMode.Soft:
                     //TODO: Try to close tabs, if it does not work, abort closing of the application.
-                    //TODO: Not that the application could be hidden (icontray) when this happens. Is should be made visible when failed to close.
+                    //TODO: Now that the application could be hidden (icontray) when this happens. Is should be made visible when failed to close.
                     Current?.MainWindow?.Close();
                     break;
                 case CloseMode.Force:
@@ -182,6 +193,8 @@ public abstract class ApplicationBase : Application
         {
             CloseMode = CloseMode.Default;
         }
+
+        return true;
     }
 
     private void BringExistingInstanceToFront()
