@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Text;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Navigation;
@@ -50,7 +51,7 @@ public partial class Splash : ISplash
 
     public void UpdateInfo(string message)
     {
-        Messages.Items.Add(message);
+        Application.Current.Dispatcher.Invoke(() => Messages.Items.Add(message));
     }
 
     public void SetErrorMessage(string message)
@@ -91,6 +92,12 @@ public partial class Splash : ISplash
 
     private void ExeLocation_OnMouseDown(object sender, MouseButtonEventArgs e)
     {
-        System.Windows.Clipboard.SetText($"{ExeLocation.ToolTip}");
+        var sb = new StringBuilder();
+        sb.AppendLine($"{ExeLocation.ToolTip}");
+        foreach (var log in ApplicationUpdateStateService.UpdateLog)
+        {
+            sb.AppendLine(log);
+        }
+        Clipboard.SetText(sb.ToString());
     }
 }
