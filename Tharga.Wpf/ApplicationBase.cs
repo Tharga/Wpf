@@ -15,11 +15,6 @@ using Tharga.Wpf.WindowLocation;
 
 namespace Tharga.Wpf;
 
-public class BeforeCloseEventArgs : EventArgs
-{
-    public bool Cancel { get; set; }
-}
-
 public abstract class ApplicationBase : Application
 {
     private readonly ThargaWpfOptions _options;

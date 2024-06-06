@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using Microsoft.Extensions.Configuration;
 using Tharga.Wpf.ApplicationUpdate;
 using Tharga.Wpf.ExceptionHandling;
