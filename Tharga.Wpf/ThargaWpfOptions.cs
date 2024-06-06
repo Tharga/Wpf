@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using Tharga.Wpf.ApplicationUpdate;
 using Tharga.Wpf.ExceptionHandling;
@@ -9,6 +10,7 @@ namespace Tharga.Wpf;
 public class ThargaWpfOptions
 {
     private readonly ConcurrentDictionary<Type, Type> _exceptionTypes = new();
+    private readonly ConcurrentDictionary<Assembly, Assembly> _assemblies = new();
 
     /// <summary>
     /// Used for folder names and where a brief name is to be used.
@@ -71,5 +73,16 @@ public class ThargaWpfOptions
         _exceptionTypes.TryAdd(typeof(TException), typeof(THandler));
     }
 
+    /// <summary>
+    /// Add assemblies where types, like IViewModel, can be found
+    /// </summary>
+    /// <param name="assembly"></param>
+    /// <exception cref="NotImplementedException"></exception>
+    public void UseAssembly(Assembly assembly)
+    {
+        _assemblies.TryAdd(assembly, assembly);
+    }
+
     internal IDictionary<Type, Type> GetExceptionTypes() => _exceptionTypes;
+    internal IDictionary<Assembly, Assembly> GetAssemblies() => _assemblies;
 }

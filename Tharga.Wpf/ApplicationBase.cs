@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Tharga.Toolkit.TypeService;
 using Tharga.Wpf.ApplicationUpdate;
 using Tharga.Wpf.ExceptionHandling;
 using Tharga.Wpf.Framework;
@@ -51,7 +52,9 @@ public abstract class ApplicationBase : Application
                 RegisterTabNavigation(_options, services);
                 RegisterIconTray(_options, services);
 
-                foreach (var viewModel in TypeHelper.GetTypesBasedOn<IViewModel>())
+                var assemblies = AssemblyService.GetAssemblies().Union(_options.GetAssemblies().Values);
+                var viewModels = AssemblyService.GetTypes<IViewModel>(x => !x.IsAbstract && !x.IsInterface, assemblies).Select(x => x.AsType());
+                foreach (var viewModel in viewModels)
                 {
                     services.AddTransient(viewModel);
                 }
