@@ -196,7 +196,7 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
                 Version = _version,
                 ExeLocation = _exeLocation,
                 EntryMessage = entryMessage,
-                FullName = _options.ApplicationFullName,
+                FullName = _options.ApplicationFullName ?? $"{_options.CompanyName} {_options.ApplicationShortName}".Trim(),
                 ClientLocation = applicationLocation,
                 ClientSourceLocation = applicationSourceLocation
             };
@@ -344,7 +344,8 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
 
         var iconInfo = new ShortcutHelper.IconInfo { Path = iconPath };
         var name = GetShortcutName();
-        ShortcutHelper.CreateShortcut(path, name, _options.ApplicationFullName, iconInfo);
+        var description = _options.ApplicationFullName ?? $"{_options.CompanyName} {_options.ApplicationShortName}".Trim();
+        ShortcutHelper.CreateShortcut(path, name, description, iconInfo);
     }
 
     private static string GetDirectory()

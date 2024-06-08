@@ -125,7 +125,7 @@ public abstract class ApplicationBase : Application
     {
         if (!_options.AllowMultipleApplications)
         {
-            _mutex = new Mutex(true, _options.ApplicationShortName, out var createdNew);
+            _mutex = new Mutex(true, _options.ApplicationFullName, out var createdNew);
             if (!createdNew)
             {
                 BringExistingInstanceToFront();

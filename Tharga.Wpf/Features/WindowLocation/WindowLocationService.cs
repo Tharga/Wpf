@@ -20,10 +20,10 @@ internal class WindowLocationService : IWindowLocationService
         _logger = logger;
     }
 
-    public MinitorInfo Monitor(Window window, string name = default)
+    public MinitorInfo Monitor(Window window, string name = default, string environment = default)
     {
         name ??= window.Name ?? window.Title?.Replace(" ", "_").NullIfEmpty() ?? window.GetType().Name.Replace(nameof(Window), "").NullIfEmpty() ?? throw new InvalidOperationException("Cannot find a name for the window");
-        var monitorEngine = new MonitorEngine(name, window, _logger);
+        var monitorEngine = new MonitorEngine(name, environment, window, _logger);
         if (!_monitors.TryAdd(name, monitorEngine)) throw new InvalidOperationException($"Window {name} is already attached to {nameof(WindowLocationService)}.");
         var minitorInfo = new MinitorInfo
         {
@@ -38,17 +38,19 @@ internal class WindowLocationService : IWindowLocationService
 
     private class MonitorEngine
     {
+        private readonly string _name;
+        private readonly string _environment;
         private readonly Window _window;
         private readonly ILogger _logger;
-        private readonly string _name;
         private readonly string _fileLocation;
         private readonly Location _loadLocation;
 
         private Location _lastLocation;
 
-        public MonitorEngine(string name, Window window, ILogger logger)
+        public MonitorEngine(string name, string environment, Window window, ILogger logger)
         {
             _name = name;
+            _environment = environment;
             _window = window;
             _logger = logger;
 
@@ -57,10 +59,11 @@ internal class WindowLocationService : IWindowLocationService
 
             _window.Loaded += OnLoaded;
 
-            if (_loadLocation == null || _loadLocation.Visibility == Visibility.Visible)
-            {
-                _window.Show();
-            }
+            //TODO: Cannot call '_window.Show()' before the component 'InitializeComponent' has been executed. If so, the 'OnLoaded' will be called too early and the change listeners will trigger OnWindowChanged so the previously saved values will be overwritten.
+            //if (_loadLocation == null || _loadLocation.Visibility == Visibility.Visible)
+            //{
+            //    _window.Show();
+            //}
         }
 
         public event EventHandler<LocationUpdatedEventArgs> LocationUpdatedEvent;
@@ -70,12 +73,14 @@ internal class WindowLocationService : IWindowLocationService
 
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
-            if (_loadLocation == null) return;
-            _window.Left = _loadLocation.Left;
-            _window.Top = _loadLocation.Top;
-            _window.Width = _loadLocation.Width;
-            _window.Height = _loadLocation.Height;
-            _window.WindowState = _loadLocation.WindowState;    //TODO: Have a configuration start Minimized is allowed
+            if (_loadLocation != null)
+            {
+                _window.Left = _loadLocation.Left;
+                _window.Top = _loadLocation.Top;
+                _window.Width = _loadLocation.Width;
+                _window.Height = _loadLocation.Height;
+                _window.WindowState = _loadLocation.WindowState; //TODO: Have a configuration start Minimized is allowed
+            }
 
             _window.LocationChanged += OnWindowChanged;
             _window.SizeChanged += OnWindowChanged;
@@ -133,7 +138,7 @@ internal class WindowLocationService : IWindowLocationService
         private string GetFileLocation()
         {
             var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            var yourAppDataPath = Path.Combine(appDataPath, _options.ApplicationShortName.Replace(" ", "_"));
+            var yourAppDataPath = Path.Combine(appDataPath, _options.CompanyName ?? string.Empty, _options.ApplicationShortName.Replace(" ", "_"), _environment?.Replace("Production", string.Empty) ?? string.Empty);
             var fileLocation = $"{yourAppDataPath}\\Window_{_name}.txt";
             if (!Directory.Exists(yourAppDataPath)) Directory.CreateDirectory(yourAppDataPath);
             return fileLocation;
@@ -151,7 +156,7 @@ internal class WindowLocationService : IWindowLocationService
 
         private void SetLocation()
         {
-            var lastLocation = _lastLocation ?? new Location();
+            var lastLocation = _lastLocation ?? _loadLocation ?? new Location();
             lastLocation = lastLocation with
             {
                 WindowState = _window.WindowState,

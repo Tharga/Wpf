@@ -13,6 +13,11 @@ public class ThargaWpfOptions
     private readonly ConcurrentDictionary<Assembly, Assembly> _assemblies = new();
 
     /// <summary>
+    /// Used for folder names when storing window locations.
+    /// </summary>
+    public string CompanyName { get; set; }
+
+    /// <summary>
     /// Used for folder names and where a brief name is to be used.
     /// </summary>
     public string ApplicationShortName { get; set; }
