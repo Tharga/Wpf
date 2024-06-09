@@ -1,30 +1,28 @@
 ﻿using System.Windows.Input;
 
-//using Tharga.Florida.Client.Framework.Authentication;
-
 namespace Tharga.Wpf.TabNavigator;
 
 public class OpenTabComamnd<TTabView> : ICommand
     where TTabView : TabView
 {
     private readonly ITabNavigationStateService _tabNavigationService;
-    //private readonly IAuthenticationStateService _authenticationStateService;
+    private readonly Action _postAction;
 
-    public OpenTabComamnd(ITabNavigationStateService tabNavigationService /*, IAuthenticationStateService authenticationStateService*/)
+    public OpenTabComamnd(ITabNavigationStateService tabNavigationService, Action postAction = default)
     {
         _tabNavigationService = tabNavigationService;
-        //_authenticationStateService = authenticationStateService;
+        _postAction = postAction;
     }
 
     public bool CanExecute(object parameter)
     {
-        //return _authenticationStateService.IsLoggedIn;
         return true;
     }
 
     public void Execute(object parameter)
     {
         _tabNavigationService.OpenTab<TTabView>();
+        _postAction?.Invoke();
     }
 
     public event EventHandler CanExecuteChanged
