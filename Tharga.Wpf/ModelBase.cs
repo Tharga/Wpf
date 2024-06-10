@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace Tharga.Wpf;
 
-public abstract class ViewModelBase : IViewModel, INotifyPropertyChanged
+public abstract record ModelBase : INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler PropertyChanged;
 
