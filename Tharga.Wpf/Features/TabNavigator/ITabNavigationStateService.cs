@@ -10,4 +10,6 @@ public interface ITabNavigationStateService
     Task<bool> CloseAllTabsAsync(bool forceClose = false);
     Task<bool> CloseTabAsync(TabView tabItem, bool forceClose = false);
     TabView GetActiveTabView();
+    T GetActiveTabView<T>();
+    T GetActiveTabViewModel<T>();
 }

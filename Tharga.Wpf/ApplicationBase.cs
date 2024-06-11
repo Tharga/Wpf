@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Tharga.Toolkit.TypeService;
 using Tharga.Wpf.ApplicationUpdate;
 using Tharga.Wpf.ExceptionHandling;
 using Tharga.Wpf.Framework;
@@ -19,6 +20,8 @@ public abstract class ApplicationBase : Application
 {
     private readonly ThargaWpfOptions _options;
     private Mutex _mutex;
+
+    public static event EventHandler<BeforeCloseEventArgs> BeforeCloseEvent;
 
     protected ApplicationBase()
     {
@@ -49,7 +52,9 @@ public abstract class ApplicationBase : Application
                 RegisterTabNavigation(_options, services);
                 RegisterIconTray(_options, services);
 
-                foreach (var viewModel in TypeHelper.GetTypesBasedOn<IViewModel>())
+                var assemblies = AssemblyService.GetAssemblies().Union(_options.GetAssemblies().Values);
+                var viewModels = AssemblyService.GetTypes<IViewModel>(x => !x.IsAbstract && !x.IsInterface, assemblies).Select(x => x.AsType());
+                foreach (var viewModel in viewModels)
                 {
                     services.AddTransient(viewModel);
                 }
@@ -120,7 +125,7 @@ public abstract class ApplicationBase : Application
     {
         if (!_options.AllowMultipleApplications)
         {
-            _mutex = new Mutex(true, _options.ApplicationShortName, out var createdNew);
+            _mutex = new Mutex(true, _options.ApplicationFullName, out var createdNew);
             if (!createdNew)
             {
                 BringExistingInstanceToFront();
@@ -148,11 +153,15 @@ public abstract class ApplicationBase : Application
         return service;
     }
 
-    public static void Close(CloseMode closeMode = CloseMode.Default)
+    public static bool Close(CloseMode closeMode = CloseMode.Default)
     {
         try
         {
             CloseMode = closeMode;
+
+            var beforeCloseEventArgs = new BeforeCloseEventArgs();
+            BeforeCloseEvent?.Invoke(null, beforeCloseEventArgs);
+            if (beforeCloseEventArgs.Cancel) return false;
 
             //TODO: When closing after an application update, it should be the "Force" mode.
 
@@ -161,7 +170,7 @@ public abstract class ApplicationBase : Application
                 case CloseMode.Default:
                 case CloseMode.Soft:
                     //TODO: Try to close tabs, if it does not work, abort closing of the application.
-                    //TODO: Not that the application could be hidden (icontray) when this happens. Is should be made visible when failed to close.
+                    //TODO: Now that the application could be hidden (icontray) when this happens. Is should be made visible when failed to close.
                     Current?.MainWindow?.Close();
                     break;
                 case CloseMode.Force:
@@ -182,6 +191,8 @@ public abstract class ApplicationBase : Application
         {
             CloseMode = CloseMode.Default;
         }
+
+        return true;
     }
 
     private void BringExistingInstanceToFront()

@@ -1,6 +1,4 @@
-﻿using System.Windows;
-
-namespace Tharga.Wpf.ApplicationUpdate;
+﻿namespace Tharga.Wpf.ApplicationUpdate;
 
 public interface ISplash
 {
@@ -10,5 +8,6 @@ public interface ISplash
     void SetErrorMessage(string message);
     void ShowCloseButton();
     void Close();
-    //void SetOwner(Window mainWindow);
+    bool IsCloseButtonVisible { get; }
+    void ClearMessages();
 }

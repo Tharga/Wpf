@@ -13,7 +13,7 @@ public class NotifyIconService : INotifyIconService
     {
         _notifyIcon = new NotifyIcon
         {
-            Text = thargaWpfOptions.ApplicationFullName,
+            Text = thargaWpfOptions.ApplicationFullName ?? $"{thargaWpfOptions.CompanyName} {thargaWpfOptions.ApplicationShortName}".Trim(),
             Icon = thargaWpfOptions.IconTray?.Icon ?? Resources.thargelion,
             Visible = true
         };

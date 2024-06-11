@@ -17,8 +17,10 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
     private readonly Window _mainWindow;
     private readonly ILogger<ApplicationUpdateStateService> _logger;
     private readonly System.Timers.Timer _timer;
+    private readonly SemaphoreSlim _lock = new(1, 1);
     private readonly string _environmentName;
     private readonly string _version;
+    private readonly string _exeLocation;
     private ISplash _splash;
     private string _applicationLocation;
     private string _applicationLocationSource;
@@ -31,8 +33,14 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
         _mainWindow = mainWindow;
         _logger = logger;
         _environmentName = configuration.GetSection("Environment").Value;
-        var version = Assembly.GetEntryAssembly()?.GetName().Version?.ToString();
+
+        var entryAssembly = Assembly.GetEntryAssembly();
+        var assemblyName = entryAssembly?.GetName();
+        var version = assemblyName?.Version?.ToString();
         _version = version == "1.0.0.0" ? null : version;
+        _exeLocation = SquirrelRuntimeInfo.EntryExePath;
+
+        UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} Initiate ApplicationUpdateStateService. ({_environmentName} {_version})");
 
         var interval = options.CheckForUpdateInterval;
         if (interval != null && interval > TimeSpan.Zero)
@@ -42,7 +50,7 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
             {
                 try
                 {
-                    await UpdateClientApplication();
+                    await UpdateClientApplication("Timer elapsed");
                 }
                 catch (Exception e)
                 {
@@ -73,6 +81,8 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
     }
 
     public event EventHandler<UpdateInfoEventArgs> UpdateInfoEvent;
+
+    internal static readonly List<string> UpdateLog = new();
 
     //NOTE: Initial Install
     private void OnInitialInstall(SemanticVersion version, IAppTools tools)
@@ -156,11 +166,19 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
         {
             ShowSplash(firstRun, entryMessage, showCloseButton);
         }
-        catch (InvalidOperationException)
+        catch (InvalidOperationException e)
         {
-            _splash = null;
+            Debugger.Break();
+            CloseSplash();
             ShowSplash(firstRun, entryMessage, showCloseButton);
         }
+    }
+
+    private void CloseSplash()
+    {
+        _splash?.Close();
+        _splash = null;
+        UpdateInfoEvent -= ApplicationUpdateStateService_UpdateInfoEvent;
     }
 
     private void ShowSplash(bool firstRun, string entryMessage, bool showCloseButton)
@@ -176,26 +194,39 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
                 FirstRun = firstRun,
                 EnvironmentName = _environmentName,
                 Version = _version,
+                ExeLocation = _exeLocation,
                 EntryMessage = entryMessage,
-                FullName = _options.ApplicationFullName,
+                FullName = _options.ApplicationFullName ?? $"{_options.CompanyName} {_options.ApplicationShortName}".Trim(),
                 ClientLocation = applicationLocation,
                 ClientSourceLocation = applicationSourceLocation
             };
             _splash = _options.SplashCreator?.Invoke(splashData) ?? new Splash(splashData);
-            UpdateInfoEvent += (_, args) => _splash?.UpdateInfo(args.Message);
+            UpdateInfoEvent += ApplicationUpdateStateService_UpdateInfoEvent;
         }
 
+        _splash.ClearMessages();
         if (showCloseButton) _splash.ShowCloseButton();
         _splash.Show();
     }
 
-    private async Task UpdateClientApplication()
+    private void ApplicationUpdateStateService_UpdateInfoEvent(object sender, UpdateInfoEventArgs e)
+    {
+        UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} {e.Message}");
+        _splash?.UpdateInfo(e.Message);
+    }
+
+    private async Task UpdateClientApplication(string source)
     {
         var splashDelay = Debugger.IsAttached ? TimeSpan.FromSeconds(4) : TimeSpan.FromSeconds(2);
         string clientLocation = null;
 
         try
         {
+            await _lock.WaitAsync();
+
+            UpdateLog.Add("--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---");
+            UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} Start check for updates. {source}");
+
             UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs("Looking for update."));
 
             var result = await _applicationDownloadService.GetApplicationLocationAsync();
@@ -211,6 +242,8 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
             else
             {
                 using var mgr = new UpdateManager(clientLocation);
+                //using var mgr = new UpdateManager(clientLocation,"C:\\Users\\danie\\AppData\\Local\\EplictaAgentWpfCI\\"); //TODO: Provide something here that might help the manager to find the currently installed version.
+                //var ver = mgr.CurrentlyInstalledVersion($"C:\\Users\\danie\\AppData\\Local\\EplictaAgentWpfCI\\Eplicta.Agent.Wpf.exe");
                 if (!mgr.IsInstalledApp)
                 {
                     var message = Debugger.IsAttached ? $"{_options.ApplicationShortName} is running in debug mode." : $"{_options.ApplicationShortName} is not installed.";
@@ -244,32 +277,43 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
         catch (Exception e)
         {
             _logger.LogError(e, e.Message);
-            var message = "Update failed.";
+            var message = "Update failed. ";
             UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs(message));
             _splash?.SetErrorMessage($"{e.Message}\n{clientLocation}\n@{e.StackTrace})");
             _splash?.ShowCloseButton();
-            splashDelay = TimeSpan.FromMinutes(5);
         }
         finally
         {
-            if (_splash != null)
+            if (_splash != null && !_splash.IsCloseButtonVisible)
             {
                 await Task.Delay(splashDelay);
-                _splash?.Close();
+                CloseSplash();
             }
 
-            _splash = null;
+            UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} Complete check for updates.");
+            _lock.Release();
         }
     }
 
-    public void ShowSplash()
+    public void ShowSplash(bool checkForUpdates)
     {
         ShowSplashWithRetry(false, null, true);
+
+        if (checkForUpdates)
+        {
+            Task.Run(async () =>
+            {
+                await Application.Current.Dispatcher.Invoke(async () =>
+                {
+                    await UpdateClientApplication($"{nameof(ShowSplash)}");
+                });
+            });
+        }
     }
 
-    public Task CheckForUpdateAsync()
+    public Task CheckForUpdateAsync(string source)
     {
-        return UpdateClientApplication();
+        return UpdateClientApplication($"Call from {source}");
     }
 
     private async Task StartUpdateLoop()
@@ -278,13 +322,13 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
         {
             if (!_timer.Enabled)
             {
-                await UpdateClientApplication();
+                await UpdateClientApplication($"{nameof(StartUpdateLoop)} before timer");
                 _timer.Start();
             }
         }
         else
         {
-            await UpdateClientApplication();
+            await UpdateClientApplication($"{nameof(StartUpdateLoop)} no timer");
         }
     }
 
@@ -300,7 +344,8 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
 
         var iconInfo = new ShortcutHelper.IconInfo { Path = iconPath };
         var name = GetShortcutName();
-        ShortcutHelper.CreateShortcut(path, name, _options.ApplicationFullName, iconInfo);
+        var description = _options.ApplicationFullName ?? $"{_options.CompanyName} {_options.ApplicationShortName}".Trim();
+        ShortcutHelper.CreateShortcut(path, name, description, iconInfo);
     }
 
     private static string GetDirectory()

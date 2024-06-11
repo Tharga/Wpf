@@ -1,8 +1,10 @@
 ﻿using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Microsoft.Extensions.DependencyInjection;
+using Tharga.Toolkit.TypeService;
 
 namespace Tharga.Wpf.TabNavigator;
 
@@ -91,6 +93,30 @@ internal class TabNavigationStateService : ITabNavigationStateService
         return _activeTab;
     }
 
+    public T GetActiveTabView<T>()
+    {
+        if (_activeTab is T t)
+        {
+            return t;
+        }
+        else if (_activeTab?.GetType().IsOfType<T>() ?? false)
+        {
+            Debugger.Break();
+        }
+
+        return default;
+    }
+
+    public T GetActiveTabViewModel<T>()
+    {
+        if (_activeTab?.DataContext is T t)
+        {
+            return t;
+        }
+
+        return default;
+    }
+
     private object GetHeader<TTabView>(TTabView tabContent)
         where TTabView : TabView
     {
@@ -113,6 +139,7 @@ internal class TabNavigationStateService : ITabNavigationStateService
 
         var tab = TabItems.FirstOrDefault(x => Equals(x.Content, tabView));
         TabItems.Remove(tab);
+        _activeTab = TabItems.FirstOrDefault(x => x.IsSelected)?.Content as TabView;
         return true;
     }
 }

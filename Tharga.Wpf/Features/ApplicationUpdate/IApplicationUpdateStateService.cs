@@ -3,6 +3,6 @@
 public interface IApplicationUpdateStateService
 {
     event EventHandler<UpdateInfoEventArgs> UpdateInfoEvent;
-    void ShowSplash();
-    Task CheckForUpdateAsync();
+    void ShowSplash(bool checkForUpdates = false);
+    Task CheckForUpdateAsync(string source = null);
 }

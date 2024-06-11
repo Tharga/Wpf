@@ -14,15 +14,16 @@
     <Grid>
         <Image Source="../../Images/Application/green.png" Stretch="Fill"/>
         <TextBlock x:Name="FullName" d:Text="Some Name" Margin="10,10,10,210" FontSize="20" />
-        <ListBox x:Name="Messages" Background="Transparent" Margin="100,34,10,100" FontWeight="Bold" BorderBrush="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+        <ListBox x:Name="Messages" Background="Transparent" Margin="120,34,10,100" FontWeight="Bold" BorderBrush="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
             <ListBox.ItemContainerStyle>
                 <Style TargetType="ListBoxItem">
                     <Setter Property="Height" Value="22" />
                 </Style>
             </ListBox.ItemContainerStyle>
         </ListBox>
-        <TextBlock x:Name="Environment" FontSize="12" Margin="10,34,200,195" d:Text="Environment" />
-        <TextBlock x:Name="Version" FontSize="12" Margin="10,48,200,180" d:Text="1.0.0.0" />
+        <TextBlock x:Name="Environment" FontSize="12" Margin="10,34,280,195" d:Text="Environment" />
+        <TextBlock x:Name="Version" FontSize="12" Margin="10,48,280,180" d:Text="1.2.3.4" />
+        <TextBlock x:Name="ExeLocation" FontSize="12" Margin="10,62,280,166" d:Text="[exe location]" MouseDown="ExeLocation_OnMouseDown" />
         <TextBox x:Name="ErrorMessage" FontSize="10" Margin="5,155,5,5" d:Text="Error message" d:Visibility="Visible" Visibility="Collapsed" IsReadOnly="true" Background="AliceBlue" />
         <TextBlock x:Name="Client" Margin="10,225,10,10"><Hyperlink x:Name="ClientLocation" RequestNavigate="Client_RequestNavigate">Client</Hyperlink></TextBlock>
         <TextBlock x:Name="ClientSource" Margin="100,225,10,10"><Hyperlink x:Name="ClientSourceLocation"  RequestNavigate="ClientSource_RequestNavigate">Client Source</Hyperlink></TextBlock>
