@@ -29,7 +29,11 @@ public class ViewModelProvider : MarkupExtension
         {
             var serviceType = AssemblyService.GetTypes(x => x == ViewModelType).Single().AsType();
             item = applicationBase?.AppHost.Services.GetService(serviceType);
-            if (item == null) Debugger.Break();
+            if (item == null)
+            {
+                Debugger.Break();
+                throw new NullReferenceException($"Cannot create instane of '{serviceType.Name}'.");
+            }
         }
 
         return item;
