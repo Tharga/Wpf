@@ -81,6 +81,7 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
     }
 
     public event EventHandler<UpdateInfoEventArgs> UpdateInfoEvent;
+    public event EventHandler<EventArgs> SplashClosedEvent;
 
     internal static readonly List<string> UpdateLog = new();
 
@@ -168,7 +169,6 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
         }
         catch (InvalidOperationException e)
         {
-            Debugger.Break();
             CloseSplash();
             ShowSplash(firstRun, entryMessage, showCloseButton);
         }
@@ -198,7 +198,8 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
                 EntryMessage = entryMessage,
                 FullName = _options.ApplicationFullName ?? $"{_options.CompanyName} {_options.ApplicationShortName}".Trim(),
                 ClientLocation = applicationLocation,
-                ClientSourceLocation = applicationSourceLocation
+                ClientSourceLocation = applicationSourceLocation,
+                SplashClosed = () => { SplashClosedEvent?.Invoke(this, EventArgs.Empty); }
             };
             _splash = _options.SplashCreator?.Invoke(splashData) ?? new Splash(splashData);
             UpdateInfoEvent += ApplicationUpdateStateService_UpdateInfoEvent;

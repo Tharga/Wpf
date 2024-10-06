@@ -48,7 +48,7 @@
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
 		<PackageReference Include="Clowd.Squirrel" Version="2.11.1" />
 		<PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" />
-		<PackageReference Include="Tharga.Toolkit" Version="1.11.6" />
+		<PackageReference Include="Tharga.Toolkit" Version="1.11.7" />
 	</ItemGroup>
 	<ItemGroup>
 		<InternalsVisibleTo Include="Tharga.Wpf.Tests" />

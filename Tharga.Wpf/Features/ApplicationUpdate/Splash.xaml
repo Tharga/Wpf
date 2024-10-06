@@ -9,6 +9,7 @@
         WindowStyle="None" ShowInTaskbar="false" AllowsTransparency="True"
         Background="Transparent"
         WindowStartupLocation="CenterOwner" Topmost="false"
+        Closed="Splash_OnClosed"
         BorderThickness="1" BorderBrush="Gray"
         >
     <Grid>
