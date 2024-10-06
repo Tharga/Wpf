@@ -117,6 +117,12 @@ internal class TabNavigationStateService : ITabNavigationStateService
         return default;
     }
 
+    public TabItem GetTabByTabView<T>(Func<TabView, bool> func)
+    {
+        var ti = TabItems.FirstOrDefault(x => func((x.Content as TabView)));
+        return ti;
+    }
+
     private object GetHeader<TTabView>(TTabView tabContent)
         where TTabView : TabView
     {

@@ -17,7 +17,7 @@ public abstract class TabView : UserControl
     public string Title
     {
         get => _title ?? DefaultTitle;
-        protected internal set
+        set
         {
             if (_title == value) return;
             _title = value;

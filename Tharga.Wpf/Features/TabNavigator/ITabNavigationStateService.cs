@@ -12,4 +12,5 @@ public interface ITabNavigationStateService
     TabView GetActiveTabView();
     T GetActiveTabView<T>();
     T GetActiveTabViewModel<T>();
+    TabItem GetTabByTabView<T>(Func<TabView, bool> func);
 }

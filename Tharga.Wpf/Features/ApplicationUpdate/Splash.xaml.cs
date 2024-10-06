@@ -8,6 +8,8 @@ namespace Tharga.Wpf.ApplicationUpdate;
 
 public partial class Splash : ISplash
 {
+    private readonly Action _splashClosed;
+
     public Splash(SplashData splashData)
     {
         if (splashData.MainWindow.Visibility == Visibility.Visible) Owner = splashData.MainWindow;
@@ -47,6 +49,8 @@ public partial class Splash : ISplash
         {
             ClientSource.Visibility = Visibility.Collapsed;
         }
+
+        _splashClosed = splashData.SplashClosed;
     }
 
     public void UpdateInfo(string message)
@@ -99,5 +103,10 @@ public partial class Splash : ISplash
             sb.AppendLine(log);
         }
         Clipboard.SetText(sb.ToString());
+    }
+
+    private void Splash_OnClosed(object sender, EventArgs e)
+    {
+        _splashClosed?.Invoke();
     }
 }

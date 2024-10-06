@@ -13,4 +13,5 @@ public record SplashData
     public string EntryMessage { get; init; }
     public required Uri ClientLocation { get; init; }
     public required Uri ClientSourceLocation { get; init; }
+    public Action SplashClosed { get; init; }
 }
