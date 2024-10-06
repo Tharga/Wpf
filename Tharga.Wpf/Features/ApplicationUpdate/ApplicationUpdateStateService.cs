@@ -169,7 +169,6 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
         }
         catch (InvalidOperationException e)
         {
-            Debugger.Break();
             CloseSplash();
             ShowSplash(firstRun, entryMessage, showCloseButton);
         }

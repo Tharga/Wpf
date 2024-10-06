@@ -14,6 +14,11 @@ using Tharga.Wpf.IconTray;
 using Tharga.Wpf.TabNavigator;
 using Tharga.Wpf.WindowLocation;
 
+using System;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
+using static Tharga.Wpf.InactivityService;
+
 namespace Tharga.Wpf;
 
 public abstract class ApplicationBase : Application
@@ -80,6 +85,11 @@ public abstract class ApplicationBase : Application
                     var httpClientFactory = s.GetService<IHttpClientFactory>();
                     return new ApplicationDownloadService(configuration, httpClientFactory, _options);
                 });
+
+                if (_options.Inactivity?.Timeout != null && _options.Inactivity?.Action != null)
+                {
+                    _ = new InactivityService(_options.Inactivity.Timeout.Value, _options.Inactivity.Action);
+                }
 
                 Register(context, services);
             })

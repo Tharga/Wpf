@@ -88,6 +88,11 @@ public class ThargaWpfOptions
         _assemblies.TryAdd(assembly, assembly);
     }
 
+    /// <summary>
+    /// Inactivity
+    /// </summary>
+    public Inactivity Inactivity { get; set; } = new();
+
     internal IDictionary<Type, Type> GetExceptionTypes() => _exceptionTypes;
     internal IDictionary<Assembly, Assembly> GetAssemblies() => _assemblies;
 }
