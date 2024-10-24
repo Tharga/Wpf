@@ -40,7 +40,7 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
         _version = version == "1.0.0.0" ? null : version;
         _exeLocation = SquirrelRuntimeInfo.EntryExePath;
 
-        UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} Initiate ApplicationUpdateStateService. ({_environmentName} {_version})");
+        UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} Initiate ApplicationUpdateStateService. ({_environmentName} {_version}, {assemblyName?.FullName})");
 
         var interval = options.CheckForUpdateInterval;
         if (interval != null && interval > TimeSpan.Zero)
@@ -88,78 +88,113 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
     //NOTE: Initial Install
     private void OnInitialInstall(SemanticVersion version, IAppTools tools)
     {
-        try
-        {
-            var name = GetShortcutName();
+	    try
+	    {
+		    UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} --- Start {nameof(OnInitialInstall)} ---");
 
-            CreateShortcut();
+		    var name = GetShortcutName();
 
-            ShowSplashWithRetry(false, $"Installing {name}.");
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, e.Message);
-            MessageBox.Show(e.Message, "Initial Install", MessageBoxButton.OK, MessageBoxImage.Error);
-        }
-    }
+		    CreateShortcut();
+
+		    ShowSplashWithRetry(false, $"Installing {name}.");
+	    }
+	    catch (Exception e)
+	    {
+		    UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} Error: {e.Message} @{e.StackTrace}");
+		    _logger.LogError(e, e.Message);
+		    MessageBox.Show(e.Message, "Initial Install", MessageBoxButton.OK, MessageBoxImage.Error);
+	    }
+	    finally
+	    {
+		    UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} --- End {nameof(OnInitialInstall)} ---");
+		}
+	}
 
     //NOTE: Updated to new version
     private void OnAppInstall(SemanticVersion version, IAppTools tools)
     {
-        try
-        {
-            //var name = GetShortcutName();
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, e.Message);
-        }
-    }
+	    try
+	    {
+		    UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} --- Start {nameof(OnAppInstall)} ---");
+
+		    //var name = GetShortcutName();
+	    }
+	    catch (Exception e)
+	    {
+		    UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} Error: {e.Message} @{e.StackTrace}");
+		    _logger.LogError(e, e.Message);
+	    }
+	    finally
+	    {
+		    UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} --- End {nameof(OnAppInstall)} ---");
+		}
+	}
 
     //NOTE: Called when the app is no longer the latest version (A new version is installed)
     private void OnAppObsoleted(SemanticVersion version, IAppTools tools)
     {
-        try
-        {
-            //var name = GetShortcutName();
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, e.Message);
-        }
-    }
+	    try
+	    {
+		    UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} --- Start {nameof(OnAppObsoleted)} ---");
+
+		    //var name = GetShortcutName();
+	    }
+	    catch (Exception e)
+	    {
+		    UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} Error: {e.Message} @{e.StackTrace}");
+		    _logger.LogError(e, e.Message);
+	    }
+	    finally
+	    {
+		    UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} --- End {nameof(OnAppObsoleted)} ---");
+		}
+	}
 
     //NOTE: Called when the app in uninstalled
     private void OnAppUninstall(SemanticVersion version, IAppTools tools)
     {
-        try
-        {
-            var name = GetShortcutName();
+	    try
+	    {
+		    UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} --- Start {nameof(OnAppUninstall)} ---");
 
-            ShortcutHelper.RemoveShortcut(name);
+		    var name = GetShortcutName();
 
-            ShowSplashWithRetry(false, $"Uninstalling {name}.");
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, e.Message);
-        }
-    }
+		    ShortcutHelper.RemoveShortcut(name);
+
+		    ShowSplashWithRetry(false, $"Uninstalling {name}.");
+	    }
+	    catch (Exception e)
+	    {
+		    UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} Error: {e.Message} @{e.StackTrace}");
+		    _logger.LogError(e, e.Message);
+	    }
+	    finally
+	    {
+		    UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} --- End {nameof(OnAppUninstall)} ---");
+		}
+	}
 
     //NOTE: Starts on every run
     private void OnEveryRun(SemanticVersion version, IAppTools tools, bool firstRun)
     {
-        try
-        {
-            tools.SetProcessAppUserModelId();
-            ShowSplashWithRetry(firstRun);
-            _ = StartUpdateLoop();
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, e.Message);
-        }
-    }
+	    try
+	    {
+		    UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} --- Start {nameof(OnEveryRun)} ---");
+
+		    tools.SetProcessAppUserModelId();
+		    ShowSplashWithRetry(firstRun);
+		    _ = StartUpdateLoop();
+	    }
+	    catch (Exception e)
+	    {
+		    UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} Error: {e.Message} @{e.StackTrace}");
+		    _logger.LogError(e, e.Message);
+	    }
+	    finally
+	    {
+		    UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} --- End {nameof(OnEveryRun)} ---");
+		}
+	}
 
     private void ShowSplashWithRetry(bool firstRun, string entryMessage = null, bool showCloseButton = false)
     {
@@ -225,10 +260,11 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
         {
             await _lock.WaitAsync();
 
-            UpdateLog.Add("--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---");
-            UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} Start check for updates. {source}");
+			//UpdateLog.Add("--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---");
+			//UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} Start check for updates. {source}");
+			UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} --- Start {nameof(UpdateClientApplication)} ---");
 
-            UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs("Looking for update."));
+			UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs("Looking for update."));
 
             var result = await _applicationDownloadService.GetApplicationLocationAsync();
             clientLocation = result.ApplicationLocation;
@@ -277,7 +313,8 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
         }
         catch (Exception e)
         {
-            _logger.LogError(e, e.Message);
+	        UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} Error: {e.Message} @{e.StackTrace}");
+			_logger.LogError(e, e.Message);
             var message = "Update failed. ";
             UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs(message));
             _splash?.SetErrorMessage($"{e.Message}\n{clientLocation}\n@{e.StackTrace})");
@@ -291,14 +328,15 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
                 CloseSplash();
             }
 
-            UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} Complete check for updates.");
-            _lock.Release();
+			//UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} Complete check for updates.");
+			UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} --- End {nameof(UpdateClientApplication)} ---");
+			_lock.Release();
         }
     }
 
-    public void ShowSplash(bool checkForUpdates)
+    public void ShowSplash(bool checkForUpdates, bool autoClose = true)
     {
-        ShowSplashWithRetry(false, null, true);
+        ShowSplashWithRetry(false, null, !autoClose);
 
         if (checkForUpdates)
         {
@@ -338,18 +376,25 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
         var entryExePath = SquirrelRuntimeInfo.EntryExePath;
         var pos = entryExePath.LastIndexOf("\\", StringComparison.Ordinal);
         var exeName = entryExePath.Substring(pos + 1);
+        UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} Exe name is '{exeName}'.");
 
-        var baseDirectory = GetDirectory();
+		var baseDirectory = GetDirectory();
         var path = Path.Combine(baseDirectory, exeName);
-        var iconPath = Path.Combine(baseDirectory, "app.ico");
+        UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} Path is '{path}'.");
 
-        var iconInfo = new ShortcutHelper.IconInfo { Path = iconPath };
+		var iconPath = Path.Combine(baseDirectory, "app.ico");
+		UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} IconPath is '{iconPath}'.");
+
+		var iconInfo = new ShortcutHelper.IconInfo { Path = iconPath };
         var name = GetShortcutName();
         var description = _options.ApplicationFullName ?? $"{_options.CompanyName} {_options.ApplicationShortName}".Trim();
-        ShortcutHelper.CreateShortcut(path, name, description, iconInfo);
-    }
+        UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} Description is '{description}'.");
 
-    private static string GetDirectory()
+		ShortcutHelper.CreateShortcut(path, name, description, iconInfo);
+        UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} Shortcut created with name '{name}'.");
+	}
+
+	private static string GetDirectory()
     {
         var baseDirectory = SquirrelRuntimeInfo.BaseDirectory;
         var pos = baseDirectory.TrimEnd('\\').LastIndexOf("\\", StringComparison.Ordinal);
@@ -360,6 +405,7 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
     private string GetShortcutName()
     {
         var name = _options.ApplicationShortName;
-        return _environmentName == "Production" ? name : $"{name} {_environmentName}";
+        var response = _environmentName == "Production" ? name : $"{name} {_environmentName}";
+        return response;
     }
 }
