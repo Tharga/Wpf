@@ -28,6 +28,6 @@
         <TextBox x:Name="ErrorMessage" FontSize="10" Margin="5,155,5,5" d:Text="Error message" d:Visibility="Visible" Visibility="Collapsed" IsReadOnly="true" Background="AliceBlue" />
         <TextBlock x:Name="Client" Margin="10,225,10,10"><Hyperlink x:Name="ClientLocation" RequestNavigate="Client_RequestNavigate">Client</Hyperlink></TextBlock>
         <TextBlock x:Name="ClientSource" Margin="100,225,10,10"><Hyperlink x:Name="ClientSourceLocation"  RequestNavigate="ClientSource_RequestNavigate">Client Source</Hyperlink></TextBlock>
-        <Button x:Name="CloseButton" Click="ButtonBase_OnClick" Visibility="Collapsed" HorizontalAlignment="Right" VerticalAlignment="Top" Width="20" Height="20" d:Visibility="Visible" Margin="5,5,5,5" Background="{DynamicResource PrimaryHueLightBrush}" >X</Button>
+        <Button x:Name="CloseButton" Click="ButtonBase_OnClick" Visibility="Collapsed" HorizontalAlignment="Right" VerticalAlignment="Top" Width="20" Height="20" d:Visibility="Visible" Margin="5,5,5,5" Background="{DynamicResource PrimaryHueLightBrush}" Padding="0" Foreground="Gray">X</Button>
     </Grid>
 </Window>
