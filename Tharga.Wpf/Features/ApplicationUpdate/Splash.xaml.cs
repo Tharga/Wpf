@@ -8,11 +8,20 @@ namespace Tharga.Wpf.ApplicationUpdate;
 
 public partial class Splash : ISplash
 {
-    private readonly Action _splashClosed;
+    private readonly Action<CloseMethod> _splashClosed;
+    private CloseMethod _closeMethod = CloseMethod.Automatically;
 
     public Splash(SplashData splashData)
     {
-        if (splashData.MainWindow.Visibility == Visibility.Visible) Owner = splashData.MainWindow;
+        if (splashData.MainWindow.Visibility == Visibility.Visible)
+        {
+            Owner = splashData.MainWindow;
+            WindowStartupLocation = WindowStartupLocation.CenterOwner;
+        }
+        else
+        {
+            WindowStartupLocation = WindowStartupLocation.CenterScreen;
+        }
         Topmost = true;
 
         MouseDown += (_, _) => DragMove();
@@ -79,6 +88,7 @@ public partial class Splash : ISplash
 
     private void ButtonBase_OnClick(object sender, RoutedEventArgs e)
     {
+        _closeMethod = CloseMethod.Manyally;
         Close();
     }
 
@@ -107,6 +117,6 @@ public partial class Splash : ISplash
 
     private void Splash_OnClosed(object sender, EventArgs e)
     {
-        _splashClosed?.Invoke();
+        _splashClosed?.Invoke(_closeMethod);
     }
 }

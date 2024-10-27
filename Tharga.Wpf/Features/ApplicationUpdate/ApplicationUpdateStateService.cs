@@ -6,6 +6,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Squirrel;
 using Tharga.Wpf.TabNavigator;
+using Application = System.Windows.Application;
+using MessageBox = System.Windows.MessageBox;
 
 namespace Tharga.Wpf.ApplicationUpdate;
 
@@ -69,19 +71,19 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
             });
         }
 
-        if (interval != null)
-        {
+        //if (interval != null)
+        //{
             SquirrelAwareApp.HandleEvents(OnInitialInstall, OnAppInstall, OnAppObsoleted, OnAppUninstall, OnEveryRun);
 
             _mainWindow.IsVisibleChanged += (_, _) =>
             {
                 if (_mainWindow.Visibility != Visibility.Visible) _splash?.Hide();
             };
-        }
+        //}
     }
 
     public event EventHandler<UpdateInfoEventArgs> UpdateInfoEvent;
-    public event EventHandler<EventArgs> SplashClosedEvent;
+    public event EventHandler<SplashClosedEventArgs> SplashClosedEvent;
 
     internal static readonly List<string> UpdateLog = new();
 
@@ -234,7 +236,7 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
                 FullName = _options.ApplicationFullName ?? $"{_options.CompanyName} {_options.ApplicationShortName}".Trim(),
                 ClientLocation = applicationLocation,
                 ClientSourceLocation = applicationSourceLocation,
-                SplashClosed = () => { SplashClosedEvent?.Invoke(this, EventArgs.Empty); }
+                SplashClosed = e => { SplashClosedEvent?.Invoke(this, new SplashClosedEventArgs(e)); }
             };
             _splash = _options.SplashCreator?.Invoke(splashData) ?? new Splash(splashData);
             UpdateInfoEvent += ApplicationUpdateStateService_UpdateInfoEvent;
@@ -260,9 +262,7 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
         {
             await _lock.WaitAsync();
 
-			//UpdateLog.Add("--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---");
-			//UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} Start check for updates. {source}");
-			UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} --- Start {nameof(UpdateClientApplication)} ---");
+			UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} --- Start {nameof(UpdateClientApplication)} (source: {source}) ---");
 
 			UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs("Looking for update."));
 
@@ -278,6 +278,7 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
             }
             else
             {
+                UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} clientLocation: {clientLocation}");
                 using var mgr = new UpdateManager(clientLocation);
                 //using var mgr = new UpdateManager(clientLocation,"C:\\Users\\danie\\AppData\\Local\\EplictaAgentWpfCI\\"); //TODO: Provide something here that might help the manager to find the currently installed version.
                 //var ver = mgr.CurrentlyInstalledVersion($"C:\\Users\\danie\\AppData\\Local\\EplictaAgentWpfCI\\Eplicta.Agent.Wpf.exe");
@@ -334,9 +335,9 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
         }
     }
 
-    public void ShowSplash(bool checkForUpdates, bool autoClose = true)
+    public void ShowSplash(bool checkForUpdates, bool showCloseButton)
     {
-        ShowSplashWithRetry(false, null, !autoClose);
+        ShowSplashWithRetry(false, null, showCloseButton);
 
         if (checkForUpdates)
         {
