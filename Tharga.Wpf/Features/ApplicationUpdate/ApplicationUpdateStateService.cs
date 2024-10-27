@@ -5,6 +5,7 @@ using System.Windows;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Squirrel;
+using Tharga.Toolkit;
 using Tharga.Wpf.TabNavigator;
 using Application = System.Windows.Application;
 using MessageBox = System.Windows.MessageBox;
@@ -26,6 +27,7 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
     private ISplash _splash;
     private string _applicationLocation;
     private string _applicationLocationSource;
+    private string _logFileName;
 
     public ApplicationUpdateStateService(IConfiguration configuration, IApplicationDownloadService applicationDownloadService, ITabNavigationStateService tabNavigationStateService, ThargaWpfOptions options, Window mainWindow, ILogger<ApplicationUpdateStateService> logger)
     {
@@ -42,7 +44,7 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
         _version = version == "1.0.0.0" ? null : version;
         _exeLocation = SquirrelRuntimeInfo.EntryExePath;
 
-        UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} Initiate ApplicationUpdateStateService. ({_environmentName} {_version}, {assemblyName?.FullName})");
+        AddLogString($"Initiate ApplicationUpdateStateService. ({_environmentName} {assemblyName?.FullName})");
 
         var interval = options.CheckForUpdateInterval;
         if (interval != null && interval > TimeSpan.Zero)
@@ -71,15 +73,12 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
             });
         }
 
-        //if (interval != null)
-        //{
-            SquirrelAwareApp.HandleEvents(OnInitialInstall, OnAppInstall, OnAppObsoleted, OnAppUninstall, OnEveryRun);
+        SquirrelAwareApp.HandleEvents(OnInitialInstall, OnAppInstall, OnAppObsoleted, OnAppUninstall, OnEveryRun);
 
-            _mainWindow.IsVisibleChanged += (_, _) =>
-            {
-                if (_mainWindow.Visibility != Visibility.Visible) _splash?.Hide();
-            };
-        //}
+        _mainWindow.IsVisibleChanged += (_, _) =>
+        {
+            if (_mainWindow.Visibility != Visibility.Visible) _splash?.Hide();
+        };
     }
 
     public event EventHandler<UpdateInfoEventArgs> UpdateInfoEvent;
@@ -87,12 +86,28 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
 
     internal static readonly List<string> UpdateLog = new();
 
+    private void AddLogString(string message)
+    {
+        var now = DateTime.UtcNow;
+        var msg = $"{now:yyyy-MM-dd hh:mm:ss} {message}";
+
+        if (_options.Debug)
+        {
+            _logFileName ??= $"Log_{now.ToLocalDateTimeString().Replace(" ", "_").Replace(":", "")}.txt";
+            File.AppendAllLines(_logFileName, [msg]);
+        }
+
+        UpdateLog.Add(msg);
+    }
+
     //NOTE: Initial Install
     private void OnInitialInstall(SemanticVersion version, IAppTools tools)
     {
 	    try
 	    {
-		    UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} --- Start {nameof(OnInitialInstall)} ---");
+            if (_options.Debug) MessageBox.Show("Initial Install", nameof(OnInitialInstall), MessageBoxButton.OK, MessageBoxImage.Information);
+
+            AddLogString($"--- Start {nameof(OnInitialInstall)} ---");
 
 		    var name = GetShortcutName();
 
@@ -102,13 +117,14 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
 	    }
 	    catch (Exception e)
 	    {
-		    UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} Error: {e.Message} @{e.StackTrace}");
+            AddLogString($"Error: {e.Message} @{e.StackTrace}");
 		    _logger.LogError(e, e.Message);
+            Task.Delay(TimeSpan.FromSeconds(2)).GetAwaiter().GetResult();
 		    MessageBox.Show(e.Message, "Initial Install", MessageBoxButton.OK, MessageBoxImage.Error);
 	    }
 	    finally
 	    {
-		    UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} --- End {nameof(OnInitialInstall)} ---");
+            AddLogString($"--- End {nameof(OnInitialInstall)} ---");
 		}
 	}
 
@@ -117,18 +133,22 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
     {
 	    try
 	    {
-		    UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} --- Start {nameof(OnAppInstall)} ---");
+            if (_options.Debug) MessageBox.Show("App Install", nameof(OnAppInstall), MessageBoxButton.OK, MessageBoxImage.Information);
+
+            AddLogString($"--- Start {nameof(OnAppInstall)} ---");
 
 		    //var name = GetShortcutName();
 	    }
 	    catch (Exception e)
 	    {
-		    UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} Error: {e.Message} @{e.StackTrace}");
+            AddLogString($"Error: {e.Message} @{e.StackTrace}");
 		    _logger.LogError(e, e.Message);
+            Task.Delay(TimeSpan.FromSeconds(2)).GetAwaiter().GetResult();
+            MessageBox.Show(e.Message, "App Install", MessageBoxButton.OK, MessageBoxImage.Error);
 	    }
-	    finally
+        finally
 	    {
-		    UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} --- End {nameof(OnAppInstall)} ---");
+            AddLogString($"--- End {nameof(OnAppInstall)} ---");
 		}
 	}
 
@@ -137,18 +157,22 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
     {
 	    try
 	    {
-		    UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} --- Start {nameof(OnAppObsoleted)} ---");
+            if (_options.Debug) MessageBox.Show("App Obsoleted", nameof(OnAppObsoleted), MessageBoxButton.OK, MessageBoxImage.Information);
+
+            AddLogString($"--- Start {nameof(OnAppObsoleted)} ---");
 
 		    //var name = GetShortcutName();
 	    }
 	    catch (Exception e)
 	    {
-		    UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} Error: {e.Message} @{e.StackTrace}");
+            AddLogString($"Error: {e.Message} @{e.StackTrace}");
 		    _logger.LogError(e, e.Message);
+            Task.Delay(TimeSpan.FromSeconds(2)).GetAwaiter().GetResult();
+            MessageBox.Show(e.Message, "App Obsoleted", MessageBoxButton.OK, MessageBoxImage.Error);
 	    }
-	    finally
+        finally
 	    {
-		    UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} --- End {nameof(OnAppObsoleted)} ---");
+            AddLogString($"--- End {nameof(OnAppObsoleted)} ---");
 		}
 	}
 
@@ -157,7 +181,9 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
     {
 	    try
 	    {
-		    UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} --- Start {nameof(OnAppUninstall)} ---");
+            if (_options.Debug) MessageBox.Show("App Uninstall", nameof(OnAppUninstall), MessageBoxButton.OK, MessageBoxImage.Information);
+
+            AddLogString($"--- Start {nameof(OnAppUninstall)} ---");
 
 		    var name = GetShortcutName();
 
@@ -167,12 +193,14 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
 	    }
 	    catch (Exception e)
 	    {
-		    UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} Error: {e.Message} @{e.StackTrace}");
+            AddLogString($"Error: {e.Message} @{e.StackTrace}");
 		    _logger.LogError(e, e.Message);
+            Task.Delay(TimeSpan.FromSeconds(2)).GetAwaiter().GetResult();
+            MessageBox.Show(e.Message, "App Uninstall", MessageBoxButton.OK, MessageBoxImage.Error);
 	    }
-	    finally
+        finally
 	    {
-		    UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} --- End {nameof(OnAppUninstall)} ---");
+            AddLogString($"--- End {nameof(OnAppUninstall)} ---");
 		}
 	}
 
@@ -180,8 +208,13 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
     private void OnEveryRun(SemanticVersion version, IAppTools tools, bool firstRun)
     {
 	    try
-	    {
-		    UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} --- Start {nameof(OnEveryRun)} ---");
+        {
+            var f = string.Empty;
+            if (firstRun) f = " (firstRun)";
+
+            if (_options.Debug) MessageBox.Show($"Every Run {f}", nameof(OnEveryRun), MessageBoxButton.OK, MessageBoxImage.Information);
+
+            AddLogString($"--- Start {nameof(OnEveryRun)} {f} ---");
 
 		    tools.SetProcessAppUserModelId();
 		    ShowSplashWithRetry(firstRun);
@@ -189,12 +222,14 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
 	    }
 	    catch (Exception e)
 	    {
-		    UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} Error: {e.Message} @{e.StackTrace}");
+            AddLogString($"Error: {e.Message} @{e.StackTrace}");
 		    _logger.LogError(e, e.Message);
+            Task.Delay(TimeSpan.FromSeconds(2)).GetAwaiter().GetResult();
+            MessageBox.Show(e.Message, "Every Run", MessageBoxButton.OK, MessageBoxImage.Error);
 	    }
-	    finally
+        finally
 	    {
-		    UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} --- End {nameof(OnEveryRun)} ---");
+            AddLogString($"--- End {nameof(OnEveryRun)} ---");
 		}
 	}
 
@@ -242,14 +277,14 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
             UpdateInfoEvent += ApplicationUpdateStateService_UpdateInfoEvent;
         }
 
-        _splash.ClearMessages();
+        //_splash.ClearMessages();
         if (showCloseButton) _splash.ShowCloseButton();
         _splash.Show();
     }
 
     private void ApplicationUpdateStateService_UpdateInfoEvent(object sender, UpdateInfoEventArgs e)
     {
-        UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} {e.Message}");
+        AddLogString($"{e.Message}");
         _splash?.UpdateInfo(e.Message);
     }
 
@@ -262,7 +297,7 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
         {
             await _lock.WaitAsync();
 
-			UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} --- Start {nameof(UpdateClientApplication)} (source: {source}) ---");
+            AddLogString($"--- Start {nameof(UpdateClientApplication)} (source: {source}) ---");
 
 			UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs("Looking for update."));
 
@@ -278,7 +313,7 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
             }
             else
             {
-                UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} clientLocation: {clientLocation}");
+                AddLogString($"clientLocation: {clientLocation}");
                 using var mgr = new UpdateManager(clientLocation);
                 //using var mgr = new UpdateManager(clientLocation,"C:\\Users\\danie\\AppData\\Local\\EplictaAgentWpfCI\\"); //TODO: Provide something here that might help the manager to find the currently installed version.
                 //var ver = mgr.CurrentlyInstalledVersion($"C:\\Users\\danie\\AppData\\Local\\EplictaAgentWpfCI\\Eplicta.Agent.Wpf.exe");
@@ -314,7 +349,7 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
         }
         catch (Exception e)
         {
-	        UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} Error: {e.Message} @{e.StackTrace}");
+            AddLogString($"Error: {e.Message} @{e.StackTrace}");
 			_logger.LogError(e, e.Message);
             var message = "Update failed. ";
             UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs(message));
@@ -329,8 +364,8 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
                 CloseSplash();
             }
 
-			//UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} Complete check for updates.");
-			UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} --- End {nameof(UpdateClientApplication)} ---");
+            //AddLogString($"Complete check for updates.");
+            AddLogString($"--- End {nameof(UpdateClientApplication)} ---");
 			_lock.Release();
         }
     }
@@ -377,22 +412,22 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
         var entryExePath = SquirrelRuntimeInfo.EntryExePath;
         var pos = entryExePath.LastIndexOf("\\", StringComparison.Ordinal);
         var exeName = entryExePath.Substring(pos + 1);
-        UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} Exe name is '{exeName}'.");
+        AddLogString($"Exe name is '{exeName}'.");
 
 		var baseDirectory = GetDirectory();
         var path = Path.Combine(baseDirectory, exeName);
-        UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} Path is '{path}'.");
+        AddLogString($"Path is '{path}'.");
 
 		var iconPath = Path.Combine(baseDirectory, "app.ico");
-		UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} IconPath is '{iconPath}'.");
+        AddLogString($"IconPath is '{iconPath}'.");
 
 		var iconInfo = new ShortcutHelper.IconInfo { Path = iconPath };
         var name = GetShortcutName();
         var description = _options.ApplicationFullName ?? $"{_options.CompanyName} {_options.ApplicationShortName}".Trim();
-        UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} Description is '{description}'.");
+        AddLogString($"Description is '{description}'.");
 
 		ShortcutHelper.CreateShortcut(path, name, description, iconInfo);
-        UpdateLog.Add($"{DateTime.UtcNow:yyyy-MM-dd hh:mm:ss} Shortcut created with name '{name}'.");
+        AddLogString($"Shortcut created with name '{name}'.");
 	}
 
 	private static string GetDirectory()
