@@ -1,4 +1,9 @@
 # Tharga Wpf
+[![NuGet](https://img.shields.io/nuget/v/Tharga.Wpf)](https://www.nuget.org/packages/Tharga.Wpf)
+![Nuget](https://img.shields.io/nuget/dt/Tharga.Wpf)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![GitHub repo Issues](https://img.shields.io/github/issues/Tharga/Wpf?style=flat&logo=github&logoColor=red&label=Issues)](https://github.com/Tharga/Wpf/issues?q=is%3Aopen)
+
 This package is a basic toolset for WPF applications.
 
 ## Features
