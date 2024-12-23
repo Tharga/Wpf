@@ -2,5 +2,5 @@
 
 internal interface IExceptionStateService
 {
-    void FallbackHandlerInternal(Exception exception);
+    Task FallbackHandlerInternalAsync(Exception exception);
 }

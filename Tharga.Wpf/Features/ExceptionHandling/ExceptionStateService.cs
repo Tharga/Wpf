@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Windows;
 using System.Windows.Markup;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Tharga.Wpf.Framework;
 
@@ -16,28 +17,12 @@ internal class ExceptionStateService : IExceptionStateService
     public ExceptionStateService(IServiceProvider serviceProvider, Window mainWindow, ILogger<ExceptionStateService> logger, IDictionary<Type, Type> exceptionHandlers)
     {
         _serviceProvider = serviceProvider;
-        _mainWindow = mainWindow;
+        _mainWindow = mainWindow ?? Application.Current.MainWindow;
         _logger = logger;
         _exceptionHandlers = exceptionHandlers;
     }
 
-    //private static event EventHandler<HandleExceptionEventArgs> HandleExceptionEvent;
-
-    //public void AttachMainWindow(Window mainWindow)
-    //{
-    //    if (_mainWindow != null) throw new InvalidOperationException("The main window has already been attached.");
-
-    //    HandleExceptionEvent += (_, e) => { FallbackHandlerInternal(e.Exception); };
-
-    //    _mainWindow = mainWindow;
-    //}
-
-    //internal static void FallbackHandler(object sender, System.Exception exception)
-    //{
-    //    HandleExceptionEvent?.Invoke(sender, new HandleExceptionEventArgs(exception));
-    //}
-
-    public void FallbackHandlerInternal(Exception exception)
+    public async Task FallbackHandlerInternalAsync(Exception exception)
     {
         try
         {
@@ -51,10 +36,19 @@ internal class ExceptionStateService : IExceptionStateService
                 return;
             }
 
+            var exceptionHandlerService = _serviceProvider.GetService<IExceptionHandlerService>();
+            if (exceptionHandlerService != null)
+            {
+                var result = await exceptionHandlerService.HandleExceptionAsync(exception, _mainWindow);
+                if (result) return;
+            }
+
             var exceptionTypeName = exception.GetType().Name;
             var message = exception.InnerException?.Message.NullIfEmpty() ?? exception.Message.NullIfEmpty() ?? exceptionTypeName;
             if (_mainWindow != null)
             {
+                _logger?.LogError(exception, exception.Message);
+
                 switch (exceptionTypeName)
                 {
                     case nameof(NotImplementedException):
@@ -69,22 +63,20 @@ internal class ExceptionStateService : IExceptionStateService
                         break;
                 }
             }
-            else if (Application.Current.MainWindow != null)
-            {
-                MessageBox.Show(Application.Current.MainWindow, message, "Fatal", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
             else
             {
-                MessageBox.Show(message, "Fatal (No Main Window)", MessageBoxButton.OK, MessageBoxImage.Error);
+                var caption = "Fatal (No Main Window)";
+                _logger?.LogCritical(exception, $"{caption}. {exception.Message}");
+                MessageBox.Show(message, caption, MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
-            _logger?.LogError(exception, exception.Message);
         }
         catch (Exception e)
         {
-            _logger?.LogCritical(e, e.Message);
+            var msg = "Error in the error handler.";
+            _logger?.LogCritical(e, $"{msg} {e.Message}");
             Debugger.Break();
-            MessageBox.Show($"Error in the error handler. {e.Message}", e.GetType().Name, MessageBoxButton.OK, MessageBoxImage.Stop);
+            MessageBox.Show($"{msg} {e.Message}", e.GetType().Name, MessageBoxButton.OK, MessageBoxImage.Stop);
         }
     }
 }

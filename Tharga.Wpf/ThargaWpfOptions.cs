@@ -10,6 +10,7 @@ namespace Tharga.Wpf;
 public class ThargaWpfOptions
 {
     private readonly ConcurrentDictionary<Type, Type> _exceptionTypes = new();
+    private readonly ConcurrentDictionary<Type, Type> _exceptionHandlerServices = new();
     private readonly ConcurrentDictionary<Assembly, Assembly> _assemblies = new();
 
     /// <summary>
@@ -78,6 +79,12 @@ public class ThargaWpfOptions
         _exceptionTypes.TryAdd(typeof(TException), typeof(THandler));
     }
 
+    public void RegisterExceptionHandler<TExceptionHandlerService>()
+        where TExceptionHandlerService : IExceptionHandlerService
+    {
+        _exceptionHandlerServices.TryAdd(typeof(TExceptionHandlerService), typeof(TExceptionHandlerService));
+    }
+
     /// <summary>
     /// Add assemblies where types, like IViewModel, can be found
     /// </summary>
@@ -94,5 +101,6 @@ public class ThargaWpfOptions
     public Inactivity Inactivity { get; set; } = new();
 
     internal IDictionary<Type, Type> GetExceptionTypes() => _exceptionTypes;
+    internal IDictionary<Type, Type> GetExceptionHandlerServices() => _exceptionHandlerServices;
     internal IDictionary<Assembly, Assembly> GetAssemblies() => _assemblies;
 }

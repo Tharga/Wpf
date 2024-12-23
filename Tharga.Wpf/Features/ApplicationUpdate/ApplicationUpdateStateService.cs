@@ -239,7 +239,7 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
         {
             ShowSplash(firstRun, entryMessage, showCloseButton);
         }
-        catch (InvalidOperationException e)
+        catch (InvalidOperationException)
         {
             CloseSplash();
             ShowSplash(firstRun, entryMessage, showCloseButton);
@@ -299,7 +299,7 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
 
             AddLogString($"--- Start {nameof(UpdateClientApplication)} (source: {source}) ---");
 
-			UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs("Looking for update."));
+            UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs("Looking for update."));
 
             var result = await _applicationDownloadService.GetApplicationLocationAsync();
             clientLocation = result.ApplicationLocation;
