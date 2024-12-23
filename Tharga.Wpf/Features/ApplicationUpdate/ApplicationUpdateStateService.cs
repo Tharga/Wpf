@@ -28,6 +28,7 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
     private string _applicationLocation;
     private string _applicationLocationSource;
     private string _logFileName;
+    private bool _checkingForUpdate;
 
     public ApplicationUpdateStateService(IConfiguration configuration, IApplicationDownloadService applicationDownloadService, ITabNavigationStateService tabNavigationStateService, ThargaWpfOptions options, Window mainWindow, ILogger<ApplicationUpdateStateService> logger)
     {
@@ -295,7 +296,15 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
 
         try
         {
+            if (_checkingForUpdate)
+            {
+                AddLogString($"Ignore {nameof(UpdateClientApplication)} since it is already running. (source: {source})");
+                //UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs($"Ignore update from {source} since it is already running."));
+                return;
+            }
+
             await _lock.WaitAsync();
+            _checkingForUpdate = true;
 
             AddLogString($"--- Start {nameof(UpdateClientApplication)} (source: {source}) ---");
 
@@ -366,6 +375,7 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
 
             //AddLogString($"Complete check for updates.");
             AddLogString($"--- End {nameof(UpdateClientApplication)} ---");
+            _checkingForUpdate = false;
 			_lock.Release();
         }
     }
