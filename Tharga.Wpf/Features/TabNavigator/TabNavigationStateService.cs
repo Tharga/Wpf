@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Tharga.Toolkit.TypeService;
 
@@ -22,7 +23,7 @@ internal class TabNavigationStateService : ITabNavigationStateService
 
     public ObservableCollection<TabItem> TabItems { get; } = new ();
 
-    public (TTabView TabView, TabAction TabAction) OpenTab<TTabView>(string title)
+    public (TTabView TabView, TabAction TabAction) OpenTab<TTabView>(string title, object parameter)
         where TTabView : TabView
     {
         var existing = TabItems.Where(x => x.Content.GetType() == typeof(TTabView)).ToArray();
@@ -36,12 +37,14 @@ internal class TabNavigationStateService : ITabNavigationStateService
                 if (!existingTabContent.AllowMultiple)
                 {
                     item.Focus();
+                    ExecuteAction(parameter, existingTabContent);
                     return (existingTabContent, TabAction.Focused);
                 }
 
                 if (!_options.AllowTabsWithSameTitles && existingTabContent.Title == title)
                 {
                     item.Focus();
+                    ExecuteAction(parameter, existingTabContent);
                     return (existingTabContent, TabAction.Focused);
                 }
             }
@@ -72,7 +75,28 @@ internal class TabNavigationStateService : ITabNavigationStateService
 
         TabItems.Add(tabItem);
         tabItem.Focus();
+        ExecuteAction(parameter, tabContent);
         return (tabView, TabAction.Created);
+    }
+
+    private static void ExecuteAction<TTabView>(object parameter, TTabView tabContent) where TTabView : TabView
+    {
+        if (parameter != default)
+        {
+            Task.Run(async () =>
+            {
+                try
+                {
+                    await tabContent.ActionAsync(parameter);
+                }
+                catch (Exception e)
+                {
+                    Debugger.Break();
+                    Trace.TraceError($"{e.Message} @{e.StackTrace}");
+                    throw;
+                }
+            });
+        }
     }
 
     public async Task<bool> CloseAllTabsAsync(bool forceClose)

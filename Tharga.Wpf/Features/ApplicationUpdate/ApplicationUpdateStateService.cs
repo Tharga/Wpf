@@ -83,7 +83,7 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
     }
 
     public event EventHandler<UpdateInfoEventArgs> UpdateInfoEvent;
-    public event EventHandler<SplashClosedEventArgs> SplashClosedEvent;
+    public event EventHandler<SplashCompleteEventArgs> SplashCompleteEvent;
 
     internal static readonly List<string> UpdateLog = new();
 
@@ -272,7 +272,7 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
                 FullName = _options.ApplicationFullName ?? $"{_options.CompanyName} {_options.ApplicationShortName}".Trim(),
                 ClientLocation = applicationLocation,
                 ClientSourceLocation = applicationSourceLocation,
-                SplashClosed = e => { SplashClosedEvent?.Invoke(this, new SplashClosedEventArgs(e)); }
+                SplashClosed = e => { SplashCompleteEvent?.Invoke(this, new SplashCompleteEventArgs(e, true)); }
             };
             _splash = _options.SplashCreator?.Invoke(splashData) ?? new Splash(splashData);
             UpdateInfoEvent += ApplicationUpdateStateService_UpdateInfoEvent;
@@ -367,6 +367,8 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
         }
         finally
         {
+            SplashCompleteEvent?.Invoke(this, new SplashCompleteEventArgs(CloseMethod.None, false));
+
             if (_splash != null && !_splash.IsCloseButtonVisible)
             {
                 await Task.Delay(splashDelay);

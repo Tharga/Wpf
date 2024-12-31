@@ -23,7 +23,7 @@ public class OpenTabComamnd<TTabView> : ICommand
 
     public void Execute(object parameter)
     {
-        _tabNavigationService.OpenTab<TTabView>();
+        _tabNavigationService.OpenTab<TTabView>(parameter: parameter);
         _postAction?.Invoke();
     }
 
@@ -32,4 +32,12 @@ public class OpenTabComamnd<TTabView> : ICommand
         add => CommandManager.RequerySuggested += value;
         remove => CommandManager.RequerySuggested -= value;
     }
+}
+
+public enum EDocumentPreset
+{
+    Today,
+    Yesterday,
+    Week,
+    Paused
 }
