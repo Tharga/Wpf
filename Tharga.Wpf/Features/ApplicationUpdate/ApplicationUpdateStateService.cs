@@ -28,6 +28,7 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
     private string _applicationLocation;
     private string _applicationLocationSource;
     private string _logFileName;
+    private bool _checkingForUpdate;
 
     public ApplicationUpdateStateService(IConfiguration configuration, IApplicationDownloadService applicationDownloadService, ITabNavigationStateService tabNavigationStateService, ThargaWpfOptions options, Window mainWindow, ILogger<ApplicationUpdateStateService> logger)
     {
@@ -82,7 +83,7 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
     }
 
     public event EventHandler<UpdateInfoEventArgs> UpdateInfoEvent;
-    public event EventHandler<SplashClosedEventArgs> SplashClosedEvent;
+    public event EventHandler<SplashCompleteEventArgs> SplashCompleteEvent;
 
     internal static readonly List<string> UpdateLog = new();
 
@@ -239,7 +240,7 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
         {
             ShowSplash(firstRun, entryMessage, showCloseButton);
         }
-        catch (InvalidOperationException e)
+        catch (InvalidOperationException)
         {
             CloseSplash();
             ShowSplash(firstRun, entryMessage, showCloseButton);
@@ -271,7 +272,7 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
                 FullName = _options.ApplicationFullName ?? $"{_options.CompanyName} {_options.ApplicationShortName}".Trim(),
                 ClientLocation = applicationLocation,
                 ClientSourceLocation = applicationSourceLocation,
-                SplashClosed = e => { SplashClosedEvent?.Invoke(this, new SplashClosedEventArgs(e)); }
+                SplashClosed = e => { SplashCompleteEvent?.Invoke(this, new SplashCompleteEventArgs(e, true)); }
             };
             _splash = _options.SplashCreator?.Invoke(splashData) ?? new Splash(splashData);
             UpdateInfoEvent += ApplicationUpdateStateService_UpdateInfoEvent;
@@ -295,11 +296,19 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
 
         try
         {
+            if (_checkingForUpdate)
+            {
+                AddLogString($"Ignore {nameof(UpdateClientApplication)} since it is already running. (source: {source})");
+                //UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs($"Ignore update from {source} since it is already running."));
+                return;
+            }
+
             await _lock.WaitAsync();
+            _checkingForUpdate = true;
 
             AddLogString($"--- Start {nameof(UpdateClientApplication)} (source: {source}) ---");
 
-			UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs("Looking for update."));
+            UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs("Looking for update."));
 
             var result = await _applicationDownloadService.GetApplicationLocationAsync();
             clientLocation = result.ApplicationLocation;
@@ -358,6 +367,8 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
         }
         finally
         {
+            SplashCompleteEvent?.Invoke(this, new SplashCompleteEventArgs(CloseMethod.None, false));
+
             if (_splash != null && !_splash.IsCloseButtonVisible)
             {
                 await Task.Delay(splashDelay);
@@ -366,6 +377,7 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
 
             //AddLogString($"Complete check for updates.");
             AddLogString($"--- End {nameof(UpdateClientApplication)} ---");
+            _checkingForUpdate = false;
 			_lock.Release();
         }
     }

@@ -8,7 +8,7 @@
         Height="250" Width="400"
         WindowStyle="None" ShowInTaskbar="false" AllowsTransparency="True"
         Background="Transparent"
-        Topmost="false" Closed="Splash_OnClosed"
+        Topmost="true" Closed="Splash_OnClosed"
         BorderThickness="1" BorderBrush="Gray"
         >
     <Grid>

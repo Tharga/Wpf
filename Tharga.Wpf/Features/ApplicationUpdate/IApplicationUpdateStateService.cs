@@ -3,7 +3,7 @@
 public interface IApplicationUpdateStateService
 {
     event EventHandler<UpdateInfoEventArgs> UpdateInfoEvent;
-    event EventHandler<SplashClosedEventArgs> SplashClosedEvent;
+    event EventHandler<SplashCompleteEventArgs> SplashCompleteEvent;
     void ShowSplash(bool checkForUpdates = false, bool showCloseButton = false);
     Task CheckForUpdateAsync(string source);
 }

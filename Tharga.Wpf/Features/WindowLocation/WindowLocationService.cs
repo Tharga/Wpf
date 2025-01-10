@@ -1,5 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
@@ -139,8 +138,8 @@ internal class WindowLocationService : IWindowLocationService
         {
             var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             var yourAppDataPath = Path.Combine(appDataPath, _options.CompanyName ?? string.Empty, _options.ApplicationShortName.Replace(" ", "_"), _environment?.Replace("Production", string.Empty) ?? string.Empty);
-            var fileLocation = $"{yourAppDataPath}\\Window_{_name}.txt";
             if (!Directory.Exists(yourAppDataPath)) Directory.CreateDirectory(yourAppDataPath);
+            var fileLocation = $"{yourAppDataPath}\\Window_{_name}.txt";
             return fileLocation;
         }
 
@@ -188,69 +187,77 @@ internal class WindowLocationService : IWindowLocationService
             LocationUpdatedEvent?.Invoke(this, new LocationUpdatedEventArgs(lastLocation, e));
         }
 
-        public void AttachProperty(INotifyPropertyChanged container, string propertyName)
-        {
-            throw new NotImplementedException();
-            container.PropertyChanged += (s, e) =>
-            {
-                if (e.PropertyName != propertyName) return;
+        //public void AttachProperty(INotifyPropertyChanged container, string propertyName)
+        //{
+        //    throw new NotImplementedException();
+        //    container.PropertyChanged += (s, e) =>
+        //    {
+        //        if (e.PropertyName != propertyName) return;
 
-                try
-                {
-                    var prop = container.GetType().GetProperty(propertyName) ?? throw new NullReferenceException($"Cannot find property named '{propertyName}' in '{container.GetType().Name}'.");
-                    var val = prop.GetValue(container);
+        //        try
+        //        {
+        //            var prop = container.GetType().GetProperty(propertyName) ?? throw new NullReferenceException($"Cannot find property named '{propertyName}' in '{container.GetType().Name}'.");
+        //            var val = prop.GetValue(container);
 
-                    if (val != default)
-                    {
-                        if (!_lastLocation.Metadata.TryAdd(propertyName, val.ToString()))
-                        {
-                            _lastLocation.Metadata[propertyName] = val.ToString();
-                        }
-                        //_timer.Start();
-                    }
-                }
-                catch (Exception exception)
-                {
-                    _logger?.LogError(exception, exception.Message);
-                    Debugger.Break();
-                }
-            };
+        //            if (val != default)
+        //            {
+        //                if (!_lastLocation.Metadata.TryAdd(propertyName, val.ToString()))
+        //                {
+        //                    _lastLocation.Metadata[propertyName] = val.ToString();
+        //                }
+        //                //_timer.Start();
+        //            }
+        //        }
+        //        catch (Exception exception)
+        //        {
+        //            _logger?.LogError(exception, exception.Message);
+        //            Debugger.Break();
+        //        }
+        //    };
 
-            try
-            {
-                //var val = _lastLocation.GetMetadata(propertyName);
-                if (_lastLocation.Metadata.TryGetValue(propertyName, out var val))
-                {
-                    var prop = container.GetType().GetProperty(propertyName) ?? throw new NullReferenceException($"Cannot find property named '{propertyName}' in '{container.GetType().Name}'.");
+        //    try
+        //    {
+        //        //var val = _lastLocation.GetMetadata(propertyName);
+        //        if (_lastLocation.Metadata.TryGetValue(propertyName, out var val))
+        //        {
+        //            var prop = container.GetType().GetProperty(propertyName) ?? throw new NullReferenceException($"Cannot find property named '{propertyName}' in '{container.GetType().Name}'.");
 
-                    var typeConverter = TypeDescriptor.GetConverter(prop.PropertyType);
-                    if (val != default)
-                    {
-                        var v = typeConverter.ConvertFromString(val);
-                        prop.SetValue(container, v);
-                    }
-                }
-                else
-                {
-                }
-            }
-            catch (Exception exception)
-            {
-                _logger?.LogError(exception, exception.Message);
-                Debugger.Break();
-            }
-        }
+        //            var typeConverter = TypeDescriptor.GetConverter(prop.PropertyType);
+        //            if (val != default)
+        //            {
+        //                var v = typeConverter.ConvertFromString(val);
+        //                prop.SetValue(container, v);
+        //            }
+        //        }
+        //        else
+        //        {
+        //        }
+        //    }
+        //    catch (Exception exception)
+        //    {
+        //        _logger?.LogError(exception, exception.Message);
+        //        Debugger.Break();
+        //    }
+        //}
     }
 
-    public void AttachProperty(string name, INotifyPropertyChanged container, string propertyName)
-    {
-        if (!_monitors.TryGetValue(name, out var monitor)) throw new InvalidOperationException($"Monitor for '{name}' must be created first.");
-        monitor.AttachProperty(container, propertyName);
-    }
+    //public void AttachProperty(string name, INotifyPropertyChanged container, string propertyName)
+    //{
+    //    if (!_monitors.TryGetValue(name, out var monitor)) throw new InvalidOperationException($"Monitor for '{name}' must be created first.");
+    //    monitor.AttachProperty(container, propertyName);
+    //}
 
     public void SetVisibility(string name, Visibility visibility)
     {
         if (!_monitors.TryGetValue(name, out var monitor)) throw new InvalidOperationException($"Monitor for '{name}' must be created first.");
         monitor.SetVisibility(visibility);
+    }
+
+    public string GetFolder(string environment)
+    {
+        var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        var yourAppDataPath = Path.Combine(appDataPath, _options.CompanyName ?? string.Empty, _options.ApplicationShortName.Replace(" ", "_"), environment?.Replace("Production", string.Empty) ?? string.Empty);
+        if (!Directory.Exists(yourAppDataPath)) Directory.CreateDirectory(yourAppDataPath);
+        return yourAppDataPath;
     }
 }

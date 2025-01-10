@@ -1,17 +1,13 @@
 ﻿namespace Tharga.Wpf.ApplicationUpdate;
 
-public class SplashClosedEventArgs : EventArgs
+public class SplashCompleteEventArgs : EventArgs
 {
-    public SplashClosedEventArgs(CloseMethod closeMethod)
+    public SplashCompleteEventArgs(CloseMethod closeMethod, bool closed)
     {
         CloseMethod = closeMethod;
+        Closed = closed;
     }
 
     public CloseMethod CloseMethod { get; }
-}
-
-public enum CloseMethod
-{
-    Automatically,
-    Manyally
+    public bool Closed { get; }
 }

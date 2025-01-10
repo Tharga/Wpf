@@ -14,15 +14,11 @@ using Tharga.Wpf.IconTray;
 using Tharga.Wpf.TabNavigator;
 using Tharga.Wpf.WindowLocation;
 
-using System;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-using static Tharga.Wpf.InactivityService;
-
 namespace Tharga.Wpf;
 
 public abstract class ApplicationBase : Application
 {
+    private readonly CancellationService _cs;
     private readonly ThargaWpfOptions _options;
     private Mutex _mutex;
 
@@ -30,14 +26,23 @@ public abstract class ApplicationBase : Application
 
     protected ApplicationBase()
     {
-        DispatcherUnhandledException += (_, e) =>
+        DispatcherUnhandledException += async (_, e) =>
         {
-            var ess = GetService<IExceptionStateService>();
-            ess.FallbackHandlerInternal(e.Exception);
-            e.Handled = true;
+            try
+            {
+                var ess = GetService<IExceptionStateService>();
+                await ess.FallbackHandlerInternalAsync(e.Exception);
+                e.Handled = true;
+            }
+            catch (Exception exception)
+            {
+                Trace.TraceError($"{exception.Message} @{exception.StackTrace}");
+                Debugger.Break();
+            }
         };
 
         var assemblyName = Assembly.GetEntryAssembly()?.GetName();
+        _cs = new CancellationService();
         _options = new ThargaWpfOptions
         {
             ApplicationFullName = assemblyName?.Name ?? "Unknown Application",
@@ -63,6 +68,8 @@ public abstract class ApplicationBase : Application
                 {
                     services.AddTransient(viewModel);
                 }
+
+                services.AddSingleton<ICancellationService>(_ => _cs);
 
                 services.AddSingleton<IWindowLocationService>(s =>
                 {
@@ -105,6 +112,12 @@ public abstract class ApplicationBase : Application
         {
             services.AddTransient(exceptionHandler.Value);
         }
+
+        foreach (var exceptionHandlerServices in options.GetExceptionHandlerServices())
+        {
+            services.AddTransient(exceptionHandlerServices.Value);
+        }
+
         services.AddSingleton<IExceptionStateService>(s =>
         {
             var logger = s.GetService<ILogger<ExceptionStateService>>();
@@ -125,35 +138,52 @@ public abstract class ApplicationBase : Application
 
     private static void RegisterIconTray(ThargaWpfOptions options, IServiceCollection services)
     {
-        services.AddSingleton<INotifyIconService>(s => new NotifyIconService(options));
+        services.AddSingleton<INotifyIconService>(_ => new NotifyIconService(options));
     }
 
     protected virtual void Register(HostBuilderContext context, IServiceCollection services) { }
     protected virtual void Options(ThargaWpfOptions thargaWpfOptions) { }
 
-    protected override async void OnStartup(StartupEventArgs e)
+    protected override async void OnStartup(StartupEventArgs args)
     {
-        if (!_options.AllowMultipleApplications)
+        try
         {
-            _mutex = new Mutex(true, _options.ApplicationFullName, out var createdNew);
-            if (!createdNew)
+            if (!_options.AllowMultipleApplications)
             {
-                BringExistingInstanceToFront();
-                Shutdown();
-                return;
+                _mutex = new Mutex(true, _options.ApplicationFullName, out var createdNew);
+                if (!createdNew)
+                {
+                    BringExistingInstanceToFront();
+                    Shutdown();
+                    return;
+                }
             }
-        }
 
-        await AppHost.StartAsync();
-        base.OnStartup(e);
+            await AppHost.StartAsync();
+            base.OnStartup(args);
+        }
+        catch (Exception e)
+        {
+            Debugger.Break();
+            Trace.TraceError($"{e.Message} @{e.StackTrace}");
+        }
     }
 
-    protected override async void OnExit(ExitEventArgs e)
+    protected override async void OnExit(ExitEventArgs args)
     {
-        _mutex?.Close();
-        await AppHost.StopAsync();
-        AppHost.Dispose();
-        base.OnExit(e);
+        try
+        {
+            await _cs.CancelAsync();
+            _mutex?.Close();
+            await AppHost.StopAsync();
+            AppHost.Dispose();
+            base.OnExit(args);
+        }
+        catch (Exception e)
+        {
+            Debugger.Break();
+            Trace.TraceError($"{e.Message} @{e.StackTrace}");
+        }
     }
 
     public static T GetService<T>()
@@ -194,7 +224,8 @@ public abstract class ApplicationBase : Application
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            Debugger.Break();
+            Trace.TraceError($"{e.Message} @{e.StackTrace}");
             throw;
         }
         finally

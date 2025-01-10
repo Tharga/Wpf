@@ -1,6 +1,6 @@
 ﻿namespace Tharga.Wpf.ExceptionHandling;
 
-internal interface IExceptionStateService
+public interface IExceptionStateService
 {
-    void FallbackHandlerInternal(Exception exception);
+    Task FallbackHandlerInternalAsync(Exception exception);
 }

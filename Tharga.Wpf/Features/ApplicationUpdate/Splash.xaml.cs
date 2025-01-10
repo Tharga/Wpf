@@ -22,7 +22,7 @@ public partial class Splash : ISplash
         {
             WindowStartupLocation = WindowStartupLocation.CenterScreen;
         }
-        Topmost = true;
+        //Topmost = true;
 
         MouseDown += (_, _) => DragMove();
 
@@ -88,7 +88,7 @@ public partial class Splash : ISplash
 
     private void ButtonBase_OnClick(object sender, RoutedEventArgs e)
     {
-        _closeMethod = CloseMethod.Manyally;
+        _closeMethod = CloseMethod.Manually;
         Close();
     }
 
