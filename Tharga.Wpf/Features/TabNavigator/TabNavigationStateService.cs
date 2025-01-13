@@ -81,13 +81,13 @@ internal class TabNavigationStateService : ITabNavigationStateService
 
     private static void ExecuteAction<TTabView>(object parameter, TTabView tabContent) where TTabView : TabView
     {
-        if (parameter != default)
-        {
+        //if (parameter != default)
+        //{
             Task.Run(async () =>
             {
                 try
                 {
-                    await tabContent.ActionAsync(parameter);
+                    await tabContent.LoadActionAsync(parameter);
                 }
                 catch (Exception e)
                 {
@@ -96,7 +96,7 @@ internal class TabNavigationStateService : ITabNavigationStateService
                     throw;
                 }
             });
-        }
+        //}
     }
 
     public async Task<bool> CloseAllTabsAsync(bool forceClose)
