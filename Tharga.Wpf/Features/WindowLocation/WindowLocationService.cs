@@ -57,12 +57,6 @@ internal class WindowLocationService : IWindowLocationService
             _loadLocation = LoadLastLocation();
 
             _window.Loaded += OnLoaded;
-
-            //TODO: Cannot call '_window.Show()' before the component 'InitializeComponent' has been executed. If so, the 'OnLoaded' will be called too early and the change listeners will trigger OnWindowChanged so the previously saved values will be overwritten.
-            //if (_loadLocation == null || _loadLocation.Visibility == Visibility.Visible)
-            //{
-            //    _window.Show();
-            //}
         }
 
         public event EventHandler<LocationUpdatedEventArgs> LocationUpdatedEvent;
@@ -78,7 +72,7 @@ internal class WindowLocationService : IWindowLocationService
                 _window.Top = _loadLocation.Top;
                 _window.Width = _loadLocation.Width;
                 _window.Height = _loadLocation.Height;
-                _window.WindowState = _loadLocation.WindowState; //TODO: Have a configuration start Minimized is allowed
+                _window.WindowState = _loadLocation.WindowState;
             }
 
             _window.LocationChanged += OnWindowChanged;

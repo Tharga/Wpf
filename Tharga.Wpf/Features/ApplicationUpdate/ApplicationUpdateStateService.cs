@@ -324,13 +324,9 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
             {
                 AddLogString($"clientLocation: {clientLocation}");
                 using var mgr = new UpdateManager(clientLocation);
-                //using var mgr = new UpdateManager(clientLocation,"C:\\Users\\danie\\AppData\\Local\\EplictaAgentWpfCI\\"); //TODO: Provide something here that might help the manager to find the currently installed version.
-                //var ver = mgr.CurrentlyInstalledVersion($"C:\\Users\\danie\\AppData\\Local\\EplictaAgentWpfCI\\Eplicta.Agent.Wpf.exe");
                 if (!mgr.IsInstalledApp)
                 {
                     var message = Debugger.IsAttached ? $"{_options.ApplicationShortName} is running in debug mode." : $"{_options.ApplicationShortName} is not installed.";
-                    //TODO: Start fast when developing... splashDelay = TimeSpan.Zero;
-                    //splashDelay = TimeSpan.FromSeconds(10);
                     UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs(message));
                     return;
                 }

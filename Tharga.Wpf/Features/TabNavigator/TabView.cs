@@ -13,7 +13,7 @@ public abstract class TabView : UserControl
     public virtual string DefaultTitle => GetType().Name;
     public virtual bool AllowMultiple => true;
     public virtual bool AllowClose => true;
-    public virtual Task ActionAsync(object parameter) => throw new NotImplementedException($"The {nameof(Action)} function has not been implemented for '{GetType().Name}'.");
+    public virtual Task LoadActionAsync(object parameter) => Task.CompletedTask;
 
     public string Title
     {
