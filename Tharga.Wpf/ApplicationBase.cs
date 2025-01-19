@@ -93,10 +93,10 @@ public abstract class ApplicationBase : Application
                     return new ApplicationDownloadService(configuration, httpClientFactory, _options);
                 });
 
-                if (_options.Inactivity?.Timeout != null && _options.Inactivity?.Action != null)
-                {
-                    _ = new InactivityService(_options.Inactivity.Timeout.Value, _options.Inactivity.Action);
-                }
+                //if (_options.Inactivity?.Timeout > TimeSpan.Zero)
+                //{
+                //    _ = new InactivityService(_options.Inactivity);
+                //}
 
                 Register(context, services);
             })

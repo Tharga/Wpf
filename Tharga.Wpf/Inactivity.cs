@@ -1,14 +1,19 @@
-﻿namespace Tharga.Wpf;
+﻿//namespace Tharga.Wpf;
 
-public record Inactivity
-{
-    /// <summary>
-    /// Set the time for when inatcivity action should be triggered.
-    /// </summary>
-    public TimeSpan? Timeout { get; set; }
+//public record Inactivity
+//{
+//    /// <summary>
+//    /// Event that triggers on inactivity.
+//    /// </summary>
+//    public event EventHandler<EventArgs> InactivityEvent;
 
-    /// <summary>
-    /// Callback method for when inactivity has occured.
-    /// </summary>
-    public Action<TimeSpan> Action { get; set; }
-}
+//    /// <summary>
+//    /// Set the time for when inatcivity action should be triggered.
+//    /// </summary>
+//    public TimeSpan Timeout { get; set; }
+
+//    internal void OnInactivity()
+//    {
+//        InactivityEvent?.Invoke(this, EventArgs.Empty);
+//    }
+//}

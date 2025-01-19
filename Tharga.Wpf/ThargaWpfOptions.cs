@@ -98,7 +98,7 @@ public class ThargaWpfOptions
     /// <summary>
     /// Inactivity
     /// </summary>
-    public Inactivity Inactivity { get; set; } = new();
+    //public Inactivity Inactivity { get; set; } = new();
 
     internal IDictionary<Type, Type> GetExceptionTypes() => _exceptionTypes;
     internal IDictionary<Type, Type> GetExceptionHandlerServices() => _exceptionHandlerServices;
