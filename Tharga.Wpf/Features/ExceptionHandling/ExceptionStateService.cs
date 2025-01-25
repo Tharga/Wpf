@@ -55,11 +55,13 @@ internal class ExceptionStateService : IExceptionStateService
                     case nameof(InvalidOperationException):
                     case nameof(NotSupportedException):
                     case nameof(TypeNotRegisteredException):
+                    case nameof(NullReferenceException):
                         MessageBox.Show(_mainWindow, message, exceptionTypeName, MessageBoxButton.OK, MessageBoxImage.Error);
                         break;
                     default:
                         Debugger.Break();
-                        MessageBox.Show(_mainWindow, $"{message}\n\n@{exception.StackTrace}", $"Unexpected {exceptionTypeName}.", MessageBoxButton.OK, MessageBoxImage.Error);
+                        //MessageBox.Show(_mainWindow, $"{message}\n\n@{exception.StackTrace}", $"Unexpected {exceptionTypeName}.", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show(_mainWindow, message, $"Unexpected {exceptionTypeName}.", MessageBoxButton.OK, MessageBoxImage.Error);
                         break;
                 }
             }
