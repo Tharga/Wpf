@@ -1,4 +1,6 @@
-﻿namespace Tharga.Wpf.Framework;
+﻿using System.Text;
+
+namespace Tharga.Wpf.Framework;
 
 internal static class StringExtensions
 {
