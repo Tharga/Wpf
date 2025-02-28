@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Tharga.Toolkit.TypeService;
 
@@ -81,22 +80,19 @@ internal class TabNavigationStateService : ITabNavigationStateService
 
     private static void ExecuteAction<TTabView>(object parameter, TTabView tabContent) where TTabView : TabView
     {
-        //if (parameter != default)
-        //{
-            Task.Run(async () =>
+        Task.Run(async () =>
+        {
+            try
             {
-                try
-                {
-                    await tabContent.LoadActionAsync(parameter);
-                }
-                catch (Exception e)
-                {
-                    Debugger.Break();
-                    Trace.TraceError($"{e.Message} @{e.StackTrace}");
-                    throw;
-                }
-            });
-        //}
+                await tabContent.LoadActionAsync(parameter);
+            }
+            catch (Exception e)
+            {
+                Debugger.Break();
+                Trace.TraceError($"{e.Message} @{e.StackTrace}");
+                throw;
+            }
+        });
     }
 
     public async Task<bool> CloseAllTabsAsync(bool forceClose)
