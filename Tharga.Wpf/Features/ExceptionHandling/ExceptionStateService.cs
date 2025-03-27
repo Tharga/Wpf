@@ -43,11 +43,12 @@ internal class ExceptionStateService : IExceptionStateService
                 if (result) return;
             }
 
+            var errorId = Guid.NewGuid();
             var exceptionTypeName = exception.GetType().Name;
-            var message = exception.InnerException?.Message.NullIfEmpty() ?? exception.Message.NullIfEmpty() ?? exceptionTypeName;
+            var message = (exception.InnerException?.Message.NullIfEmpty() ?? exception.Message.NullIfEmpty() ?? exceptionTypeName) + $"\nErrorId: {errorId}";
             if (_mainWindow != null)
             {
-                _logger?.LogError(exception, exception.Message);
+                _logger?.LogError(exception, $"{exception.Message} {{ErrorId}}", errorId);
 
                 switch (exceptionTypeName)
                 {
@@ -60,7 +61,6 @@ internal class ExceptionStateService : IExceptionStateService
                         break;
                     default:
                         Debugger.Break();
-                        //MessageBox.Show(_mainWindow, $"{message}\n\n@{exception.StackTrace}", $"Unexpected {exceptionTypeName}.", MessageBoxButton.OK, MessageBoxImage.Error);
                         MessageBox.Show(_mainWindow, message, $"Unexpected {exceptionTypeName}.", MessageBoxButton.OK, MessageBoxImage.Error);
                         break;
                 }

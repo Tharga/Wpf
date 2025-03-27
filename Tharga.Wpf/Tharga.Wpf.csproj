@@ -42,14 +42,14 @@
 		</None>
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="Fluent.Ribbon" Version="10.1.0" />
+		<PackageReference Include="Fluent.Ribbon" Version="11.0.0" />
 		<PackageReference Include="System.Linq.Async" Version="6.0.1" />
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.3" />
+		<PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.3" />
 		<PackageReference Include="Clowd.Squirrel" Version="2.11.1" />
-		<PackageReference Include="Microsoft.Extensions.Http" Version="9.0.0" />
-		<PackageReference Include="System.Text.Json" Version="9.0.0" />
-		<PackageReference Include="Tharga.Toolkit" Version="1.12.5" />
+		<PackageReference Include="Microsoft.Extensions.Http" Version="9.0.3" />
+		<PackageReference Include="System.Text.Json" Version="9.0.3" />
+		<PackageReference Include="Tharga.Toolkit" Version="1.12.11" />
 	</ItemGroup>
 	<ItemGroup>
 		<InternalsVisibleTo Include="Tharga.Wpf.Tests" />
