@@ -310,6 +310,13 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
 
             UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs("Looking for update."));
 
+            if (Debugger.IsAttached)
+            {
+                var message = $"{_options.ApplicationShortName} is running in debug mode.";
+                UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs(message));
+                return;
+            }
+
             var result = await _applicationDownloadService.GetApplicationLocationAsync();
             clientLocation = result.ApplicationLocation;
             if (string.IsNullOrEmpty(clientLocation))
@@ -326,7 +333,7 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
                 using var mgr = new UpdateManager(clientLocation);
                 if (!mgr.IsInstalledApp)
                 {
-                    var message = Debugger.IsAttached ? $"{_options.ApplicationShortName} is running in debug mode." : $"{_options.ApplicationShortName} is not installed.";
+                    var message = $"{_options.ApplicationShortName} is not installed.";
                     UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs(message));
                     return;
                 }
