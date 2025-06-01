@@ -22,7 +22,7 @@ internal class TabNavigationStateService : ITabNavigationStateService
 
     public ObservableCollection<TabItem> TabItems { get; } = new ();
 
-    public (TTabView TabView, TabAction TabAction) OpenTab<TTabView>(string title, object parameter)
+    public async Task<(TTabView TabView, TabAction TabAction)> OpenTabAsync<TTabView>(string title, object parameter)
         where TTabView : TabView
     {
         var existing = TabItems.Where(x => x.Content.GetType() == typeof(TTabView)).ToArray();
@@ -36,14 +36,14 @@ internal class TabNavigationStateService : ITabNavigationStateService
                 if (!existingTabContent.AllowMultiple)
                 {
                     item.Focus();
-                    ExecuteAction(parameter, existingTabContent);
+                    await ExecuteActionAsync(parameter, existingTabContent);
                     return (existingTabContent, TabAction.Focused);
                 }
 
                 if (!_options.AllowTabsWithSameTitles && existingTabContent.Title == title)
                 {
                     item.Focus();
-                    ExecuteAction(parameter, existingTabContent);
+                    await ExecuteActionAsync(parameter, existingTabContent);
                     return (existingTabContent, TabAction.Focused);
                 }
             }
@@ -74,25 +74,27 @@ internal class TabNavigationStateService : ITabNavigationStateService
 
         TabItems.Add(tabItem);
         tabItem.Focus();
-        ExecuteAction(parameter, tabContent);
+        await ExecuteActionAsync(parameter, tabContent);
         return (tabView, TabAction.Created);
     }
 
-    private static void ExecuteAction<TTabView>(object parameter, TTabView tabContent) where TTabView : TabView
+    private async Task ExecuteActionAsync<TTabView>(object parameter, TTabView tabContent) where TTabView : TabView
     {
-        Task.Run(async () =>
+        try
         {
-            try
-            {
-                await tabContent.LoadActionAsync(parameter);
-            }
-            catch (Exception e)
-            {
-                Debugger.Break();
-                Trace.TraceError($"{e.Message} @{e.StackTrace}");
-                throw;
-            }
-        });
+            await tabContent.LoadActionAsync(parameter);
+        }
+        catch (Exception e)
+        {
+            Debugger.Break();
+            Trace.TraceError($"{e.Message} @{e.StackTrace}");
+            //var exceptionHandlerService = _serviceProvider.GetService<IExceptionHandlerService>();
+            //await Application.Current.Dispatcher.Invoke(async () =>
+            //{
+            //    await exceptionHandlerService.HandleExceptionAsync(e, Application.Current.MainWindow);
+            //});
+            throw;
+        }
     }
 
     public async Task<bool> CloseAllTabsAsync(bool forceClose)
@@ -141,6 +143,20 @@ internal class TabNavigationStateService : ITabNavigationStateService
     {
         var ti = TabItems.FirstOrDefault(x => func((x.Content as TabView)));
         return ti;
+    }
+
+    public IEnumerable<T> GetTabsByTabView<T>(Func<T, bool> func)
+    {
+        foreach (var tabItem in TabItems)
+        {
+            if (tabItem?.Content is T t)
+            {
+                if (func == null || func(t))
+                {
+                    yield return t;
+                }
+            }
+        }
     }
 
     private object GetHeader<TTabView>(TTabView tabContent)

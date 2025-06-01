@@ -43,12 +43,12 @@ internal class ExceptionStateService : IExceptionStateService
                 if (result) return;
             }
 
-            var errorId = Guid.NewGuid();
+            var correlationId = Guid.NewGuid();
             var exceptionTypeName = exception.GetType().Name;
-            var message = (exception.InnerException?.Message.NullIfEmpty() ?? exception.Message.NullIfEmpty() ?? exceptionTypeName) + $"\nErrorId: {errorId}";
+            var message = (exception.InnerException?.Message.NullIfEmpty() ?? exception.Message.NullIfEmpty() ?? exceptionTypeName) + $"\nCorrelationId: {correlationId}";
             if (_mainWindow != null)
             {
-                _logger?.LogError(exception, $"{exception.Message} {{ErrorId}}", errorId);
+                _logger?.LogError(exception, $"{exception.Message} {{CorrelationId}}", correlationId);
 
                 switch (exceptionTypeName)
                 {

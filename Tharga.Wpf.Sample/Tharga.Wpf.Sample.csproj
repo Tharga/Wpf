@@ -18,7 +18,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Fluent.Ribbon" Version="11.0.0" />
+		<PackageReference Include="Fluent.Ribbon" Version="11.0.1" />
 		<PackageReference Include="SharpVectors" Version="1.8.4.2" />
 		<PackageReference Include="System.Text.Json" Version="9.0.5" />
 	</ItemGroup>

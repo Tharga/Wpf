@@ -73,7 +73,8 @@ public abstract class ApplicationBase : Application
 
                 services.AddSingleton<IWindowLocationService>(s =>
                 {
-                    var logger = s.GetService<ILogger<WindowLocationService>>();
+                    var loggerFactory = s.GetService<ILoggerFactory>();
+                    var logger = loggerFactory.CreateLogger<WindowLocationService>();
                     return new WindowLocationService(_options, logger);
                 });
 
@@ -83,7 +84,8 @@ public abstract class ApplicationBase : Application
                     var applicationDownloadService = s.GetService<IApplicationDownloadService>();
                     var tabNavigationStateService = s.GetService<ITabNavigationStateService>();
                     var mainWindow = ((ApplicationBase)Current).MainWindow;
-                    var logger = s.GetService<ILogger<ApplicationUpdateStateService>>();
+                    var loggerFactory = s.GetService<ILoggerFactory>();
+                    var logger = loggerFactory.CreateLogger<ApplicationUpdateStateService>();
                     return new ApplicationUpdateStateService(configuration, applicationDownloadService, tabNavigationStateService, _options, mainWindow, logger);
                 });
                 services.AddTransient<IApplicationDownloadService>(s =>
@@ -97,6 +99,12 @@ public abstract class ApplicationBase : Application
                 //{
                 //    _ = new InactivityService(_options.Inactivity);
                 //}
+
+                StaticExceptionHandler.ErrorEvent += (s, e) =>
+                {
+                    var srv = services.BuildServiceProvider().GetService<IExceptionStateService>();
+                    srv.FallbackHandlerInternalAsync(e.Exception);
+                };
 
                 Register(context, services);
             })
@@ -120,7 +128,8 @@ public abstract class ApplicationBase : Application
 
         services.AddSingleton<IExceptionStateService>(s =>
         {
-            var logger = s.GetService<ILogger<ExceptionStateService>>();
+            var loggerFactory = s.GetService<ILoggerFactory>();
+            var logger = loggerFactory.CreateLogger<ExceptionStateService>();
             var mainWindow = ((ApplicationBase)Current).MainWindow;
             return new ExceptionStateService(s, mainWindow, logger, exceptionHandlers);
         });

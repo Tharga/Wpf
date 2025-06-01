@@ -1,4 +1,5 @@
 ﻿using System.Windows.Controls;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace Tharga.Wpf.TabNavigator;
 
@@ -35,6 +36,12 @@ public abstract class TabView : UserControl
             _canClose = value;
             CanCloseChangedEvent?.Invoke(this, EventArgs.Empty);
         }
+    }
+
+    public void Select()
+    {
+        var p = (TabItem)Parent;
+        p.IsSelected = true;
     }
 
     public virtual Task<bool> OnCloseAsync()

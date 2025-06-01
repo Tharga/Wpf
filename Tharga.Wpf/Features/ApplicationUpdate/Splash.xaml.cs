@@ -2,6 +2,7 @@
 using System.Text;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 
 namespace Tharga.Wpf.ApplicationUpdate;
@@ -27,6 +28,11 @@ public partial class Splash : ISplash
         MouseDown += (_, _) => DragMove();
 
         InitializeComponent();
+
+        if (!string.IsNullOrEmpty(splashData.ImagePath))
+        {
+            Image.Source = new BitmapImage(new Uri(splashData.ImagePath));
+        }
 
         Messages.Items.MoveCurrentToLast();
         //FirstRun.Visibility = firstRun ? Visibility.Visible : Visibility.Collapsed;

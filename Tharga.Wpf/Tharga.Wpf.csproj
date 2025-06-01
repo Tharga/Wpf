@@ -23,6 +23,9 @@
 	<ItemGroup>
 		<None Remove="Images\Application\blue.png" />
 		<None Remove="Images\Application\green.png" />
+		<None Remove="Images\Application\teal.jpg" />
+		<None Remove="Images\Application\white.jpg" />
+		<None Remove="Images\Application\yellow.jpg" />
 		<None Remove="Images\Close.png" />
 		<None Remove="Images\thargelion.ico" />
 		<None Remove="Tharga.Wpf.csproj.DotSettings" />
@@ -33,6 +36,9 @@
 	<ItemGroup>
 		<Resource Include="Images\Application\blue.png" />
 		<Resource Include="Images\Application\green.png" />
+		<Resource Include="Images\Application\teal.jpg" />
+		<Resource Include="Images\Application\white.jpg" />
+		<Resource Include="Images\Application\yellow.jpg" />
 		<Resource Include="Images\Close.png" />
 	</ItemGroup>
 	<ItemGroup>
@@ -42,7 +48,7 @@
 		</None>
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="Fluent.Ribbon" Version="11.0.0" />
+		<PackageReference Include="Fluent.Ribbon" Version="11.0.1" />
 		<PackageReference Include="System.Linq.Async" Version="6.0.1" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.5" />
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.5" />
