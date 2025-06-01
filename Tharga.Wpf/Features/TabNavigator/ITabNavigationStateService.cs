@@ -13,4 +13,5 @@ public interface ITabNavigationStateService
     T GetActiveTabView<T>();
     T GetActiveTabViewModel<T>();
     TabItem GetTabByTabView<T>(Func<TabView, bool> func);
+    IEnumerable<T> GetTabsByTabView<T>(Func<T, bool> func = default);
 }

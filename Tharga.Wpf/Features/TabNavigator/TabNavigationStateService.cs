@@ -145,6 +145,20 @@ internal class TabNavigationStateService : ITabNavigationStateService
         return ti;
     }
 
+    public IEnumerable<T> GetTabsByTabView<T>(Func<T, bool> func)
+    {
+        foreach (var tabItem in TabItems)
+        {
+            if (tabItem?.Content is T t)
+            {
+                if (func == null || func(t))
+                {
+                    yield return t;
+                }
+            }
+        }
+    }
+
     private object GetHeader<TTabView>(TTabView tabContent)
         where TTabView : TabView
     {
