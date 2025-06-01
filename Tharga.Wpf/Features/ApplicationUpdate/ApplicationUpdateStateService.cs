@@ -272,7 +272,8 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
                 FullName = _options.ApplicationFullName ?? $"{_options.CompanyName} {_options.ApplicationShortName}".Trim(),
                 ClientLocation = applicationLocation,
                 ClientSourceLocation = applicationSourceLocation,
-                SplashClosed = e => { SplashCompleteEvent?.Invoke(this, new SplashCompleteEventArgs(e, true)); }
+                SplashClosed = e => { SplashCompleteEvent?.Invoke(this, new SplashCompleteEventArgs(e, true)); },
+                ImagePath = SplashImageLibrary.Teal
             };
             _splash = _options.SplashCreator?.Invoke(splashData) ?? new Splash(splashData);
             UpdateInfoEvent += ApplicationUpdateStateService_UpdateInfoEvent;

@@ -25,6 +25,6 @@ internal class ApplicationDownloadService : IApplicationDownloadService
         var result = await httpClient.GetAsync(requestUri);
         if (!result.IsSuccessStatusCode) throw new InvalidOperationException($"Failed to get application location at '{requestUri}'.");
         var data = await result.Content.ReadAsStringAsync();
-        return (data, requestUri.OriginalString);
+        return (data, requestUri.AbsoluteUri);
     }
 }

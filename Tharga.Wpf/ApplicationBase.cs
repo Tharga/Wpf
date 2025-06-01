@@ -100,6 +100,12 @@ public abstract class ApplicationBase : Application
                 //    _ = new InactivityService(_options.Inactivity);
                 //}
 
+                StaticExceptionHandler.ErrorEvent += (s, e) =>
+                {
+                    var srv = services.BuildServiceProvider().GetService<IExceptionStateService>();
+                    srv.FallbackHandlerInternalAsync(e.Exception);
+                };
+
                 Register(context, services);
             })
             .Build();

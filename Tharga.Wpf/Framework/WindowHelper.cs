@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.IO;
 using System.Runtime.InteropServices;
 
 namespace Tharga.Wpf.Framework;
@@ -31,4 +32,24 @@ internal static class WindowHelper
             SetForegroundWindow(mainWindowHandle);
         }
     }
+}
+
+internal static class StaticExceptionHandler
+{
+    public static event EventHandler<StaticErrorEventArgs> ErrorEvent;
+
+    public static void Handle(Exception e, object sender = default)
+    {
+        ErrorEvent?.Invoke(sender, new StaticErrorEventArgs(e));
+    }
+}
+
+internal class StaticErrorEventArgs : EventArgs
+{
+    public StaticErrorEventArgs(Exception exception)
+    {
+        Exception = exception;
+    }
+
+    public Exception Exception { get; }
 }

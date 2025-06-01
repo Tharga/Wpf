@@ -12,7 +12,7 @@
         BorderThickness="1" BorderBrush="Gray"
         >
     <Grid>
-        <Image Source="../../Images/Application/green.png" Stretch="Fill"/>
+        <Image Source="../../Images/Application/white.jpg" Stretch="Fill" x:Name="Image" />
         <TextBlock x:Name="FullName" d:Text="Some Name" Margin="10,10,10,210" FontSize="20" />
         <ListBox x:Name="Messages" Background="Transparent" Margin="120,34,10,100" FontWeight="Bold" BorderBrush="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
             <ListBox.ItemContainerStyle>

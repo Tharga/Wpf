@@ -1,4 +1,5 @@
 ﻿using System.Windows.Input;
+using Tharga.Wpf.Framework;
 
 namespace Tharga.Wpf.TabNavigator;
 
@@ -21,10 +22,17 @@ public class OpenTabComamnd<TTabView> : ICommand
         return _canExecute?.Invoke() ?? true;
     }
 
-    public void Execute(object parameter)
+    public async void Execute(object parameter)
     {
-        _tabNavigationService.OpenTab<TTabView>(parameter: parameter);
-        _postAction?.Invoke();
+        try
+        {
+            await _tabNavigationService.OpenTabAsync<TTabView>(parameter: parameter);
+            _postAction?.Invoke();
+        }
+        catch (Exception e)
+        {
+            StaticExceptionHandler.Handle(e, this);
+        }
     }
 
     public event EventHandler CanExecuteChanged
