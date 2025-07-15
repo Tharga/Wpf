@@ -50,12 +50,12 @@
 	<ItemGroup>
 		<PackageReference Include="Fluent.Ribbon" Version="11.0.1" />
 		<PackageReference Include="System.Linq.Async" Version="6.0.3" />
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.6" />
-		<PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.6" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.7" />
+		<PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.7" />
 		<PackageReference Include="Clowd.Squirrel" Version="2.11.1" />
-		<PackageReference Include="Microsoft.Extensions.Http" Version="9.0.6" />
-		<PackageReference Include="System.Text.Json" Version="9.0.6" />
-		<PackageReference Include="Tharga.Toolkit" Version="1.12.22" />
+		<PackageReference Include="Microsoft.Extensions.Http" Version="9.0.7" />
+		<PackageReference Include="System.Text.Json" Version="9.0.7" />
+		<PackageReference Include="Tharga.Toolkit" Version="1.12.24" />
 	</ItemGroup>
 	<ItemGroup>
 		<InternalsVisibleTo Include="Tharga.Wpf.Tests" />
