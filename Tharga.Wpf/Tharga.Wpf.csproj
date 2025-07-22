@@ -54,6 +54,7 @@
     <PackageReference Include="Clowd.Squirrel" Version="2.11.1" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.7" />
     <PackageReference Include="System.Text.Json" Version="9.0.7" />
+    <PackageReference Include="Tharga.Toolkit" Version="1.13.12" />
   </ItemGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="Tharga.Wpf.Tests" />
@@ -71,8 +72,5 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\Toolkit\Tharga.Toolkit\Tharga.Toolkit.csproj" />
   </ItemGroup>
 </Project>
