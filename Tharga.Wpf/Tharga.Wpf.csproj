@@ -1,77 +1,76 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
-	<PropertyGroup>
-		<TargetFramework>net9.0-windows</TargetFramework>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<UseWPF>true</UseWPF>
-		<Version>1.0.0</Version>
-		<Authors>Daniel Bohlin</Authors>
-		<Company>Thargelion AB</Company>
-		<Product>Tharga WPF</Product>
-		<Description>Toolkit for WPF applications.</Description>
-		<PackageIconUrl>http://thargelion.se/wp-content/uploads/2019/11/Thargelion-White-Icon-150.png</PackageIconUrl>
-		<GenerateDocumentationFile>True</GenerateDocumentationFile>
-		<PackageReadmeFile>README.md</PackageReadmeFile>
-		<PackageProjectUrl>https://github.com/Tharga/Wpf</PackageProjectUrl>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-		<NoWarn>1701;1702;CS1591</NoWarn>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-		<NoWarn>1701;1702;CS1591</NoWarn>
-	</PropertyGroup>
-	<ItemGroup>
-		<None Remove="Images\Application\blue.png" />
-		<None Remove="Images\Application\green.png" />
-		<None Remove="Images\Application\teal.jpg" />
-		<None Remove="Images\Application\white.jpg" />
-		<None Remove="Images\Application\yellow.jpg" />
-		<None Remove="Images\Close.png" />
-		<None Remove="Images\thargelion.ico" />
-		<None Remove="Tharga.Wpf.csproj.DotSettings" />
-	</ItemGroup>
-	<ItemGroup>
-	  <EmbeddedResource Include="Images\thargelion.ico" />
-	</ItemGroup>
-	<ItemGroup>
-		<Resource Include="Images\Application\blue.png" />
-		<Resource Include="Images\Application\green.png" />
-		<Resource Include="Images\Application\teal.jpg" />
-		<Resource Include="Images\Application\white.jpg" />
-		<Resource Include="Images\Application\yellow.jpg" />
-		<Resource Include="Images\Close.png" />
-	</ItemGroup>
-	<ItemGroup>
-		<None Include="README.md">
-			<Pack>True</Pack>
-			<PackagePath>\</PackagePath>
-		</None>
-	</ItemGroup>
-	<ItemGroup>
-		<PackageReference Include="Fluent.Ribbon" Version="11.0.1" />
-		<PackageReference Include="System.Linq.Async" Version="6.0.3" />
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.7" />
-		<PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.7" />
-		<PackageReference Include="Clowd.Squirrel" Version="2.11.1" />
-		<PackageReference Include="Microsoft.Extensions.Http" Version="9.0.7" />
-		<PackageReference Include="System.Text.Json" Version="9.0.7" />
-		<PackageReference Include="Tharga.Toolkit" Version="1.12.24" />
-	</ItemGroup>
-	<ItemGroup>
-		<InternalsVisibleTo Include="Tharga.Wpf.Tests" />
-		<InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
-	</ItemGroup>
-	<ItemGroup>
-	  <Compile Update="Properties\Resources.Designer.cs">
-	    <DesignTime>True</DesignTime>
-	    <AutoGen>True</AutoGen>
-	    <DependentUpon>Resources.resx</DependentUpon>
-	  </Compile>
-	</ItemGroup>
-	<ItemGroup>
-	  <EmbeddedResource Update="Properties\Resources.resx">
-	    <Generator>ResXFileCodeGenerator</Generator>
-	    <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-	  </EmbeddedResource>
-	</ItemGroup>
+  <PropertyGroup>
+    <TargetFramework>net9.0-windows</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <Version>1.0.0</Version>
+    <Authors>Daniel Bohlin</Authors>
+    <Company>Thargelion AB</Company>
+    <Product>Tharga WPF</Product>
+    <Description>Toolkit for WPF applications.</Description>
+    <PackageIconUrl>http://thargelion.se/wp-content/uploads/2019/11/Thargelion-White-Icon-150.png</PackageIconUrl>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageProjectUrl>https://github.com/Tharga/Wpf</PackageProjectUrl>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>1701;1702;CS1591</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <NoWarn>1701;1702;CS1591</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Remove="Images\Application\blue.png" />
+    <None Remove="Images\Application\green.png" />
+    <None Remove="Images\Application\teal.jpg" />
+    <None Remove="Images\Application\white.jpg" />
+    <None Remove="Images\Application\yellow.jpg" />
+    <None Remove="Images\Close.png" />
+    <None Remove="Images\thargelion.ico" />
+    <None Remove="Tharga.Wpf.csproj.DotSettings" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Images\thargelion.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Application\blue.png" />
+    <Resource Include="Images\Application\green.png" />
+    <Resource Include="Images\Application\teal.jpg" />
+    <Resource Include="Images\Application\white.jpg" />
+    <Resource Include="Images\Application\yellow.jpg" />
+    <Resource Include="Images\Close.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Fluent.Ribbon" Version="11.0.1" />
+    <PackageReference Include="System.Linq.Async" Version="6.0.3" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.7" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.7" />
+    <PackageReference Include="Clowd.Squirrel" Version="2.11.1" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.7" />
+    <PackageReference Include="System.Text.Json" Version="9.0.7" />
+    <PackageReference Include="Tharga.Toolkit" Version="1.13.12" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Tharga.Wpf.Tests" />
+    <InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
 </Project>
