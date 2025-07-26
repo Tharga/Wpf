@@ -85,8 +85,20 @@ public abstract class ApplicationBase : Application
                     var tabNavigationStateService = s.GetService<ITabNavigationStateService>();
                     var mainWindow = ((ApplicationBase)Current).MainWindow;
                     var loggerFactory = s.GetService<ILoggerFactory>();
-                    var logger = loggerFactory.CreateLogger<ApplicationUpdateStateService>();
-                    return new ApplicationUpdateStateService(configuration, applicationDownloadService, tabNavigationStateService, _options, mainWindow, logger);
+                    //var logger = loggerFactory.CreateLogger<ApplicationUpdateStateService>();
+                    //return new ApplicationUpdateStateService(configuration, applicationDownloadService, tabNavigationStateService, _options, mainWindow, logger);
+
+                    switch (_options.UpdateSystem)
+                    {
+                        case UpdateSystem.None:
+                            return new NoUpdateStateServiceBase(configuration, loggerFactory, applicationDownloadService, tabNavigationStateService, _options, mainWindow);
+                        case UpdateSystem.Squirrel:
+                            return new SquirrelApplicationUpdateStateService(configuration, loggerFactory, applicationDownloadService, tabNavigationStateService, _options, mainWindow);
+                        case UpdateSystem.Velopack:
+                            return new VelopackApplicationUpdateStateService(configuration, loggerFactory, applicationDownloadService, tabNavigationStateService, _options, mainWindow);
+                        default:
+                            throw new ArgumentOutOfRangeException(nameof(_options.UpdateSystem), @$"Unknown {nameof(_options.UpdateSystem)} {_options.UpdateSystem}.");
+                    }
                 });
                 services.AddTransient<IApplicationDownloadService>(s =>
                 {

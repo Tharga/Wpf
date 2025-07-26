@@ -8,7 +8,7 @@ public partial class App
 {
     private void Application_Startup(object sender, StartupEventArgs e)
     {
-        new MainWindow();
+        _ = new MainWindow();
     }
 
     protected override void Register(HostBuilderContext context, IServiceCollection services)
@@ -21,12 +21,12 @@ public partial class App
     {
         thargaWpfOptions.ApplicationShortName = "Sample";
         thargaWpfOptions.ApplicationFullName = "Tharga Wpf Sample Application";
-        thargaWpfOptions.CheckForUpdateInterval = TimeSpan.Zero;
+        thargaWpfOptions.UpdateIntervalCheck = TimeSpan.Zero;
         thargaWpfOptions.AllowTabsWithSameTitles = false;
         thargaWpfOptions.AllowMultipleApplications = false;
 
         thargaWpfOptions.RegisterExceptionHandler<InvalidOperationExceptionHandler, InvalidOperationException>();
 
-        thargaWpfOptions.ApplicationDownloadLocationLoader += _ => { return new Uri("https://app-eplicta-aggregator-ci.azurewebsites.net/api/Agent"); };
+        thargaWpfOptions.UpdateLocation += _ => "https://app-eplicta-aggregator-ci.azurewebsites.net/api/Agent";
     }
 }

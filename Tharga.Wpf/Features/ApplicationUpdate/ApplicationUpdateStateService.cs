@@ -1,53 +1,53 @@
-﻿using System.Diagnostics;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Windows;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
-using Squirrel;
 using Tharga.Toolkit;
 using Tharga.Wpf.TabNavigator;
 using Application = System.Windows.Application;
-using MessageBox = System.Windows.MessageBox;
 
 namespace Tharga.Wpf.ApplicationUpdate;
 
-internal class ApplicationUpdateStateService : IApplicationUpdateStateService
+internal abstract class ApplicationUpdateStateServiceBase : IApplicationUpdateStateService
 {
     private readonly IApplicationDownloadService _applicationDownloadService;
-    private readonly ITabNavigationStateService _tabNavigationStateService;
-    private readonly ThargaWpfOptions _options;
     private readonly Window _mainWindow;
-    private readonly ILogger<ApplicationUpdateStateService> _logger;
     private readonly System.Timers.Timer _timer;
     private readonly SemaphoreSlim _lock = new(1, 1);
-    private readonly string _environmentName;
     private readonly string _version;
-    private readonly string _exeLocation;
+    private readonly ILogger<ApplicationUpdateStateServiceBase> _logger;
+
+    protected readonly ITabNavigationStateService _tabNavigationStateService;
+    protected readonly ThargaWpfOptions _options;
+    protected readonly string _environmentName;
+
     private ISplash _splash;
     private string _applicationLocation;
     private string _applicationLocationSource;
     private string _logFileName;
     private bool _checkingForUpdate;
 
-    public ApplicationUpdateStateService(IConfiguration configuration, IApplicationDownloadService applicationDownloadService, ITabNavigationStateService tabNavigationStateService, ThargaWpfOptions options, Window mainWindow, ILogger<ApplicationUpdateStateService> logger)
+    internal static readonly List<string> UpdateLog = new();
+
+    protected ApplicationUpdateStateServiceBase(IConfiguration configuration, ILoggerFactory loggerFactory, IApplicationDownloadService applicationDownloadService, ITabNavigationStateService tabNavigationStateService, ThargaWpfOptions options, Window mainWindow)
     {
         _applicationDownloadService = applicationDownloadService;
         _tabNavigationStateService = tabNavigationStateService;
-        _options = options;
         _mainWindow = mainWindow;
-        _logger = logger;
+        _logger = loggerFactory.CreateLogger<ApplicationUpdateStateServiceBase>();
+        _options = options;
         _environmentName = configuration.GetSection("Environment").Value;
 
         var entryAssembly = Assembly.GetEntryAssembly();
         var assemblyName = entryAssembly?.GetName();
         var version = assemblyName?.Version?.ToString();
         _version = version == "1.0.0.0" ? null : version;
-        _exeLocation = SquirrelRuntimeInfo.EntryExePath;
 
         AddLogString($"Initiate ApplicationUpdateStateService. ({_environmentName} {assemblyName?.FullName})");
 
-        var interval = options.CheckForUpdateInterval;
+        var interval = options.UpdateIntervalCheck;
         if (interval != null && interval > TimeSpan.Zero)
         {
             _timer = new System.Timers.Timer { AutoReset = true, Enabled = false, Interval = interval.Value.TotalMilliseconds };
@@ -62,6 +62,7 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
                     _logger.LogError(e, e.Message);
                 }
             };
+            _timer.Start();
         }
 
         if (options.Debug)
@@ -74,8 +75,6 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
             });
         }
 
-        SquirrelAwareApp.HandleEvents(OnInitialInstall, OnAppInstall, OnAppObsoleted, OnAppUninstall, OnEveryRun);
-
         _mainWindow.IsVisibleChanged += (_, _) =>
         {
             if (_mainWindow.Visibility != Visibility.Visible) _splash?.Hide();
@@ -85,9 +84,16 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
     public event EventHandler<UpdateInfoEventArgs> UpdateInfoEvent;
     public event EventHandler<SplashCompleteEventArgs> SplashCompleteEvent;
 
-    internal static readonly List<string> UpdateLog = new();
+    protected virtual string ExeLocation { get; } = string.Empty;
 
-    private void AddLogString(string message)
+    protected void OnUpdateInfoEvent(object sender, string message)
+    {
+        UpdateInfoEvent?.Invoke(sender, new UpdateInfoEventArgs(message));
+    }
+
+    protected abstract Task UpdateAsync(string clientLocation);
+
+    protected void AddLogString(string message)
     {
         var now = DateTime.UtcNow;
         var msg = $"{now:yyyy-MM-dd hh:mm:ss} {message}";
@@ -101,149 +107,16 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
         UpdateLog.Add(msg);
     }
 
-    //NOTE: Initial Install
-    private void OnInitialInstall(SemanticVersion version, IAppTools tools)
-    {
-	    try
-	    {
-            if (_options.Debug) MessageBox.Show("Initial Install", nameof(OnInitialInstall), MessageBoxButton.OK, MessageBoxImage.Information);
-
-            AddLogString($"--- Start {nameof(OnInitialInstall)} ---");
-
-		    var name = GetShortcutName();
-
-		    CreateShortcut();
-
-		    ShowSplashWithRetry(false, $"Installing {name}.");
-	    }
-	    catch (Exception e)
-	    {
-            AddLogString($"Error: {e.Message} @{e.StackTrace}");
-		    _logger.LogError(e, e.Message);
-            Task.Delay(TimeSpan.FromSeconds(2)).GetAwaiter().GetResult();
-		    MessageBox.Show(e.Message, "Initial Install", MessageBoxButton.OK, MessageBoxImage.Error);
-	    }
-	    finally
-	    {
-            AddLogString($"--- End {nameof(OnInitialInstall)} ---");
-		}
-	}
-
-    //NOTE: Updated to new version
-    private void OnAppInstall(SemanticVersion version, IAppTools tools)
-    {
-	    try
-	    {
-            if (_options.Debug) MessageBox.Show("App Install", nameof(OnAppInstall), MessageBoxButton.OK, MessageBoxImage.Information);
-
-            AddLogString($"--- Start {nameof(OnAppInstall)} ---");
-
-		    //var name = GetShortcutName();
-	    }
-	    catch (Exception e)
-	    {
-            AddLogString($"Error: {e.Message} @{e.StackTrace}");
-		    _logger.LogError(e, e.Message);
-            Task.Delay(TimeSpan.FromSeconds(2)).GetAwaiter().GetResult();
-            MessageBox.Show(e.Message, "App Install", MessageBoxButton.OK, MessageBoxImage.Error);
-	    }
-        finally
-	    {
-            AddLogString($"--- End {nameof(OnAppInstall)} ---");
-		}
-	}
-
-    //NOTE: Called when the app is no longer the latest version (A new version is installed)
-    private void OnAppObsoleted(SemanticVersion version, IAppTools tools)
-    {
-	    try
-	    {
-            if (_options.Debug) MessageBox.Show("App Obsoleted", nameof(OnAppObsoleted), MessageBoxButton.OK, MessageBoxImage.Information);
-
-            AddLogString($"--- Start {nameof(OnAppObsoleted)} ---");
-
-		    //var name = GetShortcutName();
-	    }
-	    catch (Exception e)
-	    {
-            AddLogString($"Error: {e.Message} @{e.StackTrace}");
-		    _logger.LogError(e, e.Message);
-            Task.Delay(TimeSpan.FromSeconds(2)).GetAwaiter().GetResult();
-            MessageBox.Show(e.Message, "App Obsoleted", MessageBoxButton.OK, MessageBoxImage.Error);
-	    }
-        finally
-	    {
-            AddLogString($"--- End {nameof(OnAppObsoleted)} ---");
-		}
-	}
-
-    //NOTE: Called when the app in uninstalled
-    private void OnAppUninstall(SemanticVersion version, IAppTools tools)
-    {
-	    try
-	    {
-            if (_options.Debug) MessageBox.Show("App Uninstall", nameof(OnAppUninstall), MessageBoxButton.OK, MessageBoxImage.Information);
-
-            AddLogString($"--- Start {nameof(OnAppUninstall)} ---");
-
-		    var name = GetShortcutName();
-
-		    ShortcutHelper.RemoveShortcut(name);
-
-		    ShowSplashWithRetry(false, $"Uninstalling {name}.");
-	    }
-	    catch (Exception e)
-	    {
-            AddLogString($"Error: {e.Message} @{e.StackTrace}");
-		    _logger.LogError(e, e.Message);
-            Task.Delay(TimeSpan.FromSeconds(2)).GetAwaiter().GetResult();
-            MessageBox.Show(e.Message, "App Uninstall", MessageBoxButton.OK, MessageBoxImage.Error);
-	    }
-        finally
-	    {
-            AddLogString($"--- End {nameof(OnAppUninstall)} ---");
-		}
-	}
-
-    //NOTE: Starts on every run
-    private void OnEveryRun(SemanticVersion version, IAppTools tools, bool firstRun)
-    {
-	    try
-        {
-            var f = string.Empty;
-            if (firstRun) f = " (firstRun)";
-
-            if (_options.Debug) MessageBox.Show($"Every Run {f}", nameof(OnEveryRun), MessageBoxButton.OK, MessageBoxImage.Information);
-
-            AddLogString($"--- Start {nameof(OnEveryRun)} {f} ---");
-
-		    tools.SetProcessAppUserModelId();
-		    ShowSplashWithRetry(firstRun);
-		    _ = StartUpdateLoop();
-	    }
-	    catch (Exception e)
-	    {
-            AddLogString($"Error: {e.Message} @{e.StackTrace}");
-		    _logger.LogError(e, e.Message);
-            Task.Delay(TimeSpan.FromSeconds(2)).GetAwaiter().GetResult();
-            MessageBox.Show(e.Message, "Every Run", MessageBoxButton.OK, MessageBoxImage.Error);
-	    }
-        finally
-	    {
-            AddLogString($"--- End {nameof(OnEveryRun)} ---");
-		}
-	}
-
-    private void ShowSplashWithRetry(bool firstRun, string entryMessage = null, bool showCloseButton = false)
+    protected async Task ShowSplashWithRetryAsync(bool firstRun, string entryMessage = null, bool showCloseButton = false)
     {
         try
         {
-            ShowSplash(firstRun, entryMessage, showCloseButton);
+            await ShowSplashAsync(firstRun, entryMessage, showCloseButton);
         }
         catch (InvalidOperationException)
         {
             CloseSplash();
-            ShowSplash(firstRun, entryMessage, showCloseButton);
+            await ShowSplashAsync(firstRun, entryMessage, showCloseButton);
         }
     }
 
@@ -254,7 +127,7 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
         UpdateInfoEvent -= ApplicationUpdateStateService_UpdateInfoEvent;
     }
 
-    private void ShowSplash(bool firstRun, string entryMessage, bool showCloseButton)
+    private async Task ShowSplashAsync(bool firstRun, string entryMessage, bool showCloseButton)
     {
         if (_splash == null)
         {
@@ -267,7 +140,7 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
                 FirstRun = firstRun,
                 EnvironmentName = _environmentName,
                 Version = _version,
-                ExeLocation = _exeLocation,
+                ExeLocation = ExeLocation,
                 EntryMessage = entryMessage,
                 FullName = _options.ApplicationFullName ?? $"{_options.CompanyName} {_options.ApplicationShortName}".Trim(),
                 ClientLocation = applicationLocation,
@@ -282,6 +155,13 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
         //_splash.ClearMessages();
         if (showCloseButton) _splash.ShowCloseButton();
         _splash.Show();
+
+        //var splashDelay = Debugger.IsAttached ? TimeSpan.FromSeconds(4) : TimeSpan.FromSeconds(2);
+        //await Task.Delay(splashDelay);
+        //if (_splash != null && !_splash.IsCloseButtonVisible)
+        //{
+        //    CloseSplash();
+        //}
     }
 
     private void ApplicationUpdateStateService_UpdateInfoEvent(object sender, UpdateInfoEventArgs e)
@@ -292,7 +172,6 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
 
     private async Task UpdateClientApplication(string source)
     {
-        var splashDelay = Debugger.IsAttached ? TimeSpan.FromSeconds(4) : TimeSpan.FromSeconds(2);
         string clientLocation = null;
 
         try
@@ -330,34 +209,10 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
             }
             else
             {
+                AddLogString($"locationSource: {result.ApplicationLocationSource}");
                 AddLogString($"clientLocation: {clientLocation}");
-                using var mgr = new UpdateManager(clientLocation);
-                if (!mgr.IsInstalledApp)
-                {
-                    var message = $"{_options.ApplicationShortName} is not installed.";
-                    UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs(message));
-                    return;
-                }
 
-                var updateInfo = await mgr.CheckForUpdate();
-                if (updateInfo.CurrentlyInstalledVersion.Version == updateInfo.FutureReleaseEntry.Version)
-                {
-                    UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs("Already up to date."));
-                    return;
-                }
-
-                ShowSplashWithRetry(false);
-
-                UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs($"Updating to latest version, {updateInfo.FutureReleaseEntry.Version}."));
-
-                var newVersion = await mgr.UpdateApp();
-                if (newVersion != null)
-                {
-                    await _tabNavigationStateService.CloseAllTabsAsync(true);
-
-                    UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs("Restarting."));
-                    UpdateManager.RestartApp();
-                }
+                await UpdateAsync(clientLocation);
             }
         }
         catch (Exception e)
@@ -366,18 +221,21 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
 			_logger.LogError(e, e.Message);
             var message = "Update failed. ";
             UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs(message));
-            _splash?.SetErrorMessage($"{e.Message}\n{clientLocation}\n@{e.StackTrace})");
-            _splash?.ShowCloseButton();
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                _splash?.SetErrorMessage($"{e.Message}\n{clientLocation}\n@{e.StackTrace})");
+                _splash?.ShowCloseButton();
+            });
         }
         finally
         {
             SplashCompleteEvent?.Invoke(this, new SplashCompleteEventArgs(CloseMethod.None, false));
 
-            if (_splash != null && !_splash.IsCloseButtonVisible)
-            {
-                await Task.Delay(splashDelay);
-                CloseSplash();
-            }
+            //if (_splash != null && !_splash.IsCloseButtonVisible)
+            //{
+            //    await Task.Delay(splashDelay);
+            //    CloseSplash();
+            //}
 
             //AddLogString($"Complete check for updates.");
             AddLogString($"--- End {nameof(UpdateClientApplication)} ---");
@@ -386,78 +244,24 @@ internal class ApplicationUpdateStateService : IApplicationUpdateStateService
         }
     }
 
-    public void ShowSplash(bool checkForUpdates, bool showCloseButton)
+    public async Task ShowSplashAsync(bool checkForUpdates, bool showCloseButton)
     {
-        ShowSplashWithRetry(false, null, showCloseButton);
+        await ShowSplashWithRetryAsync(false, null, showCloseButton);
+        if (checkForUpdates) await UpdateClientApplication($"{nameof(ShowSplashAsync)}");
 
-        if (checkForUpdates)
+        if (!showCloseButton)
         {
-            Task.Run(async () =>
+            var splashDelay = Debugger.IsAttached ? TimeSpan.FromSeconds(4) : TimeSpan.FromSeconds(2);
+            await Task.Delay(splashDelay);
+            if (_splash != null && !_splash.IsCloseButtonVisible)
             {
-                await Application.Current.Dispatcher.Invoke(async () =>
-                {
-                    await UpdateClientApplication($"{nameof(ShowSplash)}");
-                });
-            });
+                CloseSplash();
+            }
         }
     }
 
     public Task CheckForUpdateAsync(string source)
     {
-        return UpdateClientApplication($"Call from {source}");
-    }
-
-    private async Task StartUpdateLoop()
-    {
-        if (_timer != null)
-        {
-            if (!_timer.Enabled)
-            {
-                await UpdateClientApplication($"{nameof(StartUpdateLoop)} before timer");
-                _timer.Start();
-            }
-        }
-        else
-        {
-            await UpdateClientApplication($"{nameof(StartUpdateLoop)} no timer");
-        }
-    }
-
-    private void CreateShortcut()
-    {
-        var entryExePath = SquirrelRuntimeInfo.EntryExePath;
-        var pos = entryExePath.LastIndexOf("\\", StringComparison.Ordinal);
-        var exeName = entryExePath.Substring(pos + 1);
-        AddLogString($"Exe name is '{exeName}'.");
-
-		var baseDirectory = GetDirectory();
-        var path = Path.Combine(baseDirectory, exeName);
-        AddLogString($"Path is '{path}'.");
-
-		var iconPath = Path.Combine(baseDirectory, "app.ico");
-        AddLogString($"IconPath is '{iconPath}'.");
-
-		var iconInfo = new ShortcutHelper.IconInfo { Path = iconPath };
-        var name = GetShortcutName();
-        var description = _options.ApplicationFullName ?? $"{_options.CompanyName} {_options.ApplicationShortName}".Trim();
-        AddLogString($"Description is '{description}'.");
-
-		ShortcutHelper.CreateShortcut(path, name, description, iconInfo);
-        AddLogString($"Shortcut created with name '{name}'.");
-	}
-
-	private static string GetDirectory()
-    {
-        var baseDirectory = SquirrelRuntimeInfo.BaseDirectory;
-        var pos = baseDirectory.TrimEnd('\\').LastIndexOf("\\", StringComparison.Ordinal);
-        baseDirectory = baseDirectory.Substring(0, pos);
-        return baseDirectory;
-    }
-
-    private string GetShortcutName()
-    {
-        var name = _options.ApplicationShortName;
-        var response = _environmentName == "Production" ? name : $"{name} {_environmentName}";
-        return response;
+        return UpdateClientApplication($"Call from {source ?? "Unknown"}");
     }
 }
