@@ -34,11 +34,6 @@ public class ThargaWpfOptions
     public Func<SplashData, ISplash> SplashCreator { get; set; }
 
     /// <summary>
-    /// Loader for providing the location of the application update location.
-    /// </summary>
-    public Func<IConfiguration, Uri> ApplicationDownloadLocationLoader { get; set; }
-
-    /// <summary>
     /// If set to true, multiple tabs with the same title is allowed.
     /// The property AllowTabsWithSameTitles that can be overridden on tab-level controls if tabs of the same type can be opened multiple times.
     /// </summary>
@@ -51,11 +46,20 @@ public class ThargaWpfOptions
 
     /// <summary>
     /// The interval between automatic checks for new versions.
-    /// Default is to check every hour.
-    /// If the provided value is 0, then versions will never be checked.
-    /// The application always checks for updates at startup. Updates can also be performed by calling the CheckForUpdate method in IApplicationUpdateStateService.
+    /// If the provided value is TimeSpan.Zero (0), then versions will never be checked, this is default.
+    /// Updates can also be performed by calling the CheckForUpdate method in IApplicationUpdateStateService.
     /// </summary>
-    public TimeSpan? CheckForUpdateInterval { get; set; }
+    public TimeSpan? UpdateIntervalCheck { get; set; }
+
+    /// <summary>
+    /// Select the type of system should be used for update. None, Squirrel or Velopack.
+    /// </summary>
+    public UpdateSystem UpdateSystem { get; set; }
+
+    /// <summary>
+    /// Loader for providing the location of the application update location.
+    /// </summary>
+    public Func<IConfiguration, string> UpdateLocation { get; set; }
 
     /// <summary>
     /// True if the application can be started several times. No for single application executions where the running application will be focused instead.
@@ -94,11 +98,6 @@ public class ThargaWpfOptions
     {
         _assemblies.TryAdd(assembly, assembly);
     }
-
-    /// <summary>
-    /// Inactivity
-    /// </summary>
-    //public Inactivity Inactivity { get; set; } = new();
 
     internal IDictionary<Type, Type> GetExceptionTypes() => _exceptionTypes;
     internal IDictionary<Type, Type> GetExceptionHandlerServices() => _exceptionHandlerServices;

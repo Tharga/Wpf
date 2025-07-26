@@ -114,7 +114,7 @@ public partial class Splash : ISplash
     {
         var sb = new StringBuilder();
         sb.AppendLine($"{ExeLocation.ToolTip}");
-        foreach (var log in ApplicationUpdateStateService.UpdateLog)
+        foreach (var log in ApplicationUpdateStateServiceBase.UpdateLog)
         {
             sb.AppendLine(log);
         }
