@@ -22,10 +22,20 @@ internal class ApplicationDownloadService : IApplicationDownloadService
         var path = _options.UpdateLocation?.Invoke(_configuration);
         if (path.IsNullOrEmpty()) return (null, null);
 
-        var httpClient = _httpClientFactory.CreateClient("ApplicationUpdate");
-        var result = await httpClient.GetAsync(path);
-        if (!result.IsSuccessStatusCode) throw new InvalidOperationException($"Failed to get application location at '{path}'.");
-        var data = await result.Content.ReadAsStringAsync();
-        return (data, path);
+        switch (_options.UpdateSystem)
+        {
+            case UpdateSystem.None:
+                throw new NotSupportedException();
+            case UpdateSystem.Squirrel:
+                var httpClient = _httpClientFactory.CreateClient("ApplicationUpdate");
+                var result = await httpClient.GetAsync(path);
+                if (!result.IsSuccessStatusCode) throw new InvalidOperationException($"Failed to get application location at '{path}'.");
+                var data = await result.Content.ReadAsStringAsync();
+                return (data, path);
+            case UpdateSystem.Velopack:
+                return (path, path);
+            default:
+                throw new ArgumentOutOfRangeException(nameof(_options.UpdateSystem), @$"Unknown {nameof(_options.UpdateSystem)} {_options.UpdateSystem}");
+        }
     }
 }

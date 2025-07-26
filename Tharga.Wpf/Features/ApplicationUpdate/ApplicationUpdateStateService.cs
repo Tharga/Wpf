@@ -190,12 +190,12 @@ internal abstract class ApplicationUpdateStateServiceBase : IApplicationUpdateSt
 
             UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs("Looking for update."));
 
-            //if (Debugger.IsAttached)
-            //{
-            //    var message = $"{_options.ApplicationShortName} is running in debug mode.";
-            //    UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs(message));
-            //    return;
-            //}
+            if (Debugger.IsAttached)
+            {
+                var message = $"{_options.ApplicationShortName} is running in debug mode.";
+                UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs(message));
+                return;
+            }
 
             var result = await _applicationDownloadService.GetApplicationLocationAsync();
             clientLocation = result.ApplicationLocation;
@@ -209,6 +209,7 @@ internal abstract class ApplicationUpdateStateServiceBase : IApplicationUpdateSt
             }
             else
             {
+                AddLogString($"locationSource: {result.ApplicationLocationSource}");
                 AddLogString($"clientLocation: {clientLocation}");
 
                 await UpdateAsync(clientLocation);

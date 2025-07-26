@@ -25,7 +25,7 @@ public partial class Splash : ISplash
         }
         //Topmost = true;
 
-        MouseDown += (_, _) => DragMove();
+        MouseDown += (_, e) => { if (e.LeftButton == MouseButtonState.Pressed) DragMove(); };
 
         InitializeComponent();
 
@@ -110,7 +110,12 @@ public partial class Splash : ISplash
         e.Handled = true;
     }
 
-    private void ExeLocation_OnMouseDown(object sender, MouseButtonEventArgs e)
+    private void Splash_OnClosed(object sender, EventArgs e)
+    {
+        _splashClosed?.Invoke(_closeMethod);
+    }
+
+    private void Messages_OnMouseDoubleClick(object sender, MouseButtonEventArgs e)
     {
         var sb = new StringBuilder();
         sb.AppendLine($"{ExeLocation.ToolTip}");
@@ -119,10 +124,5 @@ public partial class Splash : ISplash
             sb.AppendLine(log);
         }
         Clipboard.SetText(sb.ToString());
-    }
-
-    private void Splash_OnClosed(object sender, EventArgs e)
-    {
-        _splashClosed?.Invoke(_closeMethod);
     }
 }
