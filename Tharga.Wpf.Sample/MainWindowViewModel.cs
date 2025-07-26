@@ -23,7 +23,7 @@ public class MainWindowViewModel : ViewModelBase
         tabNavigationStateService.OpenTabAsync<MyTabView>("My Tab");
     }
 
-    public ICommand ShowSplashCommand => new RelayCommand(_ => { _applicationUpdateStateService.ShowSplash(); }, _ => true);
+    public ICommand ShowSplashCommand => new RelayCommand(_ => { _applicationUpdateStateService.ShowSplashAsync(); }, _ => true);
     public ICommand CheckForUpdateCommand => new RelayCommand(_ => { _applicationUpdateStateService.CheckForUpdateAsync("manual"); }, _ => true);
     public ICommand ThrowExceptionCommand => new RelayCommand(_ => throw new InvalidOperationException("Some error."), _ => true);
     public ICommand NewTabCommand => new OpenTabComamnd<MyTabView>(_tabNavigationStateService /*, _authenticationStateService*/);
