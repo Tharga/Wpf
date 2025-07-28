@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using Microsoft.Extensions.Configuration;
+using System.IO;
 using System.Management;
 using System.Net.Http;
 using System.Net.Http.Json;
@@ -6,19 +7,21 @@ using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using Microsoft.Extensions.Configuration;
 using Tharga.License;
+using Tharga.Toolkit;
 
 namespace Tharga.Wpf.License;
 
 internal class LicenseClient : ILicenseClient
 {
+    private readonly IHttpClientFactory _clientFactory;
     private readonly IConfiguration _configuration;
     private readonly ISigningService _signingService;
     private readonly ThargaWpfOptions _options;
 
-    public LicenseClient(IConfiguration configuration, ISigningService signingService, ThargaWpfOptions options)
+    public LicenseClient(IHttpClientFactory clientFactory, IConfiguration configuration, ISigningService signingService, ThargaWpfOptions options)
     {
+        _clientFactory = clientFactory;
         _configuration = configuration;
         _signingService = signingService;
         _options = options;
@@ -26,52 +29,45 @@ internal class LicenseClient : ILicenseClient
 
     public async Task<(bool IsValid, string Message)> CheckLicenseAsync()
     {
+        var address = _options.LicenseServerLocation?.Invoke(_configuration);
+        if (address == null) throw new InvalidOperationException("No license server address found.");
+
         var version = BuildVersionFingerprint();
         var machine = GetMachineFingerprint();
+        var requestKey = StringExtension.RandomString();
 
         var request = new LicenseCheckRequest
         {
-            ApplicationName = version.applicationName,
+            RequestKey = requestKey,
+            ApplicationName = _options.ApplicationFullName ?? _options.ApplicationShortName ?? version.applicationName,
             MachineFingerprint = new Fingerprint { Name = machine.MachineName, Value = machine.Fingerprint },
             VersionFingerprint = new Fingerprint { Name = version.Version, Value = version.Fingerprint },
             Username = Environment.UserName
         };
 
-        var address = _options.LicenseServerLocation?.Invoke(_configuration);
-        if (address == null) throw new InvalidOperationException("No license server address found.");
-
-        var http = new HttpClient();
-        var response = await http.PostAsJsonAsync($"{address}/license/check", request);
-        if (!response.IsSuccessStatusCode) return (false, "License server cannot be accessed.");
+        using var client = _clientFactory.CreateClient("license");
+        var response = await client.PostAsJsonAsync($"{address}/license/check", request);
+        if (!response.IsSuccessStatusCode) return (false, $"{response.ReasonPhrase}. (Status code: {(int)response.StatusCode})");
 
         var json = await response.Content.ReadAsStringAsync();
-
         using var doc = JsonDocument.Parse(json);
-        if (!doc.RootElement.TryGetProperty("signature", out var signatureElement))
+
+        if (!response.Headers.TryGetValues("Signature", out var signatures))
         {
             doc.RootElement.TryGetProperty("message", out var message);
             return (false, message.GetString() ?? "Cannot find signature.");
         }
+        var signature = signatures.Single();
 
-        var signature = signatureElement.GetString();
-
-        // Create a clone of the response with Signature = null for verification
-        var responseObj = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
-        responseObj.Remove("signature");
-        var unsignedJson = JsonSerializer.Serialize(responseObj, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase, WriteIndented = false });
-
-        var key = await http.GetStringAsync($"{address}/license/key");
+        var key = await client.GetStringAsync($"{address}/license/key");
         var publicKey = JsonSerializer.Deserialize<RsaPublicKey>(key);
-        if (!_signingService.VerifySignature(unsignedJson, signature, publicKey)) return (false, "Invalid signature.");
 
-        // Optionally: check expiration, app name, fingerprint match, etc.
-        if (doc.RootElement.TryGetProperty("validUntil", out var validUntilElem) && DateTime.TryParse(validUntilElem.GetString(), out var expiry))
-        {
-            var valid = expiry > DateTime.UtcNow;
-            return (valid, valid ? null : "Expired.");
-        }
+        var data = JsonSerializer.Deserialize<LicenseCheckResponse>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        if (!_signingService.VerifySignature(json, signature, publicKey)) return (false, "Invalid signature.");
 
-        return (false, "Invalid");
+        if (data.ResponseKey != requestKey) return (false, "Invalid response key.");
+
+        return (true, "License is valid.");
     }
 
     private static (string MachineName, string Fingerprint) GetMachineFingerprint()

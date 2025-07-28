@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Windows;
-using System.Windows.Forms.VisualStyles;
 using Tharga.Toolkit;
 using Tharga.Wpf.License;
 using Tharga.Wpf.TabNavigator;
@@ -132,7 +131,7 @@ internal abstract class ApplicationUpdateStateServiceBase : IApplicationUpdateSt
         UpdateInfoEvent -= ApplicationUpdateStateService_UpdateInfoEvent;
     }
 
-    private async Task ShowSplashAsync(bool firstRun, string entryMessage, bool showCloseButton)
+    private Task ShowSplashAsync(bool firstRun, string entryMessage, bool showCloseButton)
     {
         if (_splash == null)
         {
@@ -157,16 +156,9 @@ internal abstract class ApplicationUpdateStateServiceBase : IApplicationUpdateSt
             UpdateInfoEvent += ApplicationUpdateStateService_UpdateInfoEvent;
         }
 
-        //_splash.ClearMessages();
         if (showCloseButton) _splash.ShowCloseButton();
         _splash.Show();
-
-        //var splashDelay = Debugger.IsAttached ? TimeSpan.FromSeconds(4) : TimeSpan.FromSeconds(2);
-        //await Task.Delay(splashDelay);
-        //if (_splash != null && !_splash.IsCloseButtonVisible)
-        //{
-        //    CloseSplash();
-        //}
+        return Task.CompletedTask;
     }
 
     private void ApplicationUpdateStateService_UpdateInfoEvent(object sender, UpdateInfoEventArgs e)
@@ -279,16 +271,15 @@ internal abstract class ApplicationUpdateStateServiceBase : IApplicationUpdateSt
 
         try
         {
-            //if (Debugger.IsAttached)
-            //{
-            //    message = "No license needed.";
-            //    isValid = true;
-            //    UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs(message));
-            //}
-            //else
+            if (Debugger.IsAttached)
+            {
+                message = "No license needed.";
+                isValid = true;
+                UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs(message));
+            }
+            else
             {
                 var result = await _licenseClient.CheckLicenseAsync();
-                //Enabled = result.IsValid;
                 if (!result.IsValid)
                 {
                     Application.Current.Dispatcher.Invoke(() =>
