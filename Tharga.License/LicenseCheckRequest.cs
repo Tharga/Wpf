@@ -2,6 +2,7 @@
 
 public record LicenseCheckRequest
 {
+    public required string RequestKey { get; init; }
     public required string ApplicationName { get; init; }
     public required Fingerprint MachineFingerprint { get; init; }
     public required Fingerprint VersionFingerprint { get; init; }
