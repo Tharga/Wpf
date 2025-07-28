@@ -45,6 +45,11 @@ public class ThargaWpfOptions
     public bool Debug { get; set; }
 
     /// <summary>
+    /// Select the type of system should be used for update. None, Squirrel or Velopack.
+    /// </summary>
+    public UpdateSystem UpdateSystem { get; set; }
+
+    /// <summary>
     /// The interval between automatic checks for new versions.
     /// If the provided value is TimeSpan.Zero (0), then versions will never be checked, this is default.
     /// Updates can also be performed by calling the CheckForUpdate method in IApplicationUpdateStateService.
@@ -52,14 +57,14 @@ public class ThargaWpfOptions
     public TimeSpan? UpdateIntervalCheck { get; set; }
 
     /// <summary>
-    /// Select the type of system should be used for update. None, Squirrel or Velopack.
-    /// </summary>
-    public UpdateSystem UpdateSystem { get; set; }
-
-    /// <summary>
     /// Loader for providing the location of the application update location.
     /// </summary>
     public Func<IConfiguration, string> UpdateLocation { get; set; }
+
+    /// <summary>
+    /// Set the location for a license server is you want to use one.
+    /// </summary>
+    public Func<IConfiguration, string> LicenseServerLocation { get; set; }
 
     /// <summary>
     /// True if the application can be started several times. No for single application executions where the running application will be focused instead.

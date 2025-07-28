@@ -3,6 +3,7 @@ using System.Windows;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Squirrel;
+using Tharga.Wpf.License;
 using Tharga.Wpf.TabNavigator;
 
 namespace Tharga.Wpf.ApplicationUpdate;
@@ -11,8 +12,8 @@ internal class SquirrelApplicationUpdateStateService : ApplicationUpdateStateSer
 {
     private readonly ILogger<SquirrelApplicationUpdateStateService> _logger;
 
-    public SquirrelApplicationUpdateStateService(IConfiguration configuration, ILoggerFactory loggerFactory, IApplicationDownloadService applicationDownloadService, ITabNavigationStateService tabNavigationStateService, ThargaWpfOptions options, Window mainWindow)
-        : base(configuration, loggerFactory, applicationDownloadService, tabNavigationStateService, options, mainWindow)
+    public SquirrelApplicationUpdateStateService(IConfiguration configuration, ILoggerFactory loggerFactory, ILicenseClient licenseClient, IApplicationDownloadService applicationDownloadService, ITabNavigationStateService tabNavigationStateService, ThargaWpfOptions options, Window mainWindow)
+        : base(configuration, loggerFactory, licenseClient, applicationDownloadService, tabNavigationStateService, options, mainWindow)
     {
         ExeLocation = SquirrelRuntimeInfo.EntryExePath;
         _logger = loggerFactory.CreateLogger<SquirrelApplicationUpdateStateService>();
