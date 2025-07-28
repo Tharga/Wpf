@@ -1,16 +1,17 @@
-﻿using System.Diagnostics;
-using System.Net.Http;
-using System.Reflection;
-using System.Windows;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using System.Diagnostics;
+using System.Net.Http;
+using System.Reflection;
+using System.Windows;
 using Tharga.Toolkit.TypeService;
 using Tharga.Wpf.ApplicationUpdate;
 using Tharga.Wpf.ExceptionHandling;
 using Tharga.Wpf.Framework;
 using Tharga.Wpf.IconTray;
+using Tharga.Wpf.License;
 using Tharga.Wpf.TabNavigator;
 using Tharga.Wpf.WindowLocation;
 
@@ -85,17 +86,18 @@ public abstract class ApplicationBase : Application
                     var tabNavigationStateService = s.GetService<ITabNavigationStateService>();
                     var mainWindow = ((ApplicationBase)Current).MainWindow;
                     var loggerFactory = s.GetService<ILoggerFactory>();
+                    var licenseClient = s.GetService<ILicenseClient>();
                     //var logger = loggerFactory.CreateLogger<ApplicationUpdateStateService>();
                     //return new ApplicationUpdateStateService(configuration, applicationDownloadService, tabNavigationStateService, _options, mainWindow, logger);
 
                     switch (_options.UpdateSystem)
                     {
                         case UpdateSystem.None:
-                            return new NoUpdateStateServiceBase(configuration, loggerFactory, applicationDownloadService, tabNavigationStateService, _options, mainWindow);
+                            return new NoUpdateStateServiceBase(configuration, loggerFactory, licenseClient, applicationDownloadService, tabNavigationStateService, _options, mainWindow);
                         case UpdateSystem.Squirrel:
-                            return new SquirrelApplicationUpdateStateService(configuration, loggerFactory, applicationDownloadService, tabNavigationStateService, _options, mainWindow);
+                            return new SquirrelApplicationUpdateStateService(configuration, loggerFactory, licenseClient, applicationDownloadService, tabNavigationStateService, _options, mainWindow);
                         case UpdateSystem.Velopack:
-                            return new VelopackApplicationUpdateStateService(configuration, loggerFactory, applicationDownloadService, tabNavigationStateService, _options, mainWindow);
+                            return new VelopackApplicationUpdateStateService(configuration, loggerFactory, licenseClient, applicationDownloadService, tabNavigationStateService, _options, mainWindow);
                         default:
                             throw new ArgumentOutOfRangeException(nameof(_options.UpdateSystem), @$"Unknown {nameof(_options.UpdateSystem)} {_options.UpdateSystem}.");
                     }
@@ -106,6 +108,8 @@ public abstract class ApplicationBase : Application
                     var httpClientFactory = s.GetService<IHttpClientFactory>();
                     return new ApplicationDownloadService(configuration, httpClientFactory, _options);
                 });
+
+                services.AddTransient<ILicenseClient, LicenseClient>();
 
                 //if (_options.Inactivity?.Timeout > TimeSpan.Zero)
                 //{

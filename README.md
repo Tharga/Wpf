@@ -13,6 +13,7 @@ This package is a basic toolset for WPF applications.
 - [TabNavigator](#tabnavigator)
 - [*ClickOnce* application update](#clickonce-application-update)
 - [Custom Exception handling](#custom-exception-handling)
+- [License Server Check](#license-server-check)
 
 The sample uses *Fluent.Ribbon* but any package can be used since MainWindow does not need any base class.
 
@@ -112,26 +113,45 @@ public ICommand NewTabCommand => new RelayCommand(_ => _tabNavigationStateServic
 ```
 
 ## ClickOnce application update
-This features uses [Squirrel](https://www.nuget.org/packages/Clowd.Squirrel) for updates.
+This features uses [Squirrel](https://www.nuget.org/packages/Clowd.Squirrel) or [Velopack](https://www.nuget.org/packages/Velopack/0.0.1350-g3ba32af) for updates.
 
-To get started reguster the options *CheckForUpdateInterval* and *ApplicationDownloadLocationLoader*.
+To get started register the options *UpdateSystem*, *UpdateIntervalCheck* and *UpdateLocation*.
 
-#### CheckForUpdateInterval
-When set to null, this feature is not enabled (default). If set to Zero, updates are only performed at startup. If there is an interval it wil be regularly checked.
+#### UpdateSystem
+Select between None, Squirrel and Velopack.
 
-#### ApplicationDownloadLocationLoader
-This address should point to the location of the Squirrel release (the location of the *RELEASES*-file).
+#### UpdateIntervalCheck
+The interval between checks. If the interval is set to 1 hour, the first check will be done after one hour.
+If the checks should be performed at startup, use the *checkForUpdates* in *ShowSplashAsync* or call *CheckForUpdateAsync* on application startup.
+
+#### UpdateLocation
+This address should point to the location of the Squirrel/Velopack release (the location of the *RELEASES*-file).
 
 Example of registration.
 ```
 protected override void Options(ThargaWpfOptions thargaWpfOptions)
 {
-    thargaWpfOptions.CheckForUpdateInterval = TimeSpan.Zero;
-    thargaWpfOptions.ApplicationDownloadLocationLoader += _ => new Uri("https://server-address.com/api/ClientUpdate");
+    thargaWpfOptions.UpdateSystem = UpdateSystem.Velopack;
+    thargaWpfOptions.UpdateIntervalCheck = TimeSpan.Zero;
+    thargaWpfOptions.UpdateLocation += _ => new Uri("https://server-address.com/api/ClientUpdate");
 }
 ```
 
 Checks for updates can also be made manually by calling *CheckForUpdateAsync* in *IApplicationUpdateStateService*.
+
+## License Server Check
+Make api calls to a license server to check if the application has a valid license.
+
+#### LicenseServerLocation
+The endpoints that will be called are *license/check* and *license/key*. You can implement them yourself, or add *Tharga.License* in your API and inject into a controller.
+
+Example of registration.
+```
+protected override void Options(ThargaWpfOptions thargaWpfOptions)
+{
+    thargaWpfOptions.LicenseServerLocation += _ => new Uri("https://server-address.com/api");
+}
+```
 
 ## Custom Exception handling
 Custom exception handlers should implement `IExceptionHandler<T>` where T is an Exception.

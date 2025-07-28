@@ -4,7 +4,9 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Windows;
+using System.Windows.Forms.VisualStyles;
 using Tharga.Toolkit;
+using Tharga.Wpf.License;
 using Tharga.Wpf.TabNavigator;
 using Application = System.Windows.Application;
 
@@ -12,6 +14,7 @@ namespace Tharga.Wpf.ApplicationUpdate;
 
 internal abstract class ApplicationUpdateStateServiceBase : IApplicationUpdateStateService
 {
+    private readonly ILicenseClient _licenseClient;
     private readonly IApplicationDownloadService _applicationDownloadService;
     private readonly Window _mainWindow;
     private readonly System.Timers.Timer _timer;
@@ -31,8 +34,9 @@ internal abstract class ApplicationUpdateStateServiceBase : IApplicationUpdateSt
 
     internal static readonly List<string> UpdateLog = new();
 
-    protected ApplicationUpdateStateServiceBase(IConfiguration configuration, ILoggerFactory loggerFactory, IApplicationDownloadService applicationDownloadService, ITabNavigationStateService tabNavigationStateService, ThargaWpfOptions options, Window mainWindow)
+    protected ApplicationUpdateStateServiceBase(IConfiguration configuration, ILoggerFactory loggerFactory, ILicenseClient licenseClient, IApplicationDownloadService applicationDownloadService, ITabNavigationStateService tabNavigationStateService, ThargaWpfOptions options, Window mainWindow)
     {
+        _licenseClient = licenseClient;
         _applicationDownloadService = applicationDownloadService;
         _tabNavigationStateService = tabNavigationStateService;
         _mainWindow = mainWindow;
@@ -82,6 +86,7 @@ internal abstract class ApplicationUpdateStateServiceBase : IApplicationUpdateSt
     }
 
     public event EventHandler<UpdateInfoEventArgs> UpdateInfoEvent;
+    public event EventHandler<LicenseInfoEventArgs> LicenseInfoEvent;
     public event EventHandler<SplashCompleteEventArgs> SplashCompleteEvent;
 
     protected virtual string ExeLocation { get; } = string.Empty;
@@ -244,10 +249,11 @@ internal abstract class ApplicationUpdateStateServiceBase : IApplicationUpdateSt
         }
     }
 
-    public async Task ShowSplashAsync(bool checkForUpdates, bool showCloseButton)
+    public async Task ShowSplashAsync(bool checkForUpdates, bool showCloseButton, bool checkForLicense)
     {
         await ShowSplashWithRetryAsync(false, null, showCloseButton);
-        if (checkForUpdates) await UpdateClientApplication($"{nameof(ShowSplashAsync)}");
+        if (checkForUpdates) await CheckForUpdateAsync($"{nameof(ShowSplashAsync)}");
+        if (checkForLicense) await CheckForLicenseAsync($"{nameof(ShowSplashAsync)}");
 
         if (!showCloseButton)
         {
@@ -263,5 +269,57 @@ internal abstract class ApplicationUpdateStateServiceBase : IApplicationUpdateSt
     public Task CheckForUpdateAsync(string source)
     {
         return UpdateClientApplication($"Call from {source ?? "Unknown"}");
+    }
+
+    public async Task<bool> CheckForLicenseAsync(string source = null)
+    {
+        UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs("Looking for license."));
+        var isValid = false;
+        var message = string.Empty;
+
+        try
+        {
+            //if (Debugger.IsAttached)
+            //{
+            //    message = "No license needed.";
+            //    isValid = true;
+            //    UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs(message));
+            //}
+            //else
+            {
+                var result = await _licenseClient.CheckLicenseAsync();
+                //Enabled = result.IsValid;
+                if (!result.IsValid)
+                {
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        _splash?.SetErrorMessage(result.Message);
+                        _splash?.ShowCloseButton();
+                    });
+                }
+
+                message = result.Message;
+                isValid = result.IsValid;
+                UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs(message));
+            }
+        }
+        catch (Exception e)
+        {
+            AddLogString($"Error: {e.Message} @{e.StackTrace}");
+            _logger.LogError(e, e.Message);
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                _splash?.SetErrorMessage($"{e.Message}\n{source}\n@{e.StackTrace})");
+                _splash?.ShowCloseButton();
+            });
+            message = e.Message;
+            isValid = false;
+        }
+        finally
+        {
+            LicenseInfoEvent?.Invoke(this, new LicenseInfoEventArgs(isValid, message));
+        }
+
+        return isValid;
     }
 }

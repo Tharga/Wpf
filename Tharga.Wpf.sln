@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tharga.Wpf", "Tharga.Wpf\Th
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tharga.Wpf.Sample", "Tharga.Wpf.Sample\Tharga.Wpf.Sample.csproj", "{534E6AD9-D0C3-4085-B74B-9981552CD4BA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tharga.License", "Tharga.License\Tharga.License.csproj", "{987EEEA0-45E5-47B8-86B8-E83B4883B601}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{534E6AD9-D0C3-4085-B74B-9981552CD4BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{534E6AD9-D0C3-4085-B74B-9981552CD4BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{534E6AD9-D0C3-4085-B74B-9981552CD4BA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{987EEEA0-45E5-47B8-86B8-E83B4883B601}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{987EEEA0-45E5-47B8-86B8-E83B4883B601}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{987EEEA0-45E5-47B8-86B8-E83B4883B601}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{987EEEA0-45E5-47B8-86B8-E83B4883B601}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
