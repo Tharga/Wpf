@@ -27,14 +27,29 @@ internal class VelopackApplicationUpdateStateService : ApplicationUpdateStateSer
         var newVersion = await mgr.CheckForUpdatesAsync();
         if (newVersion == null)
         {
-            OnUpdateInfoEvent(this, "No new version found.");
+            OnUpdateInfoEvent(this, "Already up to date.");
             return;
         }
 
-        OnUpdateInfoEvent(this, "Downloading...");
+        string msg;
+        if (newVersion.DeltasToTarget.Any())
+        {
+            var version = $"{newVersion.DeltasToTarget.Last().Version}";
+            var delta = newVersion.DeltasToTarget.Length == 1
+                ? "delta"
+                : $"{newVersion.DeltasToTarget.Length} deltas";
+
+            msg = $"version {version} ({delta})";
+        }
+        else
+        {
+            msg = $"version {newVersion.TargetFullRelease.Version} (full)";
+        }
+
+        OnUpdateInfoEvent(this, $"Downloading {msg}.");
         await mgr.DownloadUpdatesAsync(newVersion);
 
-        OnUpdateInfoEvent(this, "Installing...");
+        OnUpdateInfoEvent(this, "Installing.");
         mgr.ApplyUpdatesAndRestart(newVersion);
     }
 }

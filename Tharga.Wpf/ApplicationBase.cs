@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Net.Http;
 using System.Reflection;
 using System.Windows;
+using Tharga.License;
 using Tharga.Toolkit.TypeService;
 using Tharga.Wpf.ApplicationUpdate;
 using Tharga.Wpf.ExceptionHandling;
@@ -86,7 +87,7 @@ public abstract class ApplicationBase : Application
                     var tabNavigationStateService = s.GetService<ITabNavigationStateService>();
                     var mainWindow = ((ApplicationBase)Current).MainWindow;
                     var loggerFactory = s.GetService<ILoggerFactory>();
-                    var licenseClient = s.GetService<ILicenseClient>();
+                    var licenseClient = s.GetService<ILicenseClient>() ?? throw new NullReferenceException();
                     //var logger = loggerFactory.CreateLogger<ApplicationUpdateStateService>();
                     //return new ApplicationUpdateStateService(configuration, applicationDownloadService, tabNavigationStateService, _options, mainWindow, logger);
 
@@ -110,6 +111,7 @@ public abstract class ApplicationBase : Application
                 });
 
                 services.AddTransient<ILicenseClient, LicenseClient>();
+                services.AddThargaLicense();
 
                 //if (_options.Inactivity?.Timeout > TimeSpan.Zero)
                 //{
