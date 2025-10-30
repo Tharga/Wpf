@@ -1,5 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-	<PropertyGroup>
+  <PropertyGroup>
     <TargetFramework>net9.0-windows</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
@@ -58,7 +58,6 @@
     <PackageReference Include="Clowd.Squirrel" Version="2.11.1" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.8" />
     <PackageReference Include="System.Text.Json" Version="9.0.8" />
-    <PackageReference Include="Tharga.Toolkit" Version="1.13.16" />
     <PackageReference Include="System.Management" Version="9.0.8" />
     <PackageReference Include="Velopack" Version="0.0.1298" />
   </ItemGroup>
@@ -67,6 +66,7 @@
     <InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Toolkit\Tharga.Toolkit\Tharga.Toolkit.csproj" />
     <ProjectReference Include="..\Tharga.License\Tharga.License.csproj" />
   </ItemGroup>
   <ItemGroup>

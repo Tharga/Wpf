@@ -34,7 +34,7 @@ internal class LicenseClient : ILicenseClient
 
         var version = BuildVersionFingerprint();
         var machine = GetMachineFingerprint();
-        var requestKey = StringExtension.RandomString();
+        var requestKey = StringExtension.GetRandomString();
 
         var request = new LicenseCheckRequest
         {
