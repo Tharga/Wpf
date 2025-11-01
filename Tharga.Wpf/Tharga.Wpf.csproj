@@ -25,10 +25,18 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Images\Application\blue.png" />
+    <None Remove="Images\Application\green-t.png" />
     <None Remove="Images\Application\green.png" />
+    <None Remove="Images\Application\orange.png" />
+    <None Remove="Images\Application\red-t.png" />
+    <None Remove="Images\Application\red.png" />
+    <None Remove="Images\Application\teal-t.png" />
     <None Remove="Images\Application\teal.jpg" />
+    <None Remove="Images\Application\teal.png" />
     <None Remove="Images\Application\white.jpg" />
+    <None Remove="Images\Application\white.png" />
     <None Remove="Images\Application\yellow.jpg" />
+    <None Remove="Images\Application\yellow.png" />
     <None Remove="Images\Close.png" />
     <None Remove="Images\thargelion.ico" />
     <None Remove="Tharga.Wpf.csproj.DotSettings" />
@@ -38,10 +46,15 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\Application\blue.png" />
+    <Resource Include="Images\Application\green-t.png" />
     <Resource Include="Images\Application\green.png" />
-    <Resource Include="Images\Application\teal.jpg" />
-    <Resource Include="Images\Application\white.jpg" />
-    <Resource Include="Images\Application\yellow.jpg" />
+    <Resource Include="Images\Application\orange.png" />
+    <Resource Include="Images\Application\red-t.png" />
+    <Resource Include="Images\Application\red.png" />
+    <Resource Include="Images\Application\teal-t.png" />
+    <Resource Include="Images\Application\teal.png" />
+    <Resource Include="Images\Application\white.png" />
+    <Resource Include="Images\Application\yellow.png" />
     <Resource Include="Images\Close.png" />
   </ItemGroup>
   <ItemGroup>

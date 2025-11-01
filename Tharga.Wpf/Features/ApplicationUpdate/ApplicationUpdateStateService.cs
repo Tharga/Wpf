@@ -150,7 +150,7 @@ internal abstract class ApplicationUpdateStateServiceBase : IApplicationUpdateSt
                 ClientLocation = applicationLocation,
                 ClientSourceLocation = applicationSourceLocation,
                 SplashClosed = e => { SplashCompleteEvent?.Invoke(this, new SplashCompleteEventArgs(e, true)); },
-                ImagePath = SplashImageLibrary.Teal
+                ImagePath = SplashImageLibrary.TealTransparent
             };
             _splash = _options.SplashCreator?.Invoke(splashData) ?? new Splash(splashData);
             UpdateInfoEvent += ApplicationUpdateStateService_UpdateInfoEvent;
