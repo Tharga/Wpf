@@ -8,7 +8,6 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using Tharga.License;
-using Tharga.Toolkit;
 
 namespace Tharga.Wpf.License;
 
@@ -34,7 +33,7 @@ internal class LicenseClient : ILicenseClient
 
         var version = BuildVersionFingerprint();
         var machine = GetMachineFingerprint();
-        var requestKey = StringExtension.GetRandomString();
+        var requestKey = Guid.NewGuid().ToString().Replace("-", "");
 
         var request = new LicenseCheckRequest
         {

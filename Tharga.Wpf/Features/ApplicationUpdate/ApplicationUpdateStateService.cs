@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Windows;
-using Tharga.Toolkit;
 using Tharga.Wpf.License;
 using Tharga.Wpf.TabNavigator;
 using Application = System.Windows.Application;
@@ -104,7 +103,7 @@ internal abstract class ApplicationUpdateStateServiceBase : IApplicationUpdateSt
 
         if (_options.Debug)
         {
-            _logFileName ??= $"Log_{now.ToLocalDateTimeString().Replace(" ", "_").Replace(":", "")}.txt";
+            _logFileName ??= $"Log_{now.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss").Replace(" ", "_").Replace(":", "")}.txt";
             File.AppendAllLines(_logFileName, [msg]);
         }
 

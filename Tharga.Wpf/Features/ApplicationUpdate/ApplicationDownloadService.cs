@@ -1,6 +1,5 @@
 ﻿using System.Net.Http;
 using Microsoft.Extensions.Configuration;
-using Tharga.Toolkit;
 
 namespace Tharga.Wpf.ApplicationUpdate;
 
@@ -20,7 +19,7 @@ internal class ApplicationDownloadService : IApplicationDownloadService
     public async Task<(string ApplicationLocation, string ApplicationLocationSource)> GetApplicationLocationAsync()
     {
         var path = _options.UpdateLocation?.Invoke(_configuration);
-        if (path.IsNullOrEmpty()) return (null, null);
+        if (string.IsNullOrEmpty(path)) return (null, null);
 
         switch (_options.UpdateSystem)
         {
