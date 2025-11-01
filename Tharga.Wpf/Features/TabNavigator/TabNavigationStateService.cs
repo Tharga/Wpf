@@ -4,7 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Microsoft.Extensions.DependencyInjection;
-using Tharga.Toolkit.TypeService;
+using Tharga.Runtime;
 
 namespace Tharga.Wpf.TabNavigator;
 

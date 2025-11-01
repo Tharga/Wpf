@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Windows;
 using System.Windows.Markup;
-using Tharga.Toolkit.TypeService;
+using Tharga.Runtime;
 
 namespace Tharga.Wpf;
 

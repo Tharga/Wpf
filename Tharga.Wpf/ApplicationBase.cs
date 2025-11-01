@@ -7,7 +7,7 @@ using System.Net.Http;
 using System.Reflection;
 using System.Windows;
 using Tharga.License;
-using Tharga.Toolkit.TypeService;
+using Tharga.Runtime;
 using Tharga.Wpf.ApplicationUpdate;
 using Tharga.Wpf.ExceptionHandling;
 using Tharga.Wpf.Framework;
