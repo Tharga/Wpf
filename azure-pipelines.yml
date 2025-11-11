@@ -1,7 +1,7 @@
 trigger:
 - master
 
-name: 1.4.$(Rev:r)
+name: 2.0.$(Rev:r)
 
 pool:
   vmImage: 'windows-latest'
@@ -20,9 +20,9 @@ stages:
 
     steps:
     - task: UseDotNet@2
-      displayName: 'Use .NET 9'
+      displayName: 'Use .NET 10'
       inputs:
-        version: 9.0.x
+        version: 10.0.x
         includePreviewVersions: false
 
     - task: NuGetToolInstaller@1
@@ -40,7 +40,7 @@ stages:
         command: 'build'
         projects: '**/Tharga.*.csproj'
         arguments: '-c Release --no-restore /p:Version=$(Build.BuildNumber)'
-        versioningScheme: 'byEnvVar'
+        versioningScheme: 'byBuildNumber'
         versionEnvVar: 'messagesPackageVersion'
 
     - task: DotNetCoreCLI@2
