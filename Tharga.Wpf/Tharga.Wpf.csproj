@@ -8,7 +8,7 @@
     <Company>Thargelion AB</Company>
     <Product>Tharga WPF</Product>
     <Description>Toolkit for WPF applications.</Description>
-    <PackageIconUrl>http://thargelion.se/wp-content/uploads/2019/11/Thargelion-White-Icon-150.png</PackageIconUrl>
+    <PackageIconUrl>http://thargelion.se/wp-content/uploads/2025/11/Thargelion-Wpf-Icon-150.png</PackageIconUrl>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageProjectUrl>https://github.com/Tharga/Wpf</PackageProjectUrl>
