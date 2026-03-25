@@ -19,14 +19,15 @@
 - [x] ThargaLicenseRegistration: DI resolves ISigningService, transient lifetime (2 tests)
 - Total: 26 tests, all passing
 
-## Step 3 — Root-level and Framework tests [~]
-- [ ] ViewModelBase: PropertyChanged notification, SetField change detection
-- [ ] RelayCommand: Execute, CanExecute, CanExecuteChanged
-- [ ] BeforeCloseEventArgs: Cancel property
-- [ ] ThargaWpfOptions: property defaults, setters, RegisterExceptionHandler, UseAssembly
-- [ ] CloseMode / UpdateSystem enums: defined values
-- [ ] CancellationService: Token, CancelAsync
-- [ ] StringExtensions: NullIfEmpty (null, empty, whitespace, value)
+## Step 3 — Root-level and Framework tests ✓
+- [x] ViewModelBase: PropertyChanged notification, SetField change detection, no-subscriber safety (6 tests)
+- [x] RelayCommand: Execute, CanExecute with/without predicate (5 tests)
+- [x] BeforeCloseEventArgs: Cancel default and setter (2 tests)
+- [x] ThargaWpfOptions: defaults, setters, RegisterExceptionHandler, UseAssembly (10 tests)
+- [x] CloseMode / UpdateSystem enums: values and member count (4 tests)
+- [x] CancellationService: Token initial state, CancelAsync (3 tests)
+- [x] StringExtensions: NullIfEmpty null/empty/value/whitespace (4 tests)
+- Total: 34 tests, all passing
 
 ## Step 4 — Dialog feature tests
 - [ ] DialogViewModelBase: OkCommand, CancelCommand, RequestCloseEvent
