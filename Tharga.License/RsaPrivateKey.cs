@@ -2,17 +2,39 @@
 
 namespace Tharga.License;
 
+/// <summary>
+/// Represents an RSA private key with base64-encoded components.
+/// </summary>
 public record RsaPrivateKey
 {
+    /// <summary>The base64-encoded RSA modulus.</summary>
     public required string Modulus { get; init; }
+
+    /// <summary>The base64-encoded RSA exponent.</summary>
     public required string Exponent { get; init; }
+
+    /// <summary>The base64-encoded RSA private exponent (D).</summary>
     public required string D { get; init; }
+
+    /// <summary>The base64-encoded RSA prime factor (P).</summary>
     public required string P { get; init; }
+
+    /// <summary>The base64-encoded RSA prime factor (Q).</summary>
     public required string Q { get; init; }
+
+    /// <summary>The base64-encoded RSA CRT exponent (DP = D mod P-1).</summary>
     public required string DP { get; init; }
+
+    /// <summary>The base64-encoded RSA CRT exponent (DQ = D mod Q-1).</summary>
     public required string DQ { get; init; }
+
+    /// <summary>The base64-encoded RSA CRT coefficient (InverseQ = Q^-1 mod P).</summary>
     public required string InverseQ { get; init; }
 
+    /// <summary>
+    /// Converts this key to <see cref="RSAParameters"/> for use with .NET cryptography APIs.
+    /// </summary>
+    /// <returns>The RSA parameters.</returns>
     public RSAParameters ToParameters()
     {
         return new RSAParameters
@@ -28,6 +50,11 @@ public record RsaPrivateKey
         };
     }
 
+    /// <summary>
+    /// Creates an <see cref="RsaPrivateKey"/> from the specified <see cref="RSAParameters"/>.
+    /// </summary>
+    /// <param name="parameters">The RSA parameters containing the private key components.</param>
+    /// <returns>A new <see cref="RsaPrivateKey"/> instance.</returns>
     public static RsaPrivateKey FromParameters(RSAParameters parameters)
     {
         return new RsaPrivateKey

@@ -3,8 +3,10 @@ using System.Text;
 
 namespace Tharga.License;
 
+/// <inheritdoc />
 internal class SigningService : ISigningService
 {
+    /// <inheritdoc />
     public RsaKeyPair BuildKeyPair()
     {
         // Generate a key pair
@@ -19,6 +21,7 @@ internal class SigningService : ISigningService
         return new RsaKeyPair { Public = publicKey, Private = privateKey };
     }
 
+    /// <inheritdoc />
     public string Sign(string data, RsaPrivateKey privateRsaKey)
     {
         using var rsa = RSA.Create();
@@ -30,6 +33,7 @@ internal class SigningService : ISigningService
         return Convert.ToBase64String(signature);
     }
 
+    /// <inheritdoc />
     public bool VerifySignature(string data, string base64Signature, RsaPublicKey rsaPublicKey)
     {
         using var rsa = RSA.Create();

@@ -21,7 +21,7 @@
     <EnableSourceLink>true</EnableSourceLink>
   </PropertyGroup>
   <PropertyGroup>
-    <NoWarn>1701;1702;CS1591;CS0809</NoWarn>
+    <NoWarn>1701;1702;CS0809</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Images\Application\blue.png" />

@@ -7,6 +7,9 @@ using Tharga.Wpf.IconTray;
 
 namespace Tharga.Wpf;
 
+/// <summary>
+/// Configuration options for the Tharga WPF toolkit.
+/// </summary>
 public class ThargaWpfOptions
 {
     private readonly ConcurrentDictionary<Type, Type> _exceptionTypes = new();
@@ -88,6 +91,10 @@ public class ThargaWpfOptions
         _exceptionTypes.TryAdd(typeof(TException), typeof(THandler));
     }
 
+    /// <summary>
+    /// Registers a custom exception handler service.
+    /// </summary>
+    /// <typeparam name="TExceptionHandlerService">The type of exception handler service to register.</typeparam>
     public void RegisterExceptionHandler<TExceptionHandlerService>()
         where TExceptionHandlerService : IExceptionHandlerService
     {

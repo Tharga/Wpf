@@ -5,10 +5,15 @@ using Tharga.Wpf.WindowLocation;
 
 namespace Tharga.Wpf.IconTray;
 
+/// <inheritdoc />
 public class NotifyIconService : INotifyIconService
 {
     private readonly NotifyIcon _notifyIcon;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="NotifyIconService"/> class.
+    /// </summary>
+    /// <param name="thargaWpfOptions">The application options containing tray icon configuration.</param>
     public NotifyIconService(ThargaWpfOptions thargaWpfOptions)
     {
         _notifyIcon = new NotifyIcon
@@ -32,6 +37,7 @@ public class NotifyIconService : INotifyIconService
         _notifyIcon.ContextMenuStrip.Items.Add("Exit", Resources.Close, (_, _) => { ApplicationBase.Close(CloseMode.Soft); });
     }
 
+    /// <inheritdoc />
     public void Create(Window window, string name, IWindowLocationService windowLocationService)
     {
         window.Closing += (_, _) => { _notifyIcon.Dispose(); };

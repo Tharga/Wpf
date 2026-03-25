@@ -2,12 +2,19 @@
 
 namespace Tharga.Wpf;
 
+/// <summary>
+/// An observable dictionary that supports WPF data binding by implementing both
+/// <see cref="ObservableCollection{T}"/> and <see cref="IDictionary{TKey,TValue}"/>.
+/// </summary>
+/// <typeparam name="TKey">The type of dictionary keys.</typeparam>
+/// <typeparam name="TValue">The type of dictionary values.</typeparam>
 [Serializable]
 public class ObservableDictionary<TKey, TValue> : ObservableCollection<ObservableKeyValuePair<TKey, TValue>>, IDictionary<TKey, TValue>
 {
 
     #region IDictionary<TKey,TValue> Members
 
+    /// <inheritdoc />
     public void Add(TKey key, TValue value)
     {
         if (ContainsKey(key))
@@ -17,6 +24,7 @@ public class ObservableDictionary<TKey, TValue> : ObservableCollection<Observabl
         base.Add(new ObservableKeyValuePair<TKey, TValue>() { Key = key, Value = value });
     }
 
+    /// <inheritdoc />
     public bool ContainsKey(TKey key)
     {
         //var m=base.FirstOrDefault((i) => i.Key == key);
@@ -35,11 +43,13 @@ public class ObservableDictionary<TKey, TValue> : ObservableCollection<Observabl
         return this;
     }
 
+    /// <inheritdoc />
     public ICollection<TKey> Keys
     {
         get { return (from i in ThisAsCollection() select i.Key).ToList(); }
     }
 
+    /// <inheritdoc />
     public bool Remove(TKey key)
     {
         var remove = ThisAsCollection().Where(pair => Equals(key, pair.Key)).ToList();
@@ -50,6 +60,7 @@ public class ObservableDictionary<TKey, TValue> : ObservableCollection<Observabl
         return remove.Count > 0;
     }
 
+    /// <inheritdoc />
     public bool TryGetValue(TKey key, out TValue value)
     {
         value = default(TValue);
@@ -67,11 +78,13 @@ public class ObservableDictionary<TKey, TValue> : ObservableCollection<Observabl
         return ThisAsCollection().FirstOrDefault((i) => i.Key.Equals(key));
     }
 
+    /// <inheritdoc />
     public ICollection<TValue> Values
     {
         get { return (from i in ThisAsCollection() select i.Value).ToList(); }
     }
 
+    /// <inheritdoc />
     public TValue this[TKey key]
     {
         get
@@ -100,11 +113,13 @@ public class ObservableDictionary<TKey, TValue> : ObservableCollection<Observabl
 
     #region ICollection<KeyValuePair<TKey,TValue>> Members
 
+    /// <inheritdoc />
     public void Add(KeyValuePair<TKey, TValue> item)
     {
         Add(item.Key, item.Value);
     }
 
+    /// <inheritdoc />
     public bool Contains(KeyValuePair<TKey, TValue> item)
     {
         var r = GetKvpByTheKey(item.Key);
@@ -115,16 +130,19 @@ public class ObservableDictionary<TKey, TValue> : ObservableCollection<Observabl
         return Equals(r.Value, item.Value);
     }
 
+    /// <inheritdoc />
     public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
     {
         throw new NotImplementedException();
     }
 
+    /// <inheritdoc />
     public bool IsReadOnly
     {
         get { return false; }
     }
 
+    /// <inheritdoc />
     public bool Remove(KeyValuePair<TKey, TValue> item)
     {
         var r = GetKvpByTheKey(item.Key);
@@ -143,6 +161,7 @@ public class ObservableDictionary<TKey, TValue> : ObservableCollection<Observabl
 
     #region IEnumerable<KeyValuePair<TKey,TValue>> Members
 
+    /// <inheritdoc />
     public new IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
     {
         return (from i in ThisAsCollection() select new KeyValuePair<TKey, TValue>(i.Key, i.Value)).ToList().GetEnumerator();

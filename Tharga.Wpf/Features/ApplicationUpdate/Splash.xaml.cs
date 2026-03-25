@@ -7,11 +7,18 @@ using System.Windows.Navigation;
 
 namespace Tharga.Wpf.ApplicationUpdate;
 
+/// <summary>
+/// Built-in splash screen window displaying startup progress and update information.
+/// </summary>
 public partial class Splash : ISplash
 {
     private readonly Action<CloseMethod> _splashClosed;
     private CloseMethod _closeMethod = CloseMethod.Automatically;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Splash"/> class.
+    /// </summary>
+    /// <param name="splashData">The data to display on the splash screen.</param>
     public Splash(SplashData splashData)
     {
         if (splashData.MainWindow.Visibility == Visibility.Visible)
@@ -68,24 +75,29 @@ public partial class Splash : ISplash
         _splashClosed = splashData.SplashClosed;
     }
 
+    /// <inheritdoc />
     public void UpdateInfo(string message)
     {
         Application.Current.Dispatcher.Invoke(() => Messages.Items.Add(message));
     }
 
+    /// <inheritdoc />
     public void SetErrorMessage(string message)
     {
         ErrorMessage.Text = message;
         ErrorMessage.Visibility = Visibility.Visible;
     }
 
+    /// <inheritdoc />
     public void ShowCloseButton()
     {
         CloseButton.Visibility = Visibility.Visible;
     }
 
+    /// <inheritdoc />
     public bool IsCloseButtonVisible => CloseButton.Visibility == Visibility.Visible;
 
+    /// <inheritdoc />
     public void ClearMessages()
     {
         Messages.Items.Clear();
