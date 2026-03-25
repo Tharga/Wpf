@@ -62,12 +62,12 @@
 - [x] HandleExceptionEventArgs: construction, type preservation (2 tests)
 - Total: 2 tests, all passing
 
-## Step 10 — Update CI pipeline [~]
-- [ ] Add `dotnet test` step to azure-pipelines.yml
-- [ ] Verify full build + test passes
+## Step 10 — Update CI pipeline ✓
+- [x] Add `dotnet test` step to azure-pipelines.yml (between Build and Pack)
+- [x] Verify `dotnet test -c Release --no-build` passes
 
-## Step 11 — Final verification
-- [ ] Run full `dotnet test -c Release` — all green
-- [ ] Commit all changes
+## Step 11 — Final verification ✓
+- [x] Full `dotnet test -c Release` — 120 tests, all green
+- [x] All changes committed
 
 ## Grand Total: 120 tests (26 License + 94 Wpf), all passing

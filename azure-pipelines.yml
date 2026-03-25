@@ -49,6 +49,13 @@ stages:
         versionEnvVar: 'messagesPackageVersion'
 
     - task: DotNetCoreCLI@2
+      displayName: 'Test'
+      inputs:
+        command: 'test'
+        projects: '**/*Tests.csproj'
+        arguments: '-c Release --no-build'
+
+    - task: DotNetCoreCLI@2
       displayName: 'Pack Tharga.Wpf'
       inputs:
         command: 'pack'
