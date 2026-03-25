@@ -1,8 +1,6 @@
 trigger:
 - master
 
-name: 2.0.$(Rev:r)
-
 pool:
   vmImage: 'windows-latest'
 
@@ -10,6 +8,7 @@ variables:
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
   BQC.ForceNewBaseline: false
+  majorMinor: '2.0'
 
 stages:
 - stage: Build
@@ -19,6 +18,12 @@ stages:
     displayName: Build and Test
 
     steps:
+    - checkout: self
+
+    - template: buildnumber.yml
+      parameters:
+        majorMinor: ${{ variables.majorMinor }}
+
     - task: UseDotNet@2
       displayName: 'Use .NET 10'
       inputs:
@@ -42,6 +47,13 @@ stages:
         arguments: '-c Release --no-restore /p:Version=$(Build.BuildNumber)'
         versioningScheme: 'byBuildNumber'
         versionEnvVar: 'messagesPackageVersion'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Test'
+      inputs:
+        command: 'test'
+        projects: '**/*Tests.csproj'
+        arguments: '-c Release --no-build'
 
     - task: DotNetCoreCLI@2
       displayName: 'Pack Tharga.Wpf'

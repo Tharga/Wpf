@@ -5,8 +5,16 @@ using Tharga.Runtime;
 
 namespace Tharga.Wpf;
 
+/// <summary>
+/// A XAML markup extension that resolves view models from the dependency injection container.
+/// Use in XAML as <c>DataContext="{wpf:ViewModelProvider local:MyViewModel}"</c>.
+/// </summary>
 public class ViewModelProvider : MarkupExtension
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ViewModelProvider"/> class.
+    /// </summary>
+    /// <param name="viewModelType">The type of view model to resolve.</param>
     public ViewModelProvider(Type viewModelType)
     {
         ViewModelType = viewModelType;
@@ -14,6 +22,7 @@ public class ViewModelProvider : MarkupExtension
 
     private Type ViewModelType { get; set; }
 
+    /// <inheritdoc />
     public override object ProvideValue(IServiceProvider serviceProvider)
     {
         var applicationBase = (Application.Current as ApplicationBase);

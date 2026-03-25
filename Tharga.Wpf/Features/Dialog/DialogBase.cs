@@ -3,8 +3,14 @@ using System.Windows;
 
 namespace Tharga.Wpf.Dialog;
 
+/// <summary>
+/// Base class for dialog windows that integrates with <see cref="DialogViewModelBase"/> for automatic close handling.
+/// </summary>
 public class DialogBase : Window
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="DialogBase"/> class with default dialog settings.
+    /// </summary>
     protected DialogBase()
     {
         DataContextChanged += DialogBase_DataContextChanged;

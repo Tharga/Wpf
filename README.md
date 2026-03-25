@@ -17,6 +17,13 @@ This package is a basic toolset for WPF applications.
 
 The sample uses *Fluent.Ribbon* but any package can be used since MainWindow does not need any base class.
 
+## Testing
+The solution includes xUnit test projects for both `Tharga.Wpf` and `Tharga.License`. Run all tests with:
+
+```bash
+dotnet test -c Release
+```
+
 ## Get started
 Set App.xaml to inherit from `ApplicationBase`.
 

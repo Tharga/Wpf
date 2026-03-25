@@ -18,14 +18,24 @@ using Tharga.Wpf.WindowLocation;
 
 namespace Tharga.Wpf;
 
+/// <summary>
+/// Abstract base class for WPF applications using the Tharga toolkit.
+/// Provides dependency injection, exception handling, tab navigation, and update management.
+/// </summary>
 public abstract class ApplicationBase : Application
 {
     private readonly CancellationService _cs;
     private readonly ThargaWpfOptions _options;
     private Mutex _mutex;
 
+    /// <summary>
+    /// Raised before the application closes, allowing handlers to cancel the operation.
+    /// </summary>
     public static event EventHandler<BeforeCloseEventArgs> BeforeCloseEvent;
 
+    /// <summary>
+    /// Initializes the application host, dependency injection, and event handlers.
+    /// </summary>
     protected ApplicationBase()
     {
         DispatcherUnhandledException += async (_, e) =>
@@ -129,6 +139,9 @@ public abstract class ApplicationBase : Application
             .Build();
     }
 
+    /// <summary>
+    /// Gets the application host providing access to dependency injection and configuration.
+    /// </summary>
     public IHost AppHost { get; protected init; }
 
     private static void RegisterExceptionHandler(ThargaWpfOptions options, IServiceCollection services)
@@ -168,9 +181,20 @@ public abstract class ApplicationBase : Application
         services.AddSingleton<INotifyIconService>(_ => new NotifyIconService(options));
     }
 
+    /// <summary>
+    /// Override to register additional services in the dependency injection container.
+    /// </summary>
+    /// <param name="context">The host builder context.</param>
+    /// <param name="services">The service collection to register services with.</param>
     protected virtual void Register(HostBuilderContext context, IServiceCollection services) { }
+
+    /// <summary>
+    /// Override to configure application options.
+    /// </summary>
+    /// <param name="thargaWpfOptions">The options to configure.</param>
     protected virtual void Options(ThargaWpfOptions thargaWpfOptions) { }
 
+    /// <inheritdoc />
     protected override async void OnStartup(StartupEventArgs args)
     {
         try
@@ -196,6 +220,7 @@ public abstract class ApplicationBase : Application
         }
     }
 
+    /// <inheritdoc />
     protected override async void OnExit(ExitEventArgs args)
     {
         try
@@ -213,6 +238,12 @@ public abstract class ApplicationBase : Application
         }
     }
 
+    /// <summary>
+    /// Resolves a service of type <typeparamref name="T"/> from the dependency injection container.
+    /// </summary>
+    /// <typeparam name="T">The type of service to resolve.</typeparam>
+    /// <returns>The resolved service instance.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when the service is not registered.</exception>
     public static T GetService<T>()
     {
         var service = ((ApplicationBase)Current).AppHost.Services.GetService<T>();
@@ -220,6 +251,11 @@ public abstract class ApplicationBase : Application
         return service;
     }
 
+    /// <summary>
+    /// Closes the application with the specified close mode.
+    /// </summary>
+    /// <param name="closeMode">The close mode to use.</param>
+    /// <returns><c>true</c> if the close was successful; <c>false</c> if it was cancelled.</returns>
     public static bool Close(CloseMode closeMode = CloseMode.Default)
     {
         try
@@ -271,5 +307,8 @@ public abstract class ApplicationBase : Application
         if (process != null) WindowHelper.FocusWindowByProcessId(process.Id);
     }
 
+    /// <summary>
+    /// Gets the current close mode of the application.
+    /// </summary>
     public static CloseMode CloseMode { get; private set; }
 }

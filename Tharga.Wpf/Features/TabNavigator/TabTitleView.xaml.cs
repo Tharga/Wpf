@@ -2,11 +2,19 @@
 
 namespace Tharga.Wpf.TabNavigator;
 
+/// <summary>
+/// Displays the title and close button for a tab in the tab navigator.
+/// </summary>
 public partial class TabTitleView
 {
     private readonly TabView _tabView;
     private readonly Func<TabView, Task> _close;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="TabTitleView"/> class.
+    /// </summary>
+    /// <param name="tabView">The tab view this title represents.</param>
+    /// <param name="close">A function to invoke when the close button is clicked.</param>
     public TabTitleView(TabView tabView, Func<TabView, Task> close)
     {
         tabView.CanCloseChangedEvent += (_, _) =>
