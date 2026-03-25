@@ -8,15 +8,18 @@
 - [x] Add InternalsVisibleTo for Tharga.License.Tests in Tharga.License.csproj
 - [x] Verify `dotnet build -c Release` passes
 
-## Step 2 — Tharga.License tests (pure logic, no WPF) [~]
-- [ ] SigningService: key pair generation, sign, verify signature, invalid signature rejection
-- [ ] RsaPublicKey / RsaPrivateKey: ToParameters, FromParameters round-trip
-- [ ] RsaKeyPair: construction
-- [ ] Fingerprint: construction and required properties
-- [ ] LicenseCheckRequest / LicenseCheckResponse: construction and required properties
-- [ ] ThargaLicenseRegistration: DI registration resolves ISigningService
+## Step 2 — Tharga.License tests (pure logic, no WPF) ✓
+- [x] SigningService: key pair generation, sign, verify, tampered data, wrong key, unicode, empty string (8 tests)
+- [x] RsaPublicKey: FromParameters/ToParameters round-trip, base64 storage, record equality (3 tests)
+- [x] RsaPrivateKey: FromParameters/ToParameters round-trip, all components, record equality (3 tests)
+- [x] RsaKeyPair: construction, record equality (2 tests)
+- [x] Fingerprint: construction, equality, inequality (3 tests)
+- [x] LicenseCheckRequest: construction, record equality (2 tests)
+- [x] LicenseCheckResponse: construction, record equality (2 tests)
+- [x] ThargaLicenseRegistration: DI resolves ISigningService, transient lifetime (2 tests)
+- Total: 26 tests, all passing
 
-## Step 3 — Root-level and Framework tests
+## Step 3 — Root-level and Framework tests [~]
 - [ ] ViewModelBase: PropertyChanged notification, SetField change detection
 - [ ] RelayCommand: Execute, CanExecute, CanExecuteChanged
 - [ ] BeforeCloseEventArgs: Cancel property
