@@ -24,7 +24,6 @@ public partial class MainWindow
 
         InitializeComponent();
 
-        //TODO: Create a tray Icon.
         ApplicationBase.GetService<INotifyIconService>().Create(this, nameof(MainWindow), _windowLocationService);
     }
 
