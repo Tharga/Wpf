@@ -6,7 +6,6 @@ using System.Reflection;
 using System.Windows;
 using Tharga.Wpf.License;
 using Tharga.Wpf.TabNavigator;
-using Application = System.Windows.Application;
 
 namespace Tharga.Wpf.ApplicationUpdate;
 
@@ -217,11 +216,8 @@ internal abstract class ApplicationUpdateStateServiceBase : IApplicationUpdateSt
 			_logger.LogError(e, e.Message);
             var message = "Update failed. ";
             UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs(message));
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                _splash?.SetErrorMessage($"{e.Message}\n{clientLocation}\n@{e.StackTrace})");
-                _splash?.ShowCloseButton();
-            });
+            _splash?.SetErrorMessage($"{e.Message}\n{clientLocation}\n@{e.StackTrace})");
+            _splash?.ShowCloseButton();
         }
         finally
         {
@@ -281,11 +277,8 @@ internal abstract class ApplicationUpdateStateServiceBase : IApplicationUpdateSt
                 var result = await _licenseClient.CheckLicenseAsync();
                 if (!result.IsValid)
                 {
-                    Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        _splash?.SetErrorMessage(result.Message);
-                        _splash?.ShowCloseButton();
-                    });
+                    _splash?.SetErrorMessage(result.Message);
+                    _splash?.ShowCloseButton();
                 }
 
                 message = result.Message;
@@ -297,11 +290,8 @@ internal abstract class ApplicationUpdateStateServiceBase : IApplicationUpdateSt
         {
             AddLogString($"Error: {e.Message} @{e.StackTrace}");
             _logger.LogError(e, e.Message);
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                _splash?.SetErrorMessage($"{e.Message}\n{source}\n@{e.StackTrace})");
-                _splash?.ShowCloseButton();
-            });
+            _splash?.SetErrorMessage($"{e.Message}\n{source}\n@{e.StackTrace})");
+            _splash?.ShowCloseButton();
             message = e.Message;
             isValid = false;
         }

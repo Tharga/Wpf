@@ -15,6 +15,21 @@ public partial class Splash : ISplash
     private readonly Action<CloseMethod> _splashClosed;
     private CloseMethod _closeMethod = CloseMethod.Automatically;
 
+    private void DispatchIfRequired(Action action)
+    {
+        if (Application.Current.Dispatcher.CheckAccess())
+            action();
+        else
+            Application.Current.Dispatcher.Invoke(action);
+    }
+
+    private T DispatchIfRequired<T>(Func<T> func)
+    {
+        if (Application.Current.Dispatcher.CheckAccess())
+            return func();
+        return Application.Current.Dispatcher.Invoke(func);
+    }
+
     /// <summary>
     /// Initializes a new instance of the <see cref="Splash"/> class.
     /// </summary>
@@ -78,30 +93,54 @@ public partial class Splash : ISplash
     /// <inheritdoc />
     public void UpdateInfo(string message)
     {
-        Application.Current.Dispatcher.Invoke(() => Messages.Items.Add(message));
+        DispatchIfRequired(() => Messages.Items.Add(message));
+    }
+
+    /// <inheritdoc />
+    void ISplash.Show()
+    {
+        DispatchIfRequired(Show);
+    }
+
+    /// <inheritdoc />
+    void ISplash.Hide()
+    {
+        DispatchIfRequired(Hide);
+    }
+
+    /// <inheritdoc />
+    void ISplash.Close()
+    {
+        DispatchIfRequired(Close);
     }
 
     /// <inheritdoc />
     public void SetErrorMessage(string message)
     {
-        ErrorMessage.Text = message;
-        ErrorMessage.Visibility = Visibility.Visible;
+        DispatchIfRequired(() =>
+        {
+            ErrorMessage.Text = message;
+            ErrorMessage.Visibility = Visibility.Visible;
+        });
     }
 
     /// <inheritdoc />
     public void ShowCloseButton()
     {
-        CloseButton.Visibility = Visibility.Visible;
+        DispatchIfRequired(() => CloseButton.Visibility = Visibility.Visible);
     }
 
     /// <inheritdoc />
-    public bool IsCloseButtonVisible => CloseButton.Visibility == Visibility.Visible;
+    public bool IsCloseButtonVisible => DispatchIfRequired(() => CloseButton.Visibility == Visibility.Visible);
 
     /// <inheritdoc />
     public void ClearMessages()
     {
-        Messages.Items.Clear();
-        ErrorMessage.Visibility = Visibility.Collapsed;
+        DispatchIfRequired(() =>
+        {
+            Messages.Items.Clear();
+            ErrorMessage.Visibility = Visibility.Collapsed;
+        });
     }
 
     private void ButtonBase_OnClick(object sender, RoutedEventArgs e)
