@@ -11,6 +11,7 @@ This package is a basic toolset for WPF applications.
 - [Built in .NET IOC](#built-in-net-ioc)
 - [Remember window location](#remember-window-location)
 - [TabNavigator](#tabnavigator)
+- [Splash Screen](#splash-screen)
 - [*ClickOnce* application update](#clickonce-application-update)
 - [Custom Exception handling](#custom-exception-handling)
 - [License Server Check](#license-server-check)
@@ -117,6 +118,49 @@ Therefore it currently does not work with the `OpenTabComamnd<T>`, you will have
 Example of relay command with title.
 ```
 public ICommand NewTabCommand => new RelayCommand(_ => _tabNavigationStateService.OpenTab<MyTabView>("My Tab"), _ => true);
+```
+
+## Splash Screen
+A splash screen is shown during application startup and update checks. By default it uses a built-in teal image.
+
+### Choosing a built-in image
+Set `SplashCreator` to return a `Splash` with a different image from `SplashImageLibrary`:
+
+```csharp
+protected override void Options(ThargaWpfOptions thargaWpfOptions)
+{
+    thargaWpfOptions.SplashCreator = data => new Splash(data with
+    {
+        ImagePath = SplashImageLibrary.Blue
+    });
+}
+```
+
+Available built-in images: `Blue`, `Green`, `GreenTransparent`, `Orange`, `Red`, `RedTransparent`, `Teal`, `TealTransparent`, `White`, `Yellow`.
+
+### Using a custom image
+Point `ImagePath` to any image file. The image should be a **PNG** at **500 x 309 pixels**. Use a transparent PNG if you want the splash window background to show through.
+
+To use an image bundled in your application, add the image file to your project (e.g. `Images/splash.png`) with **Build Action** set to **Resource**, then reference it with a pack URI:
+
+```csharp
+protected override void Options(ThargaWpfOptions thargaWpfOptions)
+{
+    thargaWpfOptions.SplashCreator = data => new Splash(data with
+    {
+        ImagePath = "pack://application:,,,/MyApp;component/Images/splash.png"
+    });
+}
+```
+
+### Replacing the splash window entirely
+To use a completely custom splash window, implement `ISplash` and return it from `SplashCreator`:
+
+```csharp
+protected override void Options(ThargaWpfOptions thargaWpfOptions)
+{
+    thargaWpfOptions.SplashCreator = data => new MyCustomSplash(data);
+}
 ```
 
 ## ClickOnce application update
