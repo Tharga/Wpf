@@ -266,18 +266,13 @@ public abstract class ApplicationBase : Application
             BeforeCloseEvent?.Invoke(null, beforeCloseEventArgs);
             if (beforeCloseEventArgs.Cancel) return false;
 
-            //TODO: When closing after an application update, it should be the "Force" mode.
-
             switch (closeMode)
             {
                 case CloseMode.Default:
                 case CloseMode.Soft:
-                    //TODO: Try to close tabs, if it does not work, abort closing of the application.
-                    //TODO: Now that the application could be hidden (icontray) when this happens. Is should be made visible when failed to close.
                     Current?.MainWindow?.Close();
                     break;
                 case CloseMode.Force:
-                    //TODO: Try to close tabs gently, if it does not work, terminate the application anyway.
                     Current?.MainWindow?.Close();
                     //Current.Shutdown();
                     break;
