@@ -28,6 +28,7 @@ internal abstract class ApplicationUpdateStateServiceBase : IApplicationUpdateSt
     private string _applicationLocationSource;
     private string _logFileName;
     private bool _checkingForUpdate;
+    private bool _isUpdating;
 
     internal static readonly List<string> UpdateLog = new();
 
@@ -207,6 +208,10 @@ internal abstract class ApplicationUpdateStateServiceBase : IApplicationUpdateSt
                 AddLogString($"locationSource: {result.ApplicationLocationSource}");
                 AddLogString($"clientLocation: {clientLocation}");
 
+                _isUpdating = true;
+                await ShowSplashWithRetryAsync(false);
+                _splash?.HideCloseButton();
+
                 await UpdateAsync(clientLocation);
             }
         }
@@ -231,6 +236,7 @@ internal abstract class ApplicationUpdateStateServiceBase : IApplicationUpdateSt
 
             //AddLogString($"Complete check for updates.");
             AddLogString($"--- End {nameof(UpdateClientApplication)} ---");
+            _isUpdating = false;
             _checkingForUpdate = false;
 			_lock.Release();
         }
@@ -242,11 +248,11 @@ internal abstract class ApplicationUpdateStateServiceBase : IApplicationUpdateSt
         if (checkForUpdates) await CheckForUpdateAsync($"{nameof(ShowSplashAsync)}");
         if (checkForLicense) await CheckForLicenseAsync($"{nameof(ShowSplashAsync)}");
 
-        if (!showCloseButton)
+        if (!showCloseButton && !_isUpdating)
         {
             var splashDelay = Debugger.IsAttached ? TimeSpan.FromSeconds(4) : TimeSpan.FromSeconds(2);
             await Task.Delay(splashDelay);
-            if (_splash != null && !_splash.IsCloseButtonVisible)
+            if (_splash != null && !_splash.IsCloseButtonVisible && !_isUpdating)
             {
                 CloseSplash();
             }

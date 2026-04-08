@@ -131,6 +131,12 @@ public partial class Splash : ISplash
     }
 
     /// <inheritdoc />
+    public void HideCloseButton()
+    {
+        DispatchIfRequired(() => CloseButton.Visibility = Visibility.Collapsed);
+    }
+
+    /// <inheritdoc />
     public bool IsCloseButtonVisible => DispatchIfRequired(() => CloseButton.Visibility == Visibility.Visible);
 
     /// <inheritdoc />

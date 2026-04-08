@@ -22,6 +22,9 @@ public interface ISplash
     /// <summary>Makes the close button visible on the splash screen.</summary>
     void ShowCloseButton();
 
+    /// <summary>Hides the close button on the splash screen, preventing the user from closing it.</summary>
+    void HideCloseButton();
+
     /// <summary>Closes and disposes the splash screen.</summary>
     void Close();
 
