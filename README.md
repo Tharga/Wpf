@@ -163,6 +163,9 @@ protected override void Options(ThargaWpfOptions thargaWpfOptions)
 }
 ```
 
+### Update behavior
+When an application update is detected, the splash screen stays open with a progress bar and the close button hidden, so the user knows an update is in progress. If the update fails, the close button reappears with an error message.
+
 ## ClickOnce application update
 This features uses [Squirrel](https://www.nuget.org/packages/Clowd.Squirrel) or [Velopack](https://www.nuget.org/packages/Velopack/0.0.1350-g3ba32af) for updates.
 
