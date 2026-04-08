@@ -211,6 +211,7 @@ internal abstract class ApplicationUpdateStateServiceBase : IApplicationUpdateSt
                 _isUpdating = true;
                 await ShowSplashWithRetryAsync(false);
                 _splash?.HideCloseButton();
+                _splash?.ShowProgress();
 
                 await UpdateAsync(clientLocation);
             }
@@ -221,6 +222,7 @@ internal abstract class ApplicationUpdateStateServiceBase : IApplicationUpdateSt
 			_logger.LogError(e, e.Message);
             var message = "Update failed. ";
             UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs(message));
+            _splash?.HideProgress();
             _splash?.SetErrorMessage($"{e.Message}\n{clientLocation}\n@{e.StackTrace})");
             _splash?.ShowCloseButton();
         }

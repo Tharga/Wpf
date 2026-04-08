@@ -137,6 +137,18 @@ public partial class Splash : ISplash
     }
 
     /// <inheritdoc />
+    public void ShowProgress()
+    {
+        DispatchIfRequired(() => UpdateProgressBar.Visibility = Visibility.Visible);
+    }
+
+    /// <inheritdoc />
+    public void HideProgress()
+    {
+        DispatchIfRequired(() => UpdateProgressBar.Visibility = Visibility.Collapsed);
+    }
+
+    /// <inheritdoc />
     public bool IsCloseButtonVisible => DispatchIfRequired(() => CloseButton.Visibility == Visibility.Visible);
 
     /// <inheritdoc />
