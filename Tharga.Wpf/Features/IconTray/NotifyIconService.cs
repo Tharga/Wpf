@@ -34,13 +34,13 @@ public class NotifyIconService : INotifyIconService
             _notifyIcon.ContextMenuStrip.Items.Add(new ToolStripSeparator());
         }
 
-        _notifyIcon.ContextMenuStrip.Items.Add("Exit", Resources.Close, (_, _) => { ApplicationBase.Close(CloseMode.Soft); });
+        _notifyIcon.ContextMenuStrip.Items.Add("Exit", Resources.Close, (_, _) => { ApplicationBase.Close(CloseMode.Force); });
     }
 
     /// <inheritdoc />
     public void Create(Window window, string name, IWindowLocationService windowLocationService)
     {
-        window.Closing += (_, _) => { _notifyIcon.Dispose(); };
+        window.Closed += (_, _) => { _notifyIcon.Dispose(); };
         _notifyIcon.DoubleClick += (_, _) =>
         {
             window.Show();

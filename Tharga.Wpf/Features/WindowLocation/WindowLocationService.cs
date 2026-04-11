@@ -64,21 +64,12 @@ internal class WindowLocationService : IWindowLocationService
 
             _window.Loaded += OnLoaded;
 
-            _window.Closing += (_, e) =>
+            _window.Closing += (_, _) =>
             {
-                if (_isMainWindow && _options.HideOnClose && ApplicationBase.CloseMode == CloseMode.Default)
-                {
-                    _window.Hide();
-                    SetLocation(Visibility.Hidden);
-                    e.Cancel = true;
-                }
-                else
-                {
-                    _window.LocationChanged -= OnWindowChanged;
-                    _window.SizeChanged -= OnWindowChanged;
-                    _window.StateChanged -= OnWindowChanged;
-                    SetLocation();
-                }
+                _window.LocationChanged -= OnWindowChanged;
+                _window.SizeChanged -= OnWindowChanged;
+                _window.StateChanged -= OnWindowChanged;
+                SetLocation();
             };
         }
 
@@ -307,7 +298,7 @@ internal class WindowLocationService : IWindowLocationService
         monitor.SetVisibility(visibility);
     }
 
-    public bool ShouldShowOnStartup(string name)
+    internal bool ShouldShowOnStartup(string name)
     {
         if (!_monitors.TryGetValue(name, out var monitor)) return true;
 

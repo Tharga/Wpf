@@ -253,6 +253,25 @@ public abstract class ApplicationBase : Application
     }
 
     /// <summary>
+    /// Call at the start of OnClosing to let the framework handle hide-on-close.
+    /// Returns true if the close was handled (window hidden) and the caller should return.
+    /// </summary>
+    /// <param name="e">The closing event args.</param>
+    /// <returns><c>true</c> if the close was handled (hidden to tray); <c>false</c> if closing should proceed.</returns>
+    public static bool HandleClose(System.ComponentModel.CancelEventArgs e)
+    {
+        var options = ((ApplicationBase)Current)._options;
+        if (options.HideOnClose && CloseMode == CloseMode.Default)
+        {
+            Hide();
+            e.Cancel = true;
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
     /// Hides the main window to the system tray and saves its visibility state.
     /// </summary>
     public static void Hide()

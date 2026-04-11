@@ -1,5 +1,7 @@
+using System.ComponentModel;
 using System.Windows;
 using Tharga.Wpf.IconTray;
+using Tharga.Wpf.TabNavigator;
 
 namespace Tharga.Wpf.WindowLocation;
 
@@ -42,5 +44,27 @@ public static class WindowExtensions
         var name = string.IsNullOrEmpty(window.Name) ? window.GetType().Name : window.Name;
         var monitor = windowLocationService.Monitor(window, name);
         return monitor;
+    }
+
+    /// <summary>
+    /// Handles the full close lifecycle: hide-on-close check, tab closing, and base OnClosing.
+    /// Call this from <c>OnClosing</c> to replace all close boilerplate.
+    /// </summary>
+    /// <param name="window">The window being closed.</param>
+    /// <param name="e">The closing event args.</param>
+    /// <param name="baseOnClosing">Pass <c>base.OnClosing</c> to allow the framework to raise the Closing event.</param>
+    public static async Task HandleCloseAsync(this Window window, CancelEventArgs e, Action<CancelEventArgs> baseOnClosing)
+    {
+        if (ApplicationBase.HandleClose(e)) return;
+
+        var tabNavigationStateService = ApplicationBase.GetService<ITabNavigationStateService>();
+        var force = ApplicationBase.CloseMode == CloseMode.Force;
+        if (!await tabNavigationStateService.CloseAllTabsAsync(force))
+        {
+            e.Cancel = true;
+            return;
+        }
+
+        baseOnClosing(e);
     }
 }
