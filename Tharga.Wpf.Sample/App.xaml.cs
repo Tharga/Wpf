@@ -9,10 +9,12 @@ public partial class App
 {
     private async void Application_Startup(object sender, StartupEventArgs e)
     {
-        _ = new MainWindow();
+        var mainWindow = new MainWindow();
 
         var updateService = GetService<IApplicationUpdateStateService>();
         await updateService.ShowSplashAsync(checkForUpdates: true);
+
+        mainWindow.Show();
     }
 
     protected override void Register(HostBuilderContext context, IServiceCollection services)
@@ -28,6 +30,9 @@ public partial class App
         thargaWpfOptions.UpdateIntervalCheck = TimeSpan.Zero;
         thargaWpfOptions.AllowTabsWithSameTitles = false;
         thargaWpfOptions.AllowMultipleApplications = false;
+        thargaWpfOptions.CompanyName = "Tharga";
+        thargaWpfOptions.Debug = false;
+        //thargaWpfOptions.IconTray = null;
 
         thargaWpfOptions.RegisterExceptionHandler<InvalidOperationExceptionHandler, InvalidOperationException>();
 

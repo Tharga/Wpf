@@ -63,6 +63,10 @@
             </fluent:Ribbon.Menu>
             <!--Tabs-->
             <fluent:RibbonTabItem Header="Home">
+                <fluent:RibbonGroupBox Header="Exit">
+                    <fluent:Button Header="Hard Close" Command="{Binding ExitCommand}"/>
+                    <fluent:Button Header="Soft Close" Command="{Binding ExitSoftCommand}"/>
+                </fluent:RibbonGroupBox>
                 <fluent:RibbonGroupBox Header="Group">
                     <fluent:Button Header="Splash" Command="{Binding ShowSplashCommand}"/>
                     <fluent:Button Header="Check for update" Command="{Binding CheckForUpdateCommand}"/>

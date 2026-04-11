@@ -30,7 +30,9 @@ public class MainWindowViewModel : ViewModelBase
     public ICommand NewTabCommand2 => new RelayCommand(_ => _tabNavigationStateService.OpenTabAsync<MyTabView>("My Tab"), _ => true);
     public ICommand NewTabCommand3 => new RelayCommand(_ => _tabNavigationStateService.OpenTabAsync<FixedTabView>(), _ => true);
     public ICommand AboutCommand => new RelayCommand(_ => { _applicationUpdateStateService.ShowSplashAsync(showCloseButton: true); }, _ => true);
-    public ICommand ExitCommand => new RelayCommand(_ => { ApplicationBase.Close(CloseMode.Soft); }, _ => true);
+
+    public ICommand ExitCommand => new RelayCommand(_ => { ApplicationBase.Close(CloseMode.Force); }, _ => true);
+    public ICommand ExitSoftCommand => new RelayCommand(_ => { ApplicationBase.Close(CloseMode.Soft); }, _ => true);
 
     public string Message
     {
