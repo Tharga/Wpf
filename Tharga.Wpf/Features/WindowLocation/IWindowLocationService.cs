@@ -24,6 +24,13 @@ public interface IWindowLocationService
     void SetVisibility(string name, Visibility visibility);
 
     /// <summary>
+    /// Returns whether the window should be shown on startup based on saved state and startup options.
+    /// </summary>
+    /// <param name="name">The window name.</param>
+    /// <returns><c>true</c> if the window should be shown; <c>false</c> if it should stay hidden.</returns>
+    bool ShouldShowOnStartup(string name);
+
+    /// <summary>
     /// Gets the folder path used for storing window location data.
     /// </summary>
     /// <param name="environment">The environment name.</param>

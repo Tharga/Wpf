@@ -263,7 +263,8 @@ public abstract class ApplicationBase : Application
         mainWindow.Hide();
 
         var windowLocationService = ((ApplicationBase)Current).AppHost.Services.GetService<IWindowLocationService>();
-        windowLocationService?.SetVisibility(mainWindow.Name ?? mainWindow.GetType().Name, mainWindow.Visibility);
+        var name = string.IsNullOrEmpty(mainWindow.Name) ? mainWindow.GetType().Name : mainWindow.Name;
+        windowLocationService?.SetVisibility(name, mainWindow.Visibility);
     }
 
     /// <summary>

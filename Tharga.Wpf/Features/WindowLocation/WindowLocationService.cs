@@ -60,24 +60,20 @@ internal class WindowLocationService : IWindowLocationService
 
             _window.Loaded += OnLoaded;
 
-            if (_options.HideOnClose)
+            _window.Closing += (_, e) =>
             {
-                _window.Closing += (_, e) =>
+                if (_options.HideOnClose && ApplicationBase.CloseMode == CloseMode.Default)
                 {
-                    if (ApplicationBase.CloseMode == CloseMode.Default)
-                    {
-                        _window.Hide();
-                        SetLocation(Visibility.Hidden);
-                        e.Cancel = true;
-                    }
-                };
-            }
-
-            _window.Closing += (_, _) =>
-            {
-                if (ApplicationBase.CloseMode != CloseMode.Default || !_options.HideOnClose)
+                    _window.Hide();
+                    SetLocation(Visibility.Hidden);
+                    e.Cancel = true;
+                }
+                else
                 {
-                    SetLocation(Visibility.Visible);
+                    _window.LocationChanged -= OnWindowChanged;
+                    _window.SizeChanged -= OnWindowChanged;
+                    _window.StateChanged -= OnWindowChanged;
+                    SetLocation();
                 }
             };
         }
@@ -105,8 +101,6 @@ internal class WindowLocationService : IWindowLocationService
                 {
                     case StartupWindowState.Last:
                         _window.WindowState = validated.WindowState;
-                        if (validated.Visibility == Visibility.Hidden)
-                            _window.Hide();
                         break;
                     case StartupWindowState.Normal:
                         _window.WindowState = WindowState.Normal;
@@ -118,7 +112,6 @@ internal class WindowLocationService : IWindowLocationService
                         _window.WindowState = WindowState.Minimized;
                         break;
                     case StartupWindowState.Hidden:
-                        _window.Hide();
                         break;
                 }
             }
@@ -301,6 +294,18 @@ internal class WindowLocationService : IWindowLocationService
     {
         if (!_monitors.TryGetValue(name, out var monitor)) throw new InvalidOperationException($"Monitor for '{name}' must be created first.");
         monitor.SetVisibility(visibility);
+    }
+
+    public bool ShouldShowOnStartup(string name)
+    {
+        if (!_monitors.TryGetValue(name, out var monitor)) return true;
+
+        return _options.StartupWindowState switch
+        {
+            StartupWindowState.Hidden => false,
+            StartupWindowState.Last => monitor.LoadLocation?.Visibility != Visibility.Hidden,
+            _ => true
+        };
     }
 
     public string GetFolder(string environment)

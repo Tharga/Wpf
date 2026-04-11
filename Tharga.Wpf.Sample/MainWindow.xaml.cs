@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel;
-using System.Diagnostics;
 using Tharga.Wpf.IconTray;
 using Tharga.Wpf.TabNavigator;
 using Tharga.Wpf.WindowLocation;
@@ -8,23 +7,14 @@ namespace Tharga.Wpf.Sample;
 
 public partial class MainWindow
 {
-    private readonly IWindowLocationService _windowLocationService;
-
     public MainWindow()
     {
-        _windowLocationService = ApplicationBase.GetService<IWindowLocationService>();
-        var m = _windowLocationService.Monitor(this, nameof(MainWindow));
-
-        m.LocationUpdatedEvent += (s, e) =>
-        {
-            Debug.WriteLine("LocationUpdatedEvent");
-        };
-
-        var myService = ApplicationBase.GetService<MyService>();
+        IWindowLocationService windowLocationService = ApplicationBase.GetService<IWindowLocationService>();
+        MinitorInfo monitor = windowLocationService.Monitor(this, nameof(MainWindow));
 
         InitializeComponent();
 
-        ApplicationBase.GetService<INotifyIconService>().Create(this, nameof(MainWindow), _windowLocationService);
+        ApplicationBase.GetService<INotifyIconService>().Create(this, nameof(MainWindow), windowLocationService);
     }
 
     protected override async void OnClosing(CancelEventArgs e)
