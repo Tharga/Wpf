@@ -20,6 +20,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tharga.License.Tests", "Tha
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tharga.Wpf.Tests", "Tharga.Wpf.Tests\Tharga.Wpf.Tests.csproj", "{A81E5D3C-811B-4D97-9B9F-028DA5EA2024}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sample", "Sample", "{A9F1DDC4-9B07-4C45-A3E4-BD4826B0BB33}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -93,6 +95,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{534E6AD9-D0C3-4085-B74B-9981552CD4BA} = {A9F1DDC4-9B07-4C45-A3E4-BD4826B0BB33}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A3865C6E-44B2-49D0-BE52-C596E4CB3987}

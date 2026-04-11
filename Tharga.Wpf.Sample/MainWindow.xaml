@@ -56,14 +56,17 @@
             <fluent:Ribbon.Menu>
                 <fluent:Backstage>
                     <fluent:BackstageTabControl>
+                        <fluent:Button Header="About" Command="{Binding AboutCommand}" />
                         <fluent:Button Header="Exit" Command="{Binding ExitCommand}" Icon="{svgc:SvgImage Exit.svg}" />
-                        <!--<fluent:BackstageTabItem Header="Print" />
-                        <fluent:Button Header="Blue" />-->
                     </fluent:BackstageTabControl>
                 </fluent:Backstage>
             </fluent:Ribbon.Menu>
             <!--Tabs-->
             <fluent:RibbonTabItem Header="Home">
+                <fluent:RibbonGroupBox Header="Exit">
+                    <fluent:Button Header="Hard Close" Command="{Binding ExitCommand}"/>
+                    <fluent:Button Header="Soft Close" Command="{Binding ExitSoftCommand}"/>
+                </fluent:RibbonGroupBox>
                 <fluent:RibbonGroupBox Header="Group">
                     <fluent:Button Header="Splash" Command="{Binding ShowSplashCommand}"/>
                     <fluent:Button Header="Check for update" Command="{Binding CheckForUpdateCommand}"/>

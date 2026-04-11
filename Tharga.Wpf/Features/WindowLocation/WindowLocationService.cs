@@ -139,7 +139,7 @@ internal class WindowLocationService : IWindowLocationService
 
         public void SetVisibility(Visibility visibility)
         {
-            SetLocation();
+            SetLocation(visibility);
         }
 
         private void OnWindowChanged(object sender, EventArgs e)
@@ -147,13 +147,13 @@ internal class WindowLocationService : IWindowLocationService
             SetLocation();
         }
 
-        private void SetLocation()
+        private void SetLocation(Visibility? visibilityOverride = null)
         {
             var lastLocation = _lastLocation ?? _loadLocation ?? new Location();
             lastLocation = lastLocation with
             {
                 WindowState = _window.WindowState,
-                Visibility = _window.Visibility,
+                Visibility = visibilityOverride ?? _window.Visibility,
                 Left = _window.Left >= 0 ? (int)_window.Left : (_lastLocation?.Left ?? 0),
                 Top = _window.Top >= 0 ? (int)_window.Top : (_lastLocation?.Top ?? 0),
                 Width = _window.Width > 0 ? (int)_window.Width : (_lastLocation?.Width ?? -1),
