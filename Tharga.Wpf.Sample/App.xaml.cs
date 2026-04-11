@@ -1,20 +1,14 @@
 ﻿using System.Windows;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using Tharga.Wpf.ApplicationUpdate;
 
 namespace Tharga.Wpf.Sample;
 
 public partial class App
 {
-    private async void Application_Startup(object sender, StartupEventArgs e)
+    private void Application_Startup(object sender, StartupEventArgs e)
     {
-        var mainWindow = new MainWindow();
-
-        var updateService = GetService<IApplicationUpdateStateService>();
-        await updateService.ShowSplashAsync(checkForUpdates: true);
-
-        mainWindow.Show();
+        this.StartMainWindow<MainWindow>(true);
     }
 
     protected override void Register(HostBuilderContext context, IServiceCollection services)
@@ -32,7 +26,9 @@ public partial class App
         thargaWpfOptions.AllowMultipleApplications = false;
         thargaWpfOptions.CompanyName = "Tharga";
         thargaWpfOptions.Debug = false;
-        //thargaWpfOptions.IconTray = null;
+
+        thargaWpfOptions.HideOnClose = true;
+        //thargaWpfOptions.StartupWindowState = StartupWindowState.Last;
 
         thargaWpfOptions.RegisterExceptionHandler<InvalidOperationExceptionHandler, InvalidOperationException>();
 

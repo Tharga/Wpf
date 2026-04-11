@@ -2,6 +2,7 @@ using Tharga.Wpf.WindowLocation;
 
 namespace Tharga.Wpf.Tests.Features.WindowLocation;
 
+#pragma warning disable CS0618 // MinitorInfo is obsolete — testing backwards compatibility
 public class MinitorInfoTests
 {
     [Fact]

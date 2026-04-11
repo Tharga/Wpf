@@ -9,6 +9,7 @@ This package is a basic toolset for WPF applications.
 ## Features
 - [MVVM binding helper](#mvvm-binding-helper)
 - [Built in .NET IOC](#built-in-net-ioc)
+- [Window Management](#window-management)
 - [Remember window location](#remember-window-location)
 - [TabNavigator](#tabnavigator)
 - [Splash Screen](#splash-screen)
@@ -71,6 +72,52 @@ Injection can be done in the ViewModel constructor for all registered service. T
 There is no support for injecting services into the View directly. To use resources this method can be used.
 
 `var myService = ApplicationBase.GetService<MyService>();`
+
+## Window Management
+
+### Close behavior
+
+By default, closing the window (X button) and calling `ApplicationBase.Close()` exits the application. To have the X button hide the window to the system tray instead:
+
+```csharp
+protected override void Options(ThargaWpfOptions thargaWpfOptions)
+{
+    thargaWpfOptions.HideOnClose = true;
+}
+```
+
+| Action | HideOnClose = false | HideOnClose = true |
+|--------|--------------------|--------------------|
+| X button | Exit | Hide to tray |
+| `ApplicationBase.Close(CloseMode.Soft)` | Exit gracefully | Exit gracefully |
+| `ApplicationBase.Close(CloseMode.Force)` | Exit immediately | Exit immediately |
+| `ApplicationBase.Hide()` | Hide to tray | Hide to tray |
+
+`ApplicationBase.Hide()` is always available regardless of `HideOnClose` — use it for a "Minimize to tray" menu item.
+
+### Startup window state
+
+Control how the window appears on startup:
+
+```csharp
+thargaWpfOptions.StartupWindowState = StartupWindowState.Last; // default
+```
+
+| Value | Behavior |
+|-------|----------|
+| `Last` | Restore the saved state, including hidden (tray) |
+| `Normal` | Always start in normal window state |
+| `Maximized` | Always start maximized |
+| `Minimized` | Always start minimized |
+| `Hidden` | Always start hidden in the system tray |
+
+### Window size and position safety
+
+When restoring a saved window location, the framework validates that:
+- Width and height are at least 200x150 pixels — smaller values are replaced with defaults
+- The window is visible on at least one connected monitor — if not, it is repositioned to the center of the primary screen
+
+This prevents issues when monitors are disconnected or the saved position is invalid.
 
 ## Remember window location
 To remember the location of any window, simply add this statement in the constructor of the window.
