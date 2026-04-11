@@ -12,6 +12,7 @@ using Tharga.Wpf.ApplicationUpdate;
 using Tharga.Wpf.ExceptionHandling;
 using Tharga.Wpf.Framework;
 using Tharga.Wpf.IconTray;
+using Tharga.Wpf.WindowLocation;
 using Tharga.Wpf.License;
 using Tharga.Wpf.TabNavigator;
 using Tharga.Wpf.WindowLocation;
@@ -252,6 +253,20 @@ public abstract class ApplicationBase : Application
     }
 
     /// <summary>
+    /// Hides the main window to the system tray and saves its visibility state.
+    /// </summary>
+    public static void Hide()
+    {
+        var mainWindow = Current?.MainWindow;
+        if (mainWindow == null) return;
+
+        mainWindow.Hide();
+
+        var windowLocationService = ((ApplicationBase)Current).AppHost.Services.GetService<IWindowLocationService>();
+        windowLocationService?.SetVisibility(mainWindow.Name ?? mainWindow.GetType().Name, mainWindow.Visibility);
+    }
+
+    /// <summary>
     /// Closes the application with the specified close mode.
     /// </summary>
     /// <param name="closeMode">The close mode to use.</param>
@@ -260,25 +275,22 @@ public abstract class ApplicationBase : Application
     {
         try
         {
+            var options = ((ApplicationBase)Current)._options;
+            var action = CloseActionResolver.Resolve(closeMode, options.HideOnClose);
+
+            if (action == CloseAction.Hide)
+            {
+                Hide();
+                return true;
+            }
+
             CloseMode = closeMode;
 
             var beforeCloseEventArgs = new BeforeCloseEventArgs();
             BeforeCloseEvent?.Invoke(null, beforeCloseEventArgs);
             if (beforeCloseEventArgs.Cancel) return false;
 
-            switch (closeMode)
-            {
-                case CloseMode.Default:
-                case CloseMode.Soft:
-                    Current?.MainWindow?.Close();
-                    break;
-                case CloseMode.Force:
-                    Current?.MainWindow?.Close();
-                    //Current.Shutdown();
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(closeMode), closeMode, null);
-            }
+            Current?.MainWindow?.Close();
         }
         catch (Exception e)
         {

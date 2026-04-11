@@ -29,25 +29,14 @@ public partial class MainWindow
 
     protected override async void OnClosing(CancelEventArgs e)
     {
-        //NOTE: Default (X button) and Soft close hide the application to the tray.
-        if (ApplicationBase.CloseMode is CloseMode.Default or CloseMode.Soft)
-        {
-            Hide();
-            _windowLocationService.SetVisibility(nameof(MainWindow), Visibility);
-            e.Cancel = true;
-            return;
-        }
-
-        //NOTE: Force close — close down tabs and exit the application.
+        //NOTE: Close down tabs before closing the application.
         var tabNavigationStateService = ApplicationBase.GetService<ITabNavigationStateService>();
-        if (!await tabNavigationStateService.CloseAllTabsAsync(true))
+        var force = ApplicationBase.CloseMode == CloseMode.Force;
+        if (!await tabNavigationStateService.CloseAllTabsAsync(force))
         {
             e.Cancel = true;
             return;
         }
-
-        //NOTE: Save visibility as Visible so the window is shown on next startup.
-        _windowLocationService.SetVisibility(nameof(MainWindow), System.Windows.Visibility.Visible);
 
         base.OnClosing(e);
     }

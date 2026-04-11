@@ -75,6 +75,19 @@ public class ThargaWpfOptions
     public bool AllowMultipleApplications { get; set; } = true;
 
     /// <summary>
+    /// When true, the default close action (X button) hides the window to the tray instead of closing.
+    /// Soft and Force close modes always exit the application regardless of this setting.
+    /// Default is false (X closes the application).
+    /// </summary>
+    public bool HideOnClose { get; set; }
+
+    /// <summary>
+    /// Controls the window state when the application starts.
+    /// Default is <see cref="Wpf.StartupWindowState.Last"/> which restores the saved state.
+    /// </summary>
+    public StartupWindowState StartupWindowState { get; set; } = StartupWindowState.Last;
+
+    /// <summary>
     /// Set this object to specify the behaviour of the icon tray when using INotifyIconService.
     /// </summary>
     public IconTrayData IconTray {get; set;}

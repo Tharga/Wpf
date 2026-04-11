@@ -33,6 +33,7 @@ public class MainWindowViewModel : ViewModelBase
 
     public ICommand ExitCommand => new RelayCommand(_ => { ApplicationBase.Close(CloseMode.Force); }, _ => true);
     public ICommand ExitSoftCommand => new RelayCommand(_ => { ApplicationBase.Close(CloseMode.Soft); }, _ => true);
+    public ICommand HideCommand => new RelayCommand(_ => { ApplicationBase.Hide(); }, _ => true);
 
     public string Message
     {

@@ -32,7 +32,7 @@ public partial class App
         thargaWpfOptions.AllowMultipleApplications = false;
         thargaWpfOptions.CompanyName = "Tharga";
         thargaWpfOptions.Debug = false;
-        //thargaWpfOptions.IconTray = null;
+        thargaWpfOptions.HideOnClose = true;
 
         thargaWpfOptions.RegisterExceptionHandler<InvalidOperationExceptionHandler, InvalidOperationException>();
 
