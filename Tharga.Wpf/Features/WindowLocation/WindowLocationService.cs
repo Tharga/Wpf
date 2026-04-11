@@ -25,6 +25,8 @@ internal class WindowLocationService : IWindowLocationService
         var monitorEngine = new MonitorEngine(name, environment, window, _logger, _options, isMainWindow);
         if (!_monitors.TryAdd(name, monitorEngine)) throw new InvalidOperationException($"Window {name} is already attached to {nameof(WindowLocationService)}.");
 
+        window.Closed += (_, _) => _monitors.TryRemove(name, out _);
+
 #pragma warning disable CS0618 // MinitorInfo is obsolete — used internally
         var monitor = new MinitorInfo
         {

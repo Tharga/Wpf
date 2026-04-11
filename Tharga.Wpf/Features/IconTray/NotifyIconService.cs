@@ -46,6 +46,11 @@ public class NotifyIconService : INotifyIconService
             window.Show();
             windowLocationService.SetVisibility(name, window.Visibility);
             if (window.WindowState == WindowState.Minimized) window.WindowState = WindowState.Normal;
+
+            foreach (var owned in window.OwnedWindows.Cast<Window>())
+            {
+                owned.Show();
+            }
         };
     }
 }

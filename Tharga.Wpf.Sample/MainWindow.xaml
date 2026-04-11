@@ -68,6 +68,9 @@
                     <fluent:Button Header="Exit" Command="{Binding ExitSoftCommand}"/>
                     <fluent:Button Header="Force Exit" Command="{Binding ExitCommand}"/>
                 </fluent:RibbonGroupBox>
+                <fluent:RibbonGroupBox Header="Windows">
+                    <fluent:Button Header="Open Child Window" Command="{Binding OpenChildWindowCommand}"/>
+                </fluent:RibbonGroupBox>
                 <fluent:RibbonGroupBox Header="Group">
                     <fluent:Button Header="Splash" Command="{Binding ShowSplashCommand}"/>
                     <fluent:Button Header="Check for update" Command="{Binding CheckForUpdateCommand}"/>

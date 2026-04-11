@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.Linq;
+using System.Windows;
 using Tharga.Wpf.ApplicationUpdate;
 using Tharga.Wpf.TabNavigator;
 using Tharga.Wpf.WindowLocation;
@@ -30,8 +31,27 @@ public static class AppExtensions
         {
             if (ApplicationBase.HandleClose(e)) return;
 
-            var tabNavigationStateService = ApplicationBase.GetService<ITabNavigationStateService>();
             var force = ApplicationBase.CloseMode == CloseMode.Force;
+
+            // Try closing owned windows first — if any refuses, cancel (unless force).
+            var ownedWindows = mainWindow.OwnedWindows.Cast<Window>().ToList();
+            foreach (var owned in ownedWindows)
+            {
+                owned.Close();
+                if (!force && owned.IsLoaded)
+                {
+                    var windowName = owned.Title ?? owned.GetType().Name;
+                    MessageBox.Show(
+                        $"Cannot close because '{windowName}' prevented closing.",
+                        "Close blocked",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
+                    e.Cancel = true;
+                    return;
+                }
+            }
+
+            var tabNavigationStateService = ApplicationBase.GetService<ITabNavigationStateService>();
             if (!await tabNavigationStateService.CloseAllTabsAsync(force))
             {
                 e.Cancel = true;

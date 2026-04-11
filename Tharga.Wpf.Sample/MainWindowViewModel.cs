@@ -1,4 +1,5 @@
-﻿using System.Windows.Input;
+﻿using System.Windows;
+using System.Windows.Input;
 using Tharga.Wpf.ApplicationUpdate;
 using Tharga.Wpf.TabNavigator;
 
@@ -34,6 +35,18 @@ public class MainWindowViewModel : ViewModelBase
     public ICommand ExitCommand => new RelayCommand(_ => { ApplicationBase.Close(CloseMode.Force); }, _ => true);
     public ICommand ExitSoftCommand => new RelayCommand(_ => { ApplicationBase.Close(CloseMode.Soft); }, _ => true);
     public ICommand HideCommand => new RelayCommand(_ => { ApplicationBase.Hide(); }, _ => true);
+    public ICommand OpenChildWindowCommand => new RelayCommand(_ =>
+    {
+        var existing = Application.Current.Windows.OfType<ChildWindow>().FirstOrDefault();
+        if (existing != null)
+        {
+            existing.Activate();
+            return;
+        }
+
+        var child = new ChildWindow { Owner = Application.Current.MainWindow };
+        child.Show();
+    }, _ => true);
 
     public string Message
     {

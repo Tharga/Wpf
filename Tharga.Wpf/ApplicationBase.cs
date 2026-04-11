@@ -279,6 +279,11 @@ public abstract class ApplicationBase : Application
         var mainWindow = Current?.MainWindow;
         if (mainWindow == null) return;
 
+        foreach (var owned in mainWindow.OwnedWindows.Cast<System.Windows.Window>())
+        {
+            owned.Hide();
+        }
+
         mainWindow.Hide();
 
         var windowLocationService = ((ApplicationBase)Current).AppHost.Services.GetService<IWindowLocationService>();
