@@ -151,11 +151,16 @@ internal abstract class ApplicationUpdateStateServiceBase : IApplicationUpdateSt
                 SplashClosed = e => { SplashCompleteEvent?.Invoke(this, new SplashCompleteEventArgs(e, true)); },
                 ImagePath = SplashImageLibrary.TealTransparent
             };
-            _splash = _options.SplashCreator?.Invoke(splashData) ?? new Splash(splashData);
+            _splash = Application.Current.Dispatcher.Invoke(() =>
+                _options.SplashCreator?.Invoke(splashData) ?? new Splash(splashData));
             UpdateInfoEvent += ApplicationUpdateStateService_UpdateInfoEvent;
         }
 
-        if (showCloseButton) _splash.ShowCloseButton();
+        _splash.HideProgress();
+        if (showCloseButton)
+            _splash.ShowCloseButton();
+        else
+            _splash.HideCloseButton();
         _splash.Show();
         return Task.CompletedTask;
     }
