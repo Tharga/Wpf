@@ -29,7 +29,7 @@ public partial class MainWindow
 
     protected override async void OnClosing(CancelEventArgs e)
     {
-        //NOTE: Interceot the 'default' close (pressing of 'x') and hide the application.
+        //NOTE: Intercept the 'default' close (pressing of 'x') and hide the application to tray.
         if (ApplicationBase.CloseMode == CloseMode.Default)
         {
             Hide();
@@ -42,10 +42,12 @@ public partial class MainWindow
         var tabNavigationStateService = ApplicationBase.GetService<ITabNavigationStateService>();
         if (!await tabNavigationStateService.CloseAllTabsAsync(ApplicationBase.CloseMode == CloseMode.Force))
         {
-            //if (Visibility != Visibility.Visible) Show();
             e.Cancel = true;
             return;
         }
+
+        //NOTE: Save visibility as Visible so the window is shown on next startup.
+        _windowLocationService.SetVisibility(nameof(MainWindow), System.Windows.Visibility.Visible);
 
         base.OnClosing(e);
     }
