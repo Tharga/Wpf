@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel;
-using Tharga.Wpf.IconTray;
 using Tharga.Wpf.TabNavigator;
 using Tharga.Wpf.WindowLocation;
 
@@ -9,12 +8,9 @@ public partial class MainWindow
 {
     public MainWindow()
     {
-        IWindowLocationService windowLocationService = ApplicationBase.GetService<IWindowLocationService>();
-        MinitorInfo monitor = windowLocationService.Monitor(this, nameof(MainWindow));
+        this.RegisterMainWindow(showTrayIcon: true);
 
         InitializeComponent();
-
-        ApplicationBase.GetService<INotifyIconService>().Create(this, nameof(MainWindow), windowLocationService);
     }
 
     protected override async void OnClosing(CancelEventArgs e)

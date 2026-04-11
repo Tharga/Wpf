@@ -19,20 +19,22 @@ internal class WindowLocationService : IWindowLocationService
         _logger = logger;
     }
 
-    public MinitorInfo Monitor(Window window, string name = default, string environment = default)
+    public IWindowMonitor Monitor(Window window, string name = default, string environment = default, bool isMainWindow = false)
     {
         name ??= window.Name ?? window.Title?.Replace(" ", "_").NullIfEmpty() ?? window.GetType().Name.Replace(nameof(Window), "").NullIfEmpty() ?? throw new InvalidOperationException("Cannot find a name for the window");
-        var monitorEngine = new MonitorEngine(name, environment, window, _logger, _options);
+        var monitorEngine = new MonitorEngine(name, environment, window, _logger, _options, isMainWindow);
         if (!_monitors.TryAdd(name, monitorEngine)) throw new InvalidOperationException($"Window {name} is already attached to {nameof(WindowLocationService)}.");
-        var minitorInfo = new MinitorInfo
+
+#pragma warning disable CS0618 // MinitorInfo is obsolete — used internally
+        var monitor = new MinitorInfo
         {
             FileLocation = monitorEngine.FileLocation,
             LoadLocation = monitorEngine.LoadLocation,
         };
+        monitorEngine.LocationUpdatedEvent += monitor.OnLocationUpdatedEvent;
+#pragma warning restore CS0618
 
-        monitorEngine.LocationUpdatedEvent += minitorInfo.OnLocationUpdatedEvent;
-
-        return minitorInfo;
+        return monitor;
     }
 
     private class MonitorEngine
@@ -45,15 +47,17 @@ internal class WindowLocationService : IWindowLocationService
         private readonly string _fileLocation;
         private readonly Location _loadLocation;
 
+        private readonly bool _isMainWindow;
         private Location _lastLocation;
 
-        public MonitorEngine(string name, string environment, Window window, ILogger logger, ThargaWpfOptions options)
+        public MonitorEngine(string name, string environment, Window window, ILogger logger, ThargaWpfOptions options, bool isMainWindow = false)
         {
             _name = name;
             _environment = environment;
             _window = window;
             _logger = logger;
             _options = options;
+            _isMainWindow = isMainWindow;
 
             _fileLocation = GetFileLocation();
             _loadLocation = LoadLastLocation();
@@ -62,7 +66,7 @@ internal class WindowLocationService : IWindowLocationService
 
             _window.Closing += (_, e) =>
             {
-                if (_options.HideOnClose && ApplicationBase.CloseMode == CloseMode.Default)
+                if (_isMainWindow && _options.HideOnClose && ApplicationBase.CloseMode == CloseMode.Default)
                 {
                     _window.Hide();
                     SetLocation(Visibility.Hidden);
@@ -96,23 +100,30 @@ internal class WindowLocationService : IWindowLocationService
                 _window.Width = validated.Width;
                 _window.Height = validated.Height;
 
-                var startupState = _options.StartupWindowState;
-                switch (startupState)
+                if (_isMainWindow)
                 {
-                    case StartupWindowState.Last:
-                        _window.WindowState = validated.WindowState;
-                        break;
-                    case StartupWindowState.Normal:
-                        _window.WindowState = WindowState.Normal;
-                        break;
-                    case StartupWindowState.Maximized:
-                        _window.WindowState = WindowState.Maximized;
-                        break;
-                    case StartupWindowState.Minimized:
-                        _window.WindowState = WindowState.Minimized;
-                        break;
-                    case StartupWindowState.Hidden:
-                        break;
+                    var startupState = _options.StartupWindowState;
+                    switch (startupState)
+                    {
+                        case StartupWindowState.Last:
+                            _window.WindowState = validated.WindowState;
+                            break;
+                        case StartupWindowState.Normal:
+                            _window.WindowState = WindowState.Normal;
+                            break;
+                        case StartupWindowState.Maximized:
+                            _window.WindowState = WindowState.Maximized;
+                            break;
+                        case StartupWindowState.Minimized:
+                            _window.WindowState = WindowState.Minimized;
+                            break;
+                        case StartupWindowState.Hidden:
+                            break;
+                    }
+                }
+                else
+                {
+                    _window.WindowState = validated.WindowState;
                 }
             }
 

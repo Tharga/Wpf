@@ -1,10 +1,14 @@
-﻿namespace Tharga.Wpf.WindowLocation;
+using System.ComponentModel;
+
+namespace Tharga.Wpf.WindowLocation;
 
 /// <summary>
 /// Contains information about a monitored window, including the file used for persistence
 /// and the initially loaded location.
 /// </summary>
-public record MinitorInfo
+[Obsolete("Use IWindowMonitor instead. This type will be removed in a future version.")]
+[EditorBrowsable(EditorBrowsableState.Never)]
+public record MinitorInfo : IWindowMonitor
 {
     /// <summary>The file path where the window location is persisted.</summary>
     public string FileLocation { get; init; }

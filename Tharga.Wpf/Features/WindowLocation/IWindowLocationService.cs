@@ -13,8 +13,9 @@ public interface IWindowLocationService
     /// <param name="window">The window to monitor.</param>
     /// <param name="name">A name identifying the window for persistence.</param>
     /// <param name="environment">An optional environment name for separate location storage.</param>
-    /// <returns>Information about the monitoring state and persisted location.</returns>
-    MinitorInfo Monitor(Window window, string name = default, string environment = default);
+    /// <param name="isMainWindow">If true, HideOnClose and StartupWindowState options apply to this window.</param>
+    /// <returns>A window monitor for the tracked window.</returns>
+    IWindowMonitor Monitor(Window window, string name = default, string environment = default, bool isMainWindow = false);
 
     /// <summary>
     /// Sets the persisted visibility for the specified window.
