@@ -272,6 +272,45 @@ public abstract class ApplicationBase : Application
     }
 
     /// <summary>
+    /// Call at the start of OnClosing to let the framework handle hide-on-close.
+    /// Returns true if the close was handled (window hidden) and the caller should return.
+    /// </summary>
+    /// <param name="e">The closing event args.</param>
+    /// <returns><c>true</c> if the close was handled (hidden to tray); <c>false</c> if closing should proceed.</returns>
+    public static bool HandleClose(System.ComponentModel.CancelEventArgs e)
+    {
+        var options = ((ApplicationBase)Current)._options;
+        if (options.HideOnClose && CloseMode == CloseMode.Default)
+        {
+            Hide();
+            e.Cancel = true;
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Hides the main window to the system tray and saves its visibility state.
+    /// </summary>
+    public static void Hide()
+    {
+        var mainWindow = Current?.MainWindow;
+        if (mainWindow == null) return;
+
+        foreach (var owned in mainWindow.OwnedWindows.Cast<System.Windows.Window>())
+        {
+            owned.Hide();
+        }
+
+        mainWindow.Hide();
+
+        var windowLocationService = ((ApplicationBase)Current).AppHost.Services.GetService<IWindowLocationService>();
+        var name = string.IsNullOrEmpty(mainWindow.Name) ? mainWindow.GetType().Name : mainWindow.Name;
+        windowLocationService?.SetVisibility(name, mainWindow.Visibility);
+    }
+
+    /// <summary>
     /// Closes the application with the specified close mode.
     /// </summary>
     /// <param name="closeMode">The close mode to use.</param>
@@ -280,25 +319,22 @@ public abstract class ApplicationBase : Application
     {
         try
         {
+            var options = ((ApplicationBase)Current)._options;
+            var action = CloseActionResolver.Resolve(closeMode, options.HideOnClose);
+
+            if (action == CloseAction.Hide)
+            {
+                Hide();
+                return true;
+            }
+
             CloseMode = closeMode;
 
             var beforeCloseEventArgs = new BeforeCloseEventArgs();
             BeforeCloseEvent?.Invoke(null, beforeCloseEventArgs);
             if (beforeCloseEventArgs.Cancel) return false;
 
-            switch (closeMode)
-            {
-                case CloseMode.Default:
-                case CloseMode.Soft:
-                    Current?.MainWindow?.Close();
-                    break;
-                case CloseMode.Force:
-                    Current?.MainWindow?.Close();
-                    //Current.Shutdown();
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(closeMode), closeMode, null);
-            }
+            Current?.MainWindow?.Close();
         }
         catch (Exception e)
         {
