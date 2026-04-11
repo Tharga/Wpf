@@ -58,15 +58,12 @@ dotnet test -c Release
 - **Cross-project guard:** If an instruction or change targets a different project than the one currently open, ask the user for confirmation before proceeding. Do not silently apply changes to other projects.
 
 ## Git Rules
+- This project uses **GitHub Actions** — follow the "With GitHub Actions" branching strategy from shared-instructions.md
+- Feature branches are created from `master` and PRs target `master`
 - Never push to remote without explicit approval from me
 - Never force push under any circumstances
-- Create branch `feature/<feature-name>` at the start of each feature
 - Commit at logical milestones (e.g. a component is complete and tested)
 - Never commit failing tests
-- Use conventional commits: `feat:`, `fix:`, `test:`, `docs:`
-- Never merge to master/main — leave that for me to review and merge
-- Default branch strategy: `master` is production, `develop` is integration. Feature branches branch from and merge to `develop`.
-- When merging a completed feature back to the originating branch, use `--no-ff` (no fast-forward) to preserve the feature branch history as a merge commit
 
 ## Feature Workflow
 
@@ -81,8 +78,7 @@ Planned and completed features are stored externally in the **Plan directory** d
 ### Starting a feature
 When told to start a new feature:
 1. Ask for the feature name and goal if not provided
-2. Note the current branch as the originating branch for the feature
-3. Create a new branch: `git checkout -b feature/<feature-name>`
+2. Create a new branch from master: `git checkout -b feature/<feature-name> master`
 4. Create `plan/feature.md` with goal, scope, acceptance criteria, and done condition
 5. Create `plan/plan.md` with the steps to implement the feature
 6. Confirm the plan before starting any code changes
@@ -106,7 +102,8 @@ When all planned steps are done:
 - Archive `plan/feature.md` to the Plan directory `done/<feature-name>.md`
 - Delete the `plan/` directory from the project
 - A final commit is made with message: `feat: <feature-name> complete`
-- Merge to originating branch with `--no-ff` and delete feature branch only when the user explicitly asks
+- Push the feature branch and create a PR from `feature/<name>` → `master`
+- Do NOT merge locally — the PR is the review and merge step
 
 ## Feature Requests (cross-project)
 
