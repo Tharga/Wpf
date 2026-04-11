@@ -27,7 +27,7 @@ public partial class App
         thargaWpfOptions.CompanyName = "Tharga";
         thargaWpfOptions.Debug = false;
 
-        //thargaWpfOptions.HideOnClose = true;
+        thargaWpfOptions.HideOnClose = true;
         //thargaWpfOptions.StartupWindowState = StartupWindowState.Last;
 
         thargaWpfOptions.RegisterExceptionHandler<InvalidOperationExceptionHandler, InvalidOperationException>();
