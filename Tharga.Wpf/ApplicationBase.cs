@@ -12,7 +12,6 @@ using Tharga.Wpf.ApplicationUpdate;
 using Tharga.Wpf.ExceptionHandling;
 using Tharga.Wpf.Framework;
 using Tharga.Wpf.IconTray;
-using Tharga.Wpf.WindowLocation;
 using Tharga.Wpf.License;
 using Tharga.Wpf.TabNavigator;
 using Tharga.Wpf.WindowLocation;
