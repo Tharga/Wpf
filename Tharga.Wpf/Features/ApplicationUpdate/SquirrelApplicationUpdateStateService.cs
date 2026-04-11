@@ -50,6 +50,7 @@ internal class SquirrelApplicationUpdateStateService : ApplicationUpdateStateSer
             await _tabNavigationStateService.CloseAllTabsAsync(true);
 
             OnUpdateInfoEvent(this, "Restarting.");
+            ApplicationBase.ReleaseSingleInstanceLock();
             UpdateManager.RestartApp();
         }
     }

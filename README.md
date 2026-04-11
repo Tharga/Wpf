@@ -9,6 +9,7 @@ This package is a basic toolset for WPF applications.
 ## Features
 - [MVVM binding helper](#mvvm-binding-helper)
 - [Built in .NET IOC](#built-in-net-ioc)
+- [Single Instance](#single-instance)
 - [Window Management](#window-management)
 - [Remember window location](#remember-window-location)
 - [TabNavigator](#tabnavigator)
@@ -72,6 +73,19 @@ Injection can be done in the ViewModel constructor for all registered service. T
 There is no support for injecting services into the View directly. To use resources this method can be used.
 
 `var myService = ApplicationBase.GetService<MyService>();`
+
+## Single Instance
+
+Prevent multiple instances of the application from running. When a second instance is started, it signals the existing instance to show itself (even if hidden to the system tray) and then exits.
+
+```csharp
+protected override void Options(ThargaWpfOptions thargaWpfOptions)
+{
+    thargaWpfOptions.AllowMultipleApplications = false;
+}
+```
+
+This works with Squirrel and Velopack update systems — the single-instance lock is automatically released before an update restart.
 
 ## Window Management
 

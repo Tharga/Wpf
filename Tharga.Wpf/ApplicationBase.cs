@@ -26,7 +26,7 @@ public abstract class ApplicationBase : Application
 {
     private readonly CancellationService _cs;
     private readonly ThargaWpfOptions _options;
-    private Mutex _mutex;
+    private SingleInstanceService _singleInstanceService;
 
     /// <summary>
     /// Raised before the application closes, allowing handlers to cancel the operation.
@@ -201,13 +201,24 @@ public abstract class ApplicationBase : Application
         {
             if (!_options.AllowMultipleApplications)
             {
-                _mutex = new Mutex(true, _options.ApplicationFullName, out var createdNew);
-                if (!createdNew)
+                _singleInstanceService = new SingleInstanceService(_options.ApplicationFullName);
+                if (!_singleInstanceService.TryAcquire())
                 {
-                    BringExistingInstanceToFront();
+                    SingleInstanceService.SignalExistingInstance(_options.ApplicationFullName);
                     Shutdown();
                     return;
                 }
+
+                _singleInstanceService.StartListening(() =>
+                {
+                    Dispatcher.Invoke(() =>
+                    {
+                        MainWindow?.Show();
+                        if (MainWindow?.WindowState == System.Windows.WindowState.Minimized)
+                            MainWindow.WindowState = System.Windows.WindowState.Normal;
+                        MainWindow?.Activate();
+                    });
+                });
             }
 
             await AppHost.StartAsync();
@@ -221,12 +232,13 @@ public abstract class ApplicationBase : Application
     }
 
     /// <inheritdoc />
+    /// <inheritdoc />
     protected override async void OnExit(ExitEventArgs args)
     {
         try
         {
             await _cs.CancelAsync();
-            _mutex?.Close();
+            _singleInstanceService?.Dispose();
             await AppHost.StopAsync();
             AppHost.Dispose();
             base.OnExit(args);
@@ -236,6 +248,14 @@ public abstract class ApplicationBase : Application
             Debugger.Break();
             Trace.TraceError($"{e.Message} @{e.StackTrace}");
         }
+    }
+
+    /// <summary>
+    /// Releases the single-instance lock to allow a new process to start (e.g. during update restart).
+    /// </summary>
+    internal static void ReleaseSingleInstanceLock()
+    {
+        ((ApplicationBase)Current)?._singleInstanceService?.ReleaseMutex();
     }
 
     /// <summary>
@@ -328,14 +348,6 @@ public abstract class ApplicationBase : Application
         }
 
         return true;
-    }
-
-    private void BringExistingInstanceToFront()
-    {
-        var currentProcess = Process.GetCurrentProcess();
-        var processes = Process.GetProcessesByName(currentProcess.ProcessName);
-        var process = processes.FirstOrDefault(x => x.Id != currentProcess.Id);
-        if (process != null) WindowHelper.FocusWindowByProcessId(process.Id);
     }
 
     /// <summary>
