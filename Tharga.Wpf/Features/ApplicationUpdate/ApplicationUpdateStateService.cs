@@ -23,12 +23,22 @@ internal abstract class ApplicationUpdateStateServiceBase : IApplicationUpdateSt
     protected readonly ThargaWpfOptions _options;
     protected readonly string _environmentName;
 
-    private ISplash _splash;
+    /// <summary>
+    /// Current splash window. Visible to subclasses so they can show/hide progress and the
+    /// close button at the precise moment they know an update is actually starting/finishing.
+    /// </summary>
+    protected ISplash _splash;
     private string _applicationLocation;
     private string _applicationLocationSource;
     private string _logFileName;
     private bool _checkingForUpdate;
     private bool _isUpdating;
+    /// <summary>
+    /// True when the splash was opened with an explicit user-visible close button
+    /// (e.g. from an About menu). In that case we never hide the close button while
+    /// the splash is open, even during an update.
+    /// </summary>
+    protected bool _persistentCloseButton;
 
     internal static readonly List<string> UpdateLog = new();
 
@@ -125,13 +135,17 @@ internal abstract class ApplicationUpdateStateServiceBase : IApplicationUpdateSt
 
     private void CloseSplash()
     {
+        _logger.LogInformation("CloseSplash (persistentCloseButton was {Persistent}).", _persistentCloseButton);
         _splash?.Close();
         _splash = null;
+        _persistentCloseButton = false;
         UpdateInfoEvent -= ApplicationUpdateStateService_UpdateInfoEvent;
     }
 
     private Task ShowSplashAsync(bool firstRun, string entryMessage, bool showCloseButton)
     {
+        _logger.LogInformation("ShowSplashAsync(firstRun={FirstRun}, showCloseButton={ShowCloseButton}, persistentCloseButton={Persistent}, splashExists={SplashExists}).", firstRun, showCloseButton, _persistentCloseButton, _splash != null);
+
         if (_splash == null)
         {
             Uri.TryCreate(_applicationLocation, UriKind.Absolute, out var applicationLocation);
@@ -148,16 +162,31 @@ internal abstract class ApplicationUpdateStateServiceBase : IApplicationUpdateSt
                 FullName = _options.ApplicationFullName ?? $"{_options.CompanyName} {_options.ApplicationShortName}".Trim(),
                 ClientLocation = applicationLocation,
                 ClientSourceLocation = applicationSourceLocation,
-                SplashClosed = e => { SplashCompleteEvent?.Invoke(this, new SplashCompleteEventArgs(e, true)); },
+                SplashClosed = e =>
+                {
+                    _persistentCloseButton = false;
+                    SplashCompleteEvent?.Invoke(this, new SplashCompleteEventArgs(e, true));
+                },
                 ImagePath = SplashImageLibrary.TealTransparent
             };
-            _splash = Application.Current.Dispatcher.Invoke(() =>
-                _options.SplashCreator?.Invoke(splashData) ?? new Splash(splashData));
+            var app = Application.Current;
+            var dispatcher = app?.Dispatcher;
+            if (dispatcher == null)
+            {
+                _logger.LogError("Cannot create splash - Application.Current.Dispatcher is null. Calling thread ApartmentState={ApartmentState}.", Thread.CurrentThread.GetApartmentState());
+                return Task.CompletedTask;
+            }
+
+            _splash = dispatcher.Invoke(() =>
+            {
+                _logger.LogInformation("Creating splash on thread ApartmentState={ApartmentState}, IsDispatcherThread={IsDispatcherThread}.", Thread.CurrentThread.GetApartmentState(), dispatcher.CheckAccess());
+                return _options.SplashCreator?.Invoke(splashData) ?? new Splash(splashData);
+            });
             UpdateInfoEvent += ApplicationUpdateStateService_UpdateInfoEvent;
         }
 
         _splash.HideProgress();
-        if (showCloseButton)
+        if (showCloseButton || _persistentCloseButton)
             _splash.ShowCloseButton();
         else
             _splash.HideCloseButton();
@@ -180,7 +209,7 @@ internal abstract class ApplicationUpdateStateServiceBase : IApplicationUpdateSt
             if (_checkingForUpdate)
             {
                 AddLogString($"Ignore {nameof(UpdateClientApplication)} since it is already running. (source: {source})");
-                //UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs($"Ignore update from {source} since it is already running."));
+                _logger.LogInformation("UpdateClientApplication ignored - already running. source={Source}", source);
                 return;
             }
 
@@ -188,6 +217,7 @@ internal abstract class ApplicationUpdateStateServiceBase : IApplicationUpdateSt
             _checkingForUpdate = true;
 
             AddLogString($"--- Start {nameof(UpdateClientApplication)} (source: {source}) ---");
+            _logger.LogInformation("UpdateClientApplication start. source={Source}, persistentCloseButton={Persistent}", source, _persistentCloseButton);
 
             UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs("Looking for update."));
 
@@ -195,6 +225,7 @@ internal abstract class ApplicationUpdateStateServiceBase : IApplicationUpdateSt
             {
                 var message = $"{_options.ApplicationShortName} is running in debug mode.";
                 UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs(message));
+                _logger.LogInformation("UpdateClientApplication skipped - debugger attached.");
                 return;
             }
 
@@ -212,12 +243,15 @@ internal abstract class ApplicationUpdateStateServiceBase : IApplicationUpdateSt
             {
                 AddLogString($"locationSource: {result.ApplicationLocationSource}");
                 AddLogString($"clientLocation: {clientLocation}");
+                _logger.LogInformation("UpdateClientApplication invoking UpdateAsync. clientLocation={ClientLocation}", clientLocation);
 
                 _isUpdating = true;
-                await ShowSplashWithRetryAsync(false);
-                _splash?.HideCloseButton();
-                _splash?.ShowProgress();
+                await ShowSplashWithRetryAsync(false, null, _persistentCloseButton);
 
+                // The close button + progress visibility during the update is the subclass's
+                // responsibility (it knows whether an update is actually being downloaded vs
+                // "already up to date"). The persistent close button is honoured by
+                // ShowSplashAsync above, so the subclass should NOT hide it when persistent.
                 await UpdateAsync(clientLocation);
             }
         }
@@ -251,6 +285,9 @@ internal abstract class ApplicationUpdateStateServiceBase : IApplicationUpdateSt
 
     public async Task ShowSplashAsync(bool checkForUpdates, bool showCloseButton, bool checkForLicense)
     {
+        _logger.LogInformation("ShowSplashAsync(checkForUpdates={CheckForUpdates}, showCloseButton={ShowCloseButton}, checkForLicense={CheckForLicense}).", checkForUpdates, showCloseButton, checkForLicense);
+        if (showCloseButton) _persistentCloseButton = true;
+
         await ShowSplashWithRetryAsync(false, null, showCloseButton);
         if (checkForUpdates) await CheckForUpdateAsync($"{nameof(ShowSplashAsync)}");
         if (checkForLicense) await CheckForLicenseAsync($"{nameof(ShowSplashAsync)}");

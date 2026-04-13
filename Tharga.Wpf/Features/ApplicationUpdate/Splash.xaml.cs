@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 using System.Text;
 using System.Windows;
 using System.Windows.Input;
@@ -14,6 +15,7 @@ public partial class Splash : ISplash
 {
     private readonly Action<CloseMethod> _splashClosed;
     private CloseMethod _closeMethod = CloseMethod.Automatically;
+    private readonly ILogger<Splash> _logger;
 
     private void DispatchIfRequired(Action action)
     {
@@ -36,6 +38,8 @@ public partial class Splash : ISplash
     /// <param name="splashData">The data to display on the splash screen.</param>
     public Splash(SplashData splashData)
     {
+        _logger = ApplicationBase.GetService<ILogger<Splash>>();
+
         if (splashData.MainWindow.Visibility == Visibility.Visible)
         {
             Owner = splashData.MainWindow;
@@ -93,30 +97,35 @@ public partial class Splash : ISplash
     /// <inheritdoc />
     public void UpdateInfo(string message)
     {
+        _logger.LogInformation(message);
         DispatchIfRequired(() => Messages.Items.Add(message));
     }
 
     /// <inheritdoc />
     void ISplash.Show()
     {
+        _logger.LogInformation("Splash window action {action}.", nameof(Show));
         DispatchIfRequired(Show);
     }
 
     /// <inheritdoc />
     void ISplash.Hide()
     {
+        _logger.LogInformation("Splash window action {action}.", nameof(Hide));
         DispatchIfRequired(Hide);
     }
 
     /// <inheritdoc />
     void ISplash.Close()
     {
+        _logger.LogInformation("Splash window action {action}.", nameof(Close));
         DispatchIfRequired(Close);
     }
 
     /// <inheritdoc />
     public void SetErrorMessage(string message)
     {
+        _logger.LogError(message);
         DispatchIfRequired(() =>
         {
             ErrorMessage.Text = message;
@@ -127,24 +136,28 @@ public partial class Splash : ISplash
     /// <inheritdoc />
     public void ShowCloseButton()
     {
+        _logger.LogInformation("Splash window action {action}.", nameof(ShowCloseButton));
         DispatchIfRequired(() => CloseButton.Visibility = Visibility.Visible);
     }
 
     /// <inheritdoc />
     public void HideCloseButton()
     {
+        _logger.LogInformation("Splash window action {action}.", nameof(HideCloseButton));
         DispatchIfRequired(() => CloseButton.Visibility = Visibility.Collapsed);
     }
 
     /// <inheritdoc />
     public void ShowProgress()
     {
+        _logger.LogInformation("Splash window action {action}.", nameof(ShowProgress));
         DispatchIfRequired(() => UpdateProgressBar.Visibility = Visibility.Visible);
     }
 
     /// <inheritdoc />
     public void HideProgress()
     {
+        _logger.LogInformation("Splash window action {action}.", nameof(HideProgress));
         DispatchIfRequired(() => UpdateProgressBar.Visibility = Visibility.Collapsed);
     }
 
@@ -154,6 +167,7 @@ public partial class Splash : ISplash
     /// <inheritdoc />
     public void ClearMessages()
     {
+        _logger.LogInformation("Splash window action {action}.", nameof(ClearMessages));
         DispatchIfRequired(() =>
         {
             Messages.Items.Clear();
@@ -169,12 +183,14 @@ public partial class Splash : ISplash
 
     private void Client_RequestNavigate(object sender, RequestNavigateEventArgs e)
     {
+        _logger.LogInformation("{action} Start process /c start {uri}/RELEASES", nameof(Client_RequestNavigate), e.Uri.AbsoluteUri);
         Process.Start(new ProcessStartInfo("cmd", $"/c start {e.Uri.AbsoluteUri}/RELEASES") { CreateNoWindow = true });
         e.Handled = true;
     }
 
     private void ClientSource_RequestNavigate(object sender, RequestNavigateEventArgs e)
     {
+        _logger.LogInformation("{action} Start process /c start {uri}", nameof(ClientSource_RequestNavigate), e.Uri.AbsoluteUri);
         Process.Start(new ProcessStartInfo("cmd", $"/c start {e.Uri.AbsoluteUri}") { CreateNoWindow = true });
         e.Handled = true;
     }

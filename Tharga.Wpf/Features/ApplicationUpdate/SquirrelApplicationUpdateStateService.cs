@@ -25,10 +25,13 @@ internal class SquirrelApplicationUpdateStateService : ApplicationUpdateStateSer
 
     protected override async Task UpdateAsync(string clientLocation)
     {
+        _logger.LogInformation("Squirrel UpdateAsync start. clientLocation={ClientLocation}", clientLocation);
+
         using var mgr = new UpdateManager(clientLocation);
         if (!mgr.IsInstalledApp)
         {
             var message = $"{_options.ApplicationShortName} is not installed.";
+            _logger.LogInformation("Squirrel UpdateAsync: {Message}", message);
             OnUpdateInfoEvent(this, message);
             return;
         }
@@ -36,22 +39,44 @@ internal class SquirrelApplicationUpdateStateService : ApplicationUpdateStateSer
         var updateInfo = await mgr.CheckForUpdate();
         if (updateInfo.CurrentlyInstalledVersion.Version == updateInfo.FutureReleaseEntry.Version)
         {
+            _logger.LogInformation("Squirrel UpdateAsync: already up to date ({Version}).", updateInfo.CurrentlyInstalledVersion.Version);
             OnUpdateInfoEvent(this, "Already up to date.");
+            // Make sure no progress bar is shown when there is nothing to download.
+            _splash?.HideProgress();
             return;
         }
 
-        await ShowSplashWithRetryAsync(false);
+        _logger.LogInformation("Squirrel UpdateAsync: update available {From} -> {To}.", updateInfo.CurrentlyInstalledVersion.Version, updateInfo.FutureReleaseEntry.Version);
+
+        await ShowSplashWithRetryAsync(false, null, _persistentCloseButton);
+
+        // Now we know there is a real download about to happen — show the progress bar.
+        _splash?.ShowProgress();
+        if (!_persistentCloseButton)
+        {
+            // During an actual update, hide the close button so the user can't kill it
+            // mid-download. If the splash was opened from the About menu (persistent),
+            // leave the close button visible per the user's intent.
+            _splash?.HideCloseButton();
+        }
 
         OnUpdateInfoEvent(this, $"Updating to latest version, {updateInfo.FutureReleaseEntry.Version}.");
 
-        var newVersion = await mgr.UpdateApp();
-        if (newVersion != null)
+        try
         {
-            await _tabNavigationStateService.CloseAllTabsAsync(true);
+            var newVersion = await mgr.UpdateApp();
+            if (newVersion != null)
+            {
+                await _tabNavigationStateService.CloseAllTabsAsync(true);
 
-            OnUpdateInfoEvent(this, "Restarting.");
-            ApplicationBase.ReleaseSingleInstanceLock();
-            UpdateManager.RestartApp();
+                OnUpdateInfoEvent(this, "Restarting.");
+                ApplicationBase.ReleaseSingleInstanceLock();
+                UpdateManager.RestartApp();
+            }
+        }
+        finally
+        {
+            _splash?.HideProgress();
         }
     }
 
