@@ -195,6 +195,17 @@ jobs:
             $NOTES_FLAG \
             ./artifacts/*.nupkg
 
+      - name: Comment released version on merged PR
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR_NUMBER=$(echo "${{ github.event.head_commit.message }}" | grep -oP 'Merge pull request #\K\d+' | head -1)
+          if [ -n "$PR_NUMBER" ]; then
+            gh pr comment "$PR_NUMBER" --body "Released as **v${{ steps.version.outputs.version }}** — https://github.com/${{ github.repository }}/releases/tag/${{ steps.version.outputs.version }}"
+          else
+            echo "No PR number found in commit message — skipping PR comment."
+          fi
+
   prerelease:
     needs: [build, security]
     runs-on: ubuntu-latest
