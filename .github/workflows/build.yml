@@ -11,6 +11,7 @@ env:
 
 permissions:
   contents: write
+  pull-requests: write
   security-events: write
 
 jobs:
@@ -196,6 +197,8 @@ jobs:
             ./artifacts/*.nupkg
 
       - name: Comment released version on merged PR
+        if: always()
+        continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
