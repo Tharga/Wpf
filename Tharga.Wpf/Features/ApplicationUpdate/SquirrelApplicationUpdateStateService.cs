@@ -67,10 +67,8 @@ internal class SquirrelApplicationUpdateStateService : ApplicationUpdateStateSer
             var newVersion = await mgr.UpdateApp();
             if (newVersion != null)
             {
-                await _tabNavigationStateService.CloseAllTabsAsync(true);
-
                 OnUpdateInfoEvent(this, "Restarting.");
-                ApplicationBase.ReleaseSingleInstanceLock();
+                await BeforeRestartAsync();
                 UpdateManager.RestartApp();
             }
         }

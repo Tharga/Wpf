@@ -73,7 +73,7 @@ internal class VelopackApplicationUpdateStateService : ApplicationUpdateStateSer
             await mgr.DownloadUpdatesAsync(newVersion);
 
             OnUpdateInfoEvent(this, "Installing.");
-            ApplicationBase.ReleaseSingleInstanceLock();
+            await BeforeRestartAsync();
             mgr.ApplyUpdatesAndRestart(newVersion);
         }
         finally
