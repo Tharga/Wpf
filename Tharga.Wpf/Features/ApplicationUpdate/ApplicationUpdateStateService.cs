@@ -67,7 +67,7 @@ internal abstract class ApplicationUpdateStateServiceBase : IApplicationUpdateSt
             {
                 try
                 {
-                    await UpdateClientApplication("Timer elapsed");
+                    await UpdateClientApplication("Timer elapsed", silent: true);
                 }
                 catch (Exception e)
                 {
@@ -200,7 +200,7 @@ internal abstract class ApplicationUpdateStateServiceBase : IApplicationUpdateSt
         _splash?.UpdateInfo(e.Message);
     }
 
-    private async Task UpdateClientApplication(string source)
+    private async Task UpdateClientApplication(string source, bool silent = false)
     {
         string clientLocation = null;
 
@@ -216,15 +216,17 @@ internal abstract class ApplicationUpdateStateServiceBase : IApplicationUpdateSt
             await _lock.WaitAsync();
             _checkingForUpdate = true;
 
-            AddLogString($"--- Start {nameof(UpdateClientApplication)} (source: {source}) ---");
-            _logger.LogInformation("UpdateClientApplication start. source={Source}, persistentCloseButton={Persistent}", source, _persistentCloseButton);
+            AddLogString($"--- Start {nameof(UpdateClientApplication)} (source: {source}, silent: {silent}) ---");
+            _logger.LogInformation("UpdateClientApplication start. source={Source}, silent={Silent}, persistentCloseButton={Persistent}", source, silent, _persistentCloseButton);
 
-            UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs("Looking for update."));
+            if (!silent)
+                UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs("Looking for update."));
 
             if (Debugger.IsAttached)
             {
                 var message = $"{_options.ApplicationShortName} is running in debug mode.";
-                UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs(message));
+                if (!silent)
+                    UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs(message));
                 _logger.LogInformation("UpdateClientApplication skipped - debugger attached.");
                 return;
             }
@@ -235,30 +237,32 @@ internal abstract class ApplicationUpdateStateServiceBase : IApplicationUpdateSt
             {
                 var message = $"No application download location configured in options under {nameof(IApplicationDownloadService.GetApplicationLocationAsync)}.";
                 _logger.LogWarning(message);
-                _splash?.SetErrorMessage(message);
-                UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs(message));
-                await Task.Delay(TimeSpan.FromSeconds(5));
+                if (!silent)
+                {
+                    _splash?.SetErrorMessage(message);
+                    UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs(message));
+                    await Task.Delay(TimeSpan.FromSeconds(5));
+                }
             }
             else
             {
                 AddLogString($"locationSource: {result.ApplicationLocationSource}");
                 AddLogString($"clientLocation: {clientLocation}");
-                _logger.LogInformation("UpdateClientApplication invoking UpdateAsync. clientLocation={ClientLocation}", clientLocation);
+                _logger.LogInformation("UpdateClientApplication invoking UpdateAsync. clientLocation={ClientLocation}, silent={Silent}", clientLocation, silent);
 
                 _isUpdating = true;
-                await ShowSplashWithRetryAsync(false, null, _persistentCloseButton);
+                if (!silent)
+                {
+                    await ShowSplashWithRetryAsync(false, null, _persistentCloseButton);
+                }
 
-                // The close button + progress visibility during the update is the subclass's
-                // responsibility (it knows whether an update is actually being downloaded vs
-                // "already up to date"). The persistent close button is honoured by
-                // ShowSplashAsync above, so the subclass should NOT hide it when persistent.
                 await UpdateAsync(clientLocation);
             }
         }
         catch (Exception e)
         {
             AddLogString($"Error: {e.Message} @{e.StackTrace}");
-			_logger.LogError(e, e.Message);
+            _logger.LogError(e, e.Message);
             var message = "Update failed. ";
             UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs(message));
             _splash?.HideProgress();
@@ -269,17 +273,17 @@ internal abstract class ApplicationUpdateStateServiceBase : IApplicationUpdateSt
         {
             SplashCompleteEvent?.Invoke(this, new SplashCompleteEventArgs(CloseMethod.None, false));
 
-            //if (_splash != null && !_splash.IsCloseButtonVisible)
-            //{
-            //    await Task.Delay(splashDelay);
-            //    CloseSplash();
-            //}
+            if (!silent && _splash != null && !_splash.IsCloseButtonVisible)
+            {
+                var splashDelay = Debugger.IsAttached ? TimeSpan.FromSeconds(4) : TimeSpan.FromSeconds(2);
+                await Task.Delay(splashDelay);
+                CloseSplash();
+            }
 
-            //AddLogString($"Complete check for updates.");
             AddLogString($"--- End {nameof(UpdateClientApplication)} ---");
             _isUpdating = false;
             _checkingForUpdate = false;
-			_lock.Release();
+            _lock.Release();
         }
     }
 
