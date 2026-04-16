@@ -106,6 +106,18 @@ internal abstract class ApplicationUpdateStateServiceBase : IApplicationUpdateSt
 
     protected abstract Task UpdateAsync(string clientLocation);
 
+    /// <summary>
+    /// Common pre-restart steps for both Squirrel and Velopack: close all tabs (on the UI thread)
+    /// and release the single-instance lock so the new process can start.
+    /// </summary>
+    protected async Task BeforeRestartAsync()
+    {
+        _logger.LogInformation("BeforeRestartAsync — closing all tabs and releasing single-instance lock.");
+        await Application.Current.Dispatcher.InvokeAsync(async () =>
+            await _tabNavigationStateService.CloseAllTabsAsync(true));
+        ApplicationBase.ReleaseSingleInstanceLock();
+    }
+
     protected void AddLogString(string message)
     {
         var now = DateTime.UtcNow;
@@ -203,6 +215,7 @@ internal abstract class ApplicationUpdateStateServiceBase : IApplicationUpdateSt
     private async Task UpdateClientApplication(string source, bool silent = false)
     {
         string clientLocation = null;
+        var hadException = false;
 
         try
         {
@@ -261,19 +274,50 @@ internal abstract class ApplicationUpdateStateServiceBase : IApplicationUpdateSt
         }
         catch (Exception e)
         {
+            hadException = true;
             AddLogString($"Error: {e.Message} @{e.StackTrace}");
             _logger.LogError(e, e.Message);
             var message = "Update failed. ";
-            UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs(message));
-            _splash?.HideProgress();
-            _splash?.SetErrorMessage($"{e.Message}\n{clientLocation}\n@{e.StackTrace})");
-            _splash?.ShowCloseButton();
+            try { UpdateInfoEvent?.Invoke(this, new UpdateInfoEventArgs(message)); }
+            catch (Exception cleanupEx) { _logger.LogError(cleanupEx, "Cleanup: UpdateInfoEvent failed."); }
+
+            // If the splash was never opened (silent path), open it so the user sees the error.
+            if (_splash == null)
+            {
+                try { await ShowSplashWithRetryAsync(false, null, true); }
+                catch (Exception cleanupEx) { _logger.LogError(cleanupEx, "Cleanup: ShowSplashWithRetryAsync failed."); }
+            }
+
+            try { _splash?.HideProgress(); }
+            catch (Exception cleanupEx) { _logger.LogError(cleanupEx, "Cleanup: HideProgress failed."); }
+
+            try { _splash?.SetErrorMessage($"{e.Message}\n{clientLocation}\n@{e.StackTrace})"); }
+            catch (Exception cleanupEx) { _logger.LogError(cleanupEx, "Cleanup: SetErrorMessage failed."); }
+
+            try { _splash?.ShowCloseButton(); }
+            catch (Exception cleanupEx) { _logger.LogError(cleanupEx, "Cleanup: ShowCloseButton failed."); }
+
+            try { _splash?.Show(); }
+            catch (Exception cleanupEx) { _logger.LogError(cleanupEx, "Cleanup: Show failed."); }
         }
         finally
         {
             SplashCompleteEvent?.Invoke(this, new SplashCompleteEventArgs(CloseMethod.None, false));
 
-            if (!silent && _splash != null && !_splash.IsCloseButtonVisible)
+            // Final guard: on exception, ensure the splash has a visible close button so the user is never stuck.
+            if (hadException && _splash != null)
+            {
+                try
+                {
+                    if (!_splash.IsCloseButtonVisible) _splash.ShowCloseButton();
+                    _splash.Show();
+                }
+                catch (Exception guardEx)
+                {
+                    _logger.LogError(guardEx, "Final guard failed to ensure close button visibility.");
+                }
+            }
+            else if (!silent && _splash != null && !_splash.IsCloseButtonVisible)
             {
                 var splashDelay = Debugger.IsAttached ? TimeSpan.FromSeconds(4) : TimeSpan.FromSeconds(2);
                 await Task.Delay(splashDelay);
