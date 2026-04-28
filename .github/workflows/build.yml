@@ -98,11 +98,19 @@ jobs:
           echo "version=$PRE_VERSION" >> "$GITHUB_OUTPUT"
           echo "Computed pre-release version: $PRE_VERSION"
 
-      - name: Pack
+      - name: Pack (stable)
+        if: github.ref == 'refs/heads/master' && github.event_name == 'push'
         shell: bash
         run: |
           dotnet pack Tharga.Wpf/Tharga.Wpf.csproj -c Release --no-build -o ./artifacts -p:PackageVersion=${{ steps.version.outputs.version }}
           dotnet pack Tharga.License/Tharga.License.csproj -c Release --no-build -o ./artifacts -p:PackageVersion=${{ steps.version.outputs.version }}
+
+      - name: Pack (prerelease)
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          dotnet pack Tharga.Wpf/Tharga.Wpf.csproj -c Release --no-build -o ./artifacts -p:PackageVersion=${{ steps.preversion.outputs.version }}
+          dotnet pack Tharga.License/Tharga.License.csproj -c Release --no-build -o ./artifacts -p:PackageVersion=${{ steps.preversion.outputs.version }}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
