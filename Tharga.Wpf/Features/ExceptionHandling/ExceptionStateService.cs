@@ -28,6 +28,13 @@ internal class ExceptionStateService : IExceptionStateService
         {
             if (exception is XamlParseException && exception.InnerException != null) exception = exception.InnerException;
 
+            // Always log the exception with an ErrorId before any handler runs, so the exception
+            // reaches Application Insights even when a custom IExceptionHandler<T> handles it
+            // (which would otherwise early-return before the dialog/log code below).
+            var correlationId = Guid.NewGuid();
+            _logger?.LogError(exception, "ErrorId={ErrorId} ExceptionType={ExceptionType} Message={Message}",
+                correlationId, exception.GetType().FullName, exception.Message);
+
             if (_exceptionHandlers.TryGetValue(exception.GetType(), out var handlerType))
             {
                 var handler = _serviceProvider.GetService(handlerType) ?? throw new NullReferenceException($"Cannot find error handler type '{handlerType.Name}'.");
@@ -43,13 +50,10 @@ internal class ExceptionStateService : IExceptionStateService
                 if (result) return;
             }
 
-            var correlationId = Guid.NewGuid();
             var exceptionTypeName = exception.GetType().Name;
             var message = (exception.InnerException?.Message.NullIfEmpty() ?? exception.Message.NullIfEmpty() ?? exceptionTypeName) + $"\nCorrelationId: {correlationId}";
             if (_mainWindow != null)
             {
-                _logger?.LogError(exception, $"{exception.Message} {{CorrelationId}}", correlationId);
-
                 switch (exceptionTypeName)
                 {
                     case nameof(NotImplementedException):
@@ -68,7 +72,6 @@ internal class ExceptionStateService : IExceptionStateService
             else
             {
                 var caption = "Fatal (No Main Window)";
-                _logger?.LogCritical(exception, $"{caption}. {exception.Message}");
                 MessageBox.Show(message, caption, MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
