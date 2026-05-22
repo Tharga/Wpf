@@ -95,7 +95,7 @@ public abstract class ApplicationBase : Application
                     var configuration = s.GetService<IConfiguration>();
                     var applicationDownloadService = s.GetService<IApplicationDownloadService>();
                     var tabNavigationStateService = s.GetService<ITabNavigationStateService>();
-                    var mainWindow = ((ApplicationBase)Current).MainWindow;
+                    var mainWindow = Current.Dispatcher.Invoke(() => ((ApplicationBase)Current).MainWindow);
                     var loggerFactory = s.GetService<ILoggerFactory>();
                     var licenseClient = s.GetService<ILicenseClient>() ?? throw new NullReferenceException();
                     //var logger = loggerFactory.CreateLogger<ApplicationUpdateStateService>();
@@ -130,8 +130,18 @@ public abstract class ApplicationBase : Application
 
                 StaticExceptionHandler.ErrorEvent += (s, e) =>
                 {
-                    var srv = services.BuildServiceProvider().GetService<IExceptionStateService>();
-                    srv.FallbackHandlerInternalAsync(e.Exception);
+                    try
+                    {
+                        // Resolve the app-lifetime singleton (NOT a throwaway provider) so the
+                        // factory does not re-run on the error's thread. FallbackHandlerInternalAsync
+                        // marshals UI work to the dispatcher itself, so this is safe from any thread.
+                        var srv = AppHost.Services.GetService<IExceptionStateService>();
+                        srv?.FallbackHandlerInternalAsync(e.Exception);
+                    }
+                    catch (Exception ex)
+                    {
+                        Trace.TraceError($"Error in StaticExceptionHandler.ErrorEvent handler: {ex.Message} @{ex.StackTrace}");
+                    }
                 };
 
                 Register(context, services);
@@ -161,7 +171,7 @@ public abstract class ApplicationBase : Application
         {
             var loggerFactory = s.GetService<ILoggerFactory>();
             var logger = loggerFactory.CreateLogger<ExceptionStateService>();
-            var mainWindow = ((ApplicationBase)Current).MainWindow;
+            var mainWindow = Current.Dispatcher.Invoke(() => ((ApplicationBase)Current).MainWindow);
             return new ExceptionStateService(s, mainWindow, logger, exceptionHandlers);
         });
     }

@@ -24,6 +24,16 @@ internal class ExceptionStateService : IExceptionStateService
 
     public async Task FallbackHandlerInternalAsync(Exception exception)
     {
+        // The handler reads MainWindow and shows MessageBox — both UI-thread-only.
+        // Marshal to the dispatcher so this is safe to call from any thread (e.g. a
+        // faulted background Task routed through StaticExceptionHandler).
+        var dispatcher = Application.Current?.Dispatcher;
+        if (dispatcher != null && !dispatcher.CheckAccess())
+        {
+            await dispatcher.InvokeAsync(async () => await FallbackHandlerInternalAsync(exception));
+            return;
+        }
+
         try
         {
             if (exception is XamlParseException && exception.InnerException != null) exception = exception.InnerException;
