@@ -6,7 +6,7 @@ This package is a basic toolset for WPF applications.
 - Built in .NET IOC
 - Remember window location
 - TabNavigator
-- *ClickOnce* application update with Squirrel or Velopack.
+- *ClickOnce* application update with Velopack.
 - Custom Exception handling
 - License Server Check
 

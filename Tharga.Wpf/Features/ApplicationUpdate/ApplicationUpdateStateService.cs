@@ -107,7 +107,7 @@ internal abstract class ApplicationUpdateStateServiceBase : IApplicationUpdateSt
     protected abstract Task UpdateAsync(string clientLocation);
 
     /// <summary>
-    /// Common pre-restart steps for both Squirrel and Velopack: close all tabs (on the UI thread)
+    /// Common pre-restart steps for Velopack: close all tabs (on the UI thread)
     /// and release the single-instance lock so the new process can start.
     /// </summary>
     protected async Task BeforeRestartAsync()

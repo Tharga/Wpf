@@ -105,8 +105,6 @@ public abstract class ApplicationBase : Application
                     {
                         case UpdateSystem.None:
                             return new NoUpdateStateServiceBase(configuration, loggerFactory, licenseClient, applicationDownloadService, tabNavigationStateService, _options, mainWindow);
-                        case UpdateSystem.Squirrel:
-                            return new SquirrelApplicationUpdateStateService(configuration, loggerFactory, licenseClient, applicationDownloadService, tabNavigationStateService, _options, mainWindow);
                         case UpdateSystem.Velopack:
                             return new VelopackApplicationUpdateStateService(configuration, loggerFactory, licenseClient, applicationDownloadService, tabNavigationStateService, _options, mainWindow);
                         default:

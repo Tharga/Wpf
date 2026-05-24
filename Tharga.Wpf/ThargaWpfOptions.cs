@@ -48,7 +48,7 @@ public class ThargaWpfOptions
     public bool Debug { get; set; }
 
     /// <summary>
-    /// Select the type of system should be used for update. None, Squirrel or Velopack.
+    /// Select the type of system should be used for update. None or Velopack.
     /// </summary>
     public UpdateSystem UpdateSystem { get; set; }
 
