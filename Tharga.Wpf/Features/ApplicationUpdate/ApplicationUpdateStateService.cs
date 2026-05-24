@@ -107,7 +107,7 @@ internal abstract class ApplicationUpdateStateServiceBase : IApplicationUpdateSt
     protected abstract Task UpdateAsync(string clientLocation);
 
     /// <summary>
-    /// Common pre-restart steps for both Squirrel and Velopack: close all tabs (on the UI thread)
+    /// Common pre-restart steps for Velopack: close all tabs (on the UI thread)
     /// and release the single-instance lock so the new process can start.
     /// </summary>
     protected async Task BeforeRestartAsync()
@@ -150,8 +150,11 @@ internal abstract class ApplicationUpdateStateServiceBase : IApplicationUpdateSt
         _logger.LogInformation("CloseSplash (persistentCloseButton was {Persistent}).", _persistentCloseButton);
         _splash?.Close();
         _splash = null;
-        _persistentCloseButton = false;
         UpdateInfoEvent -= ApplicationUpdateStateService_UpdateInfoEvent;
+        // Note: do NOT reset _persistentCloseButton here. It is set per-call by the public
+        // ShowSplashAsync entry point and clobbering it mid-flight (e.g. from the
+        // ShowSplashWithRetryAsync recovery path) causes the close button to disappear on the
+        // next splash, which then auto-closes (Tharga/Wpf#41).
     }
 
     private Task ShowSplashAsync(bool firstRun, string entryMessage, bool showCloseButton)
@@ -176,6 +179,11 @@ internal abstract class ApplicationUpdateStateServiceBase : IApplicationUpdateSt
                 ClientSourceLocation = applicationSourceLocation,
                 SplashClosed = e =>
                 {
+                    // The Splash window's Closed event fired (e.g. user clicked [x]).
+                    // Drop the stale reference so the next ShowSplashAsync creates a fresh splash
+                    // instead of attempting Show() on a closed window (Tharga/Wpf#41).
+                    _splash = null;
+                    UpdateInfoEvent -= ApplicationUpdateStateService_UpdateInfoEvent;
                     _persistentCloseButton = false;
                     SplashCompleteEvent?.Invoke(this, new SplashCompleteEventArgs(e, true));
                 },

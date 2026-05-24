@@ -1,16 +1,10 @@
-﻿using System.Windows;
-using Microsoft.Extensions.Hosting;
+﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Tharga.Wpf.Sample;
 
 public partial class App
 {
-    private void Application_Startup(object sender, StartupEventArgs e)
-    {
-        this.StartMainWindow<MainWindow>(true);
-    }
-
     protected override void Register(HostBuilderContext context, IServiceCollection services)
     {
         services.AddTransient<MyService>();

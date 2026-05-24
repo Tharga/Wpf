@@ -3,7 +3,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
-using System.Net.Http;
 using System.Reflection;
 using System.Windows;
 using Tharga.License;
@@ -105,8 +104,6 @@ public abstract class ApplicationBase : Application
                     {
                         case UpdateSystem.None:
                             return new NoUpdateStateServiceBase(configuration, loggerFactory, licenseClient, applicationDownloadService, tabNavigationStateService, _options, mainWindow);
-                        case UpdateSystem.Squirrel:
-                            return new SquirrelApplicationUpdateStateService(configuration, loggerFactory, licenseClient, applicationDownloadService, tabNavigationStateService, _options, mainWindow);
                         case UpdateSystem.Velopack:
                             return new VelopackApplicationUpdateStateService(configuration, loggerFactory, licenseClient, applicationDownloadService, tabNavigationStateService, _options, mainWindow);
                         default:
@@ -116,8 +113,7 @@ public abstract class ApplicationBase : Application
                 services.AddTransient<IApplicationDownloadService>(s =>
                 {
                     var configuration = s.GetService<IConfiguration>();
-                    var httpClientFactory = s.GetService<IHttpClientFactory>();
-                    return new ApplicationDownloadService(configuration, httpClientFactory, _options);
+                    return new ApplicationDownloadService(configuration, _options);
                 });
 
                 services.AddTransient<ILicenseClient, LicenseClient>();

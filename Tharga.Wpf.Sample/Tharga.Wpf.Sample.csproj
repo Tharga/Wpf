@@ -10,11 +10,15 @@
 	<ItemGroup>
 		<None Remove="Close.svg" />
 		<None Remove="Exit.svg" />
+		<None Remove="Images\Application\AboutBox.svg" />
+		<None Remove="Images\Application\WebApplication.svg" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<Resource Include="Exit.svg" />
 		<Resource Include="Close.svg" />
+		<Resource Include="Images\Application\AboutBox.svg" />
+		<Resource Include="Images\Application\WebApplication.svg" />
 	</ItemGroup>
 
 	<ItemGroup>

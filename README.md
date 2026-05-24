@@ -85,7 +85,7 @@ protected override void Options(ThargaWpfOptions thargaWpfOptions)
 }
 ```
 
-This works with Squirrel and Velopack update systems — the single-instance lock is automatically released before an update restart.
+This works with the Velopack update system — the single-instance lock is automatically released before an update restart.
 
 ## Window Management
 
@@ -228,19 +228,19 @@ protected override void Options(ThargaWpfOptions thargaWpfOptions)
 When an application update is detected, the splash screen stays open with a progress bar and the close button hidden, so the user knows an update is in progress. If the update fails, the close button reappears with an error message.
 
 ## ClickOnce application update
-This features uses [Squirrel](https://www.nuget.org/packages/Clowd.Squirrel) or [Velopack](https://www.nuget.org/packages/Velopack/0.0.1350-g3ba32af) for updates.
+This features uses [Velopack](https://www.nuget.org/packages/Velopack) for updates.
 
 To get started register the options *UpdateSystem*, *UpdateIntervalCheck* and *UpdateLocation*.
 
 #### UpdateSystem
-Select between None, Squirrel and Velopack.
+Select between None and Velopack.
 
 #### UpdateIntervalCheck
 The interval between checks. If the interval is set to 1 hour, the first check will be done after one hour.
 If the checks should be performed at startup, use the *checkForUpdates* in *ShowSplashAsync* or call *CheckForUpdateAsync* on application startup.
 
 #### UpdateLocation
-This address should point to the location of the Squirrel/Velopack release (the location of the *RELEASES*-file).
+This address should point to the location of the Velopack release (the location of the *RELEASES*-file).
 
 Example of registration.
 ```
