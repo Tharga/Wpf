@@ -3,7 +3,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
-using System.Net.Http;
 using System.Reflection;
 using System.Windows;
 using Tharga.License;
@@ -114,8 +113,7 @@ public abstract class ApplicationBase : Application
                 services.AddTransient<IApplicationDownloadService>(s =>
                 {
                     var configuration = s.GetService<IConfiguration>();
-                    var httpClientFactory = s.GetService<IHttpClientFactory>();
-                    return new ApplicationDownloadService(configuration, httpClientFactory, _options);
+                    return new ApplicationDownloadService(configuration, _options);
                 });
 
                 services.AddTransient<ILicenseClient, LicenseClient>();

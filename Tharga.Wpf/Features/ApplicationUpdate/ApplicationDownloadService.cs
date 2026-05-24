@@ -1,4 +1,3 @@
-﻿using System.Net.Http;
 using Microsoft.Extensions.Configuration;
 
 namespace Tharga.Wpf.ApplicationUpdate;
@@ -8,7 +7,7 @@ internal class ApplicationDownloadService : IApplicationDownloadService
     private readonly IConfiguration _configuration;
     private readonly ThargaWpfOptions _options;
 
-    public ApplicationDownloadService(IConfiguration configuration, IHttpClientFactory httpClientFactory, ThargaWpfOptions options)
+    public ApplicationDownloadService(IConfiguration configuration, ThargaWpfOptions options)
     {
         _configuration = configuration;
         _options = options;
