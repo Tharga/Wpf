@@ -22,7 +22,23 @@ internal class TabNavigationStateService : ITabNavigationStateService
 
     public ObservableCollection<TabItem> TabItems { get; } = new ();
 
-    public async Task<(TTabView TabView, TabAction TabAction)> OpenTabAsync<TTabView>(string title, object parameter)
+    public Task<(TTabView TabView, TabAction TabAction)> OpenTabAsync<TTabView>(string title, object parameter)
+        where TTabView : TabView
+    {
+        // TabItems and TabItem.Content are UI-thread-only (ContentControl). Dispatch so the
+        // method is safe to call from any thread (e.g. from OpenTabComamnd<T>.Execute whose
+        // async void body may resume on a thread-pool thread).
+        var dispatcher = Application.Current?.Dispatcher;
+        if (dispatcher != null && !dispatcher.CheckAccess())
+        {
+            // Start the async method on the dispatcher thread; its continuations will resume
+            // on the dispatcher's SynchronizationContext. Caller awaits the returned Task safely.
+            return dispatcher.Invoke(() => OpenTabCoreAsync<TTabView>(title, parameter));
+        }
+        return OpenTabCoreAsync<TTabView>(title, parameter);
+    }
+
+    private async Task<(TTabView TabView, TabAction TabAction)> OpenTabCoreAsync<TTabView>(string title, object parameter)
         where TTabView : TabView
     {
         var existing = TabItems.Where(x => x.Content.GetType() == typeof(TTabView)).ToArray();
@@ -97,7 +113,17 @@ internal class TabNavigationStateService : ITabNavigationStateService
         }
     }
 
-    public async Task<bool> CloseAllTabsAsync(bool forceClose)
+    public Task<bool> CloseAllTabsAsync(bool forceClose)
+    {
+        var dispatcher = Application.Current?.Dispatcher;
+        if (dispatcher != null && !dispatcher.CheckAccess())
+        {
+            return dispatcher.Invoke(() => CloseAllTabsCoreAsync(forceClose));
+        }
+        return CloseAllTabsCoreAsync(forceClose);
+    }
+
+    private async Task<bool> CloseAllTabsCoreAsync(bool forceClose)
     {
         var allowClose = true;
 
@@ -170,7 +196,17 @@ internal class TabNavigationStateService : ITabNavigationStateService
         return CloseTabAsync(tabView, false);
     }
 
-    public async Task<bool> CloseTabAsync(TabView tabView, bool forceClose)
+    public Task<bool> CloseTabAsync(TabView tabView, bool forceClose)
+    {
+        var dispatcher = Application.Current?.Dispatcher;
+        if (dispatcher != null && !dispatcher.CheckAccess())
+        {
+            return dispatcher.Invoke(() => CloseTabCoreAsync(tabView, forceClose));
+        }
+        return CloseTabCoreAsync(tabView, forceClose);
+    }
+
+    private async Task<bool> CloseTabCoreAsync(TabView tabView, bool forceClose)
     {
         var closeResult = await tabView.OnCloseAsync();
         if (!forceClose && !closeResult)
