@@ -184,6 +184,26 @@ public ICommand NewTabCommand => new RelayCommand(_ => _tabNavigationStateServic
 ## Splash Screen
 A splash screen is shown during application startup and update checks. By default it uses a built-in teal image.
 
+### Triggering the splash
+The splash is **not** shown automatically. Three ways to trigger it:
+
+1. **Canonical** — `AppExtensions.StartMainWindow<T>` does everything (window registration, splash, tray icon, close behaviour, startup visibility):
+   ```csharp
+   private void Application_Startup(object sender, StartupEventArgs e)
+   {
+       this.StartMainWindow<MainWindow>(showSplash: true, checkForUpdates: true);
+   }
+   ```
+2. **Manual** — call `IApplicationUpdateStateService.ShowSplashAsync` from your startup code for full control:
+   ```csharp
+   var update = ApplicationBase.GetService<IApplicationUpdateStateService>();
+   await update.ShowSplashAsync(checkForUpdates: true);  // auto-closes after a short delay when no update is found
+   ```
+3. **About-style** — pass `showCloseButton: true` so the splash stays open until the user dismisses it (e.g. from an About menu):
+   ```csharp
+   await update.ShowSplashAsync(checkForUpdates: false, showCloseButton: true, checkForLicense: true);
+   ```
+
 ### Choosing a built-in image
 Set `SplashCreator` to return a `Splash` with a different image from `SplashImageLibrary`:
 
@@ -197,7 +217,25 @@ protected override void Options(ThargaWpfOptions thargaWpfOptions)
 }
 ```
 
-Available built-in images: `Blue`, `Green`, `GreenTransparent`, `Orange`, `Red`, `RedTransparent`, `Teal`, `TealTransparent`, `White`, `Yellow`.
+Available built-in images:
+- Light: `Blue`, `Green`, `GreenTransparent`, `Orange`, `Red`, `RedTransparent`, `Teal`, `TealTransparent`, `White`, `Yellow`
+- Dark (needs a light foreground brush — see below): `Colours`, `Fire`, `Mosaik`, `Prism`, `Silicon`
+
+### Foreground color
+The built-in `Splash` overlays text (`FullName`, `Environment`, `Version`, `ExeLocation`, messages, hyperlinks, close button) on the background image. By default WPF uses a dark foreground brush, which is unreadable on a dark image. Set `SplashForeground` to a bright brush so the text remains visible:
+
+```csharp
+protected override void Options(ThargaWpfOptions thargaWpfOptions)
+{
+    thargaWpfOptions.SplashCreator = data => new Splash(data with
+    {
+        ImagePath = SplashImageLibrary.Silicon
+    });
+    thargaWpfOptions.SplashForeground = Brushes.White;
+}
+```
+
+The same effect can be achieved per-splash by setting `SplashData.Foreground` inside `SplashCreator`. When not set, the WPF default foreground is used (no behaviour change for existing consumers).
 
 ### Using a custom image
 Point `ImagePath` to any image file. The image should be a **PNG** at **500 x 309 pixels**. Use a transparent PNG if you want the splash window background to show through.

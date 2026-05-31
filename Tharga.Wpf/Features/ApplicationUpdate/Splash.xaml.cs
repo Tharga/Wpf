@@ -92,6 +92,20 @@ public partial class Splash : ISplash
         }
 
         _splashClosed = splashData.SplashClosed;
+
+        if (splashData.Foreground != null)
+        {
+            FullName.Foreground = splashData.Foreground;
+            Environment.Foreground = splashData.Foreground;
+            Version.Foreground = splashData.Foreground;
+            ExeLocation.Foreground = splashData.Foreground;
+            Messages.Foreground = splashData.Foreground;
+            Client.Foreground = splashData.Foreground;
+            ClientLocation.Foreground = splashData.Foreground;
+            ClientSource.Foreground = splashData.Foreground;
+            ClientSourceLocation.Foreground = splashData.Foreground;
+            CloseButton.Foreground = splashData.Foreground;
+        }
     }
 
     /// <inheritdoc />
