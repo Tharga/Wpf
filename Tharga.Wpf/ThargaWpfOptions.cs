@@ -37,6 +37,14 @@ public class ThargaWpfOptions
     public Func<SplashData, ISplash> SplashCreator { get; set; }
 
     /// <summary>
+    /// Foreground brush for the splash overlaid text. Applied to all overlaid elements
+    /// (FullName, Environment, Version, ExeLocation, Messages, hyperlinks, close button).
+    /// Set this when using a dark splash background image so the default (dark) text is readable.
+    /// When <c>null</c> the WPF default foreground is used.
+    /// </summary>
+    public System.Windows.Media.Brush SplashForeground { get; set; }
+
+    /// <summary>
     /// If set to true, multiple tabs with the same title is allowed.
     /// The property AllowTabsWithSameTitles that can be overridden on tab-level controls if tabs of the same type can be opened multiple times.
     /// </summary>

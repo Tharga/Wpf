@@ -187,7 +187,8 @@ internal abstract class ApplicationUpdateStateServiceBase : IApplicationUpdateSt
                     _persistentCloseButton = false;
                     SplashCompleteEvent?.Invoke(this, new SplashCompleteEventArgs(e, true));
                 },
-                ImagePath = SplashImageLibrary.TealTransparent
+                ImagePath = SplashImageLibrary.TealTransparent,
+                Foreground = _options.SplashForeground
             };
             var app = Application.Current;
             var dispatcher = app?.Dispatcher;

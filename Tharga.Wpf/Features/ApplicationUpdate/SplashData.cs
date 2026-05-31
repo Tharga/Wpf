@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using System.Windows.Media;
 
 namespace Tharga.Wpf.ApplicationUpdate;
 
@@ -39,4 +40,11 @@ public record SplashData
 
     /// <summary>The path to a custom splash screen background image.</summary>
     public string ImagePath { get; init; }
+
+    /// <summary>
+    /// Foreground brush applied to all overlaid splash text (FullName, Environment, Version,
+    /// ExeLocation, Messages, hyperlinks, close button). When <c>null</c> the WPF default is used.
+    /// Set this when the splash background image is dark and the default (dark) text is unreadable.
+    /// </summary>
+    public Brush Foreground { get; init; }
 }

@@ -1,5 +1,7 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using System.Windows.Media;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using Tharga.Wpf.ApplicationUpdate;
 
 namespace Tharga.Wpf.Sample;
 
@@ -23,6 +25,10 @@ public partial class App
 
         thargaWpfOptions.HideOnClose = true;
         //thargaWpfOptions.StartupWindowState = StartupWindowState.Last;
+
+        // Demo the dark splash image + light foreground brush (so the overlaid text stays readable).
+        thargaWpfOptions.SplashCreator = data => new Splash(data with { ImagePath = SplashImageLibrary.Colours });
+        thargaWpfOptions.SplashForeground = Brushes.White;
 
         thargaWpfOptions.RegisterExceptionHandler<InvalidOperationExceptionHandler, InvalidOperationException>();
 
