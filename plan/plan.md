@@ -16,8 +16,9 @@
 - [x] 14. `docfx docs/docfx.json` — 0 errors, 2 warnings (one pre-existing CS0693, one benign multi-target "no Compile target" on License which still processed)
 - [x] 15. Fix duplicate `<inheritdoc />` on `OnExit` in `ApplicationBase.cs` (caught by docfx)
 - [x] 16. Final `dotnet build -c Release` + `dotnet test -c Release` green (145/145)
-- [~] 17. Commit all changes
-- [ ] 18. Push branch and open PR to `master`
+- [x] 17. Commit all changes (commit `c140f53`)
+- [~] 18. Bump `MAJOR_MINOR` in `build.yml` from `2.1` to `2.2` — Velopack 0.x → 1.x is a transitive breaking change for consumers that reference Velopack directly. First release will be `2.2.0`.
+- [ ] 19. Push branch and open PR to `master`
 
 ## Last session
 - All implementation steps complete on `feature/icon-and-docs`.

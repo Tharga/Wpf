@@ -65,7 +65,7 @@ Mirrors the `feature/icon-and-docs` branch pattern already used by Tharga.Test, 
 - All tests pass after Velopack 1.x bump
 - `docfx docs/docfx.json` builds locally without errors
 - PR opens against `master`, workflow runs green
-- After merge: stable release `2.1.3` (or next patch) published, docs deployed at `wpf.tharga.net`
+- After merge: stable release `2.2.0` published (minor bump — Velopack 0.x → 1.x is a transitive breaking change for any consumer that touches Velopack directly), docs deployed at `wpf.tharga.net`
 
 ## Done condition
 User confirms the docs site is reachable and the two Requests.md items can be marked Done.
