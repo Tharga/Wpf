@@ -238,7 +238,6 @@ public abstract class ApplicationBase : Application
     }
 
     /// <inheritdoc />
-    /// <inheritdoc />
     protected override async void OnExit(ExitEventArgs args)
     {
         try

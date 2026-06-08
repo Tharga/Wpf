@@ -8,7 +8,7 @@
     <Company>Thargelion AB</Company>
     <Product>Tharga WPF</Product>
     <Description>Toolkit for WPF applications.</Description>
-    <PackageIconUrl>http://thargelion.se/wp-content/uploads/2025/11/Thargelion-Wpf-Icon-150.png</PackageIconUrl>
+    <PackageIconUrl>https://thargelion.net/assets/component-wpf.png</PackageIconUrl>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageProjectUrl>https://github.com/Tharga/Wpf</PackageProjectUrl>
@@ -79,8 +79,8 @@
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.8" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.8" />
     <PackageReference Include="System.Management" Version="10.0.8" />
-    <PackageReference Include="Tharga.Runtime" Version="0.1.12" />
-    <PackageReference Include="Velopack" Version="0.0.1298" />
+    <PackageReference Include="Tharga.Runtime" Version="0.1.14" />
+    <PackageReference Include="Velopack" Version="1.2.0" />
   </ItemGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="Tharga.Wpf.Tests" />

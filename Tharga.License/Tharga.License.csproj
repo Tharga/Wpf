@@ -8,7 +8,7 @@
     <Company>Thargelion AB</Company>
     <Product>Tharga License</Product>
     <Description>License Service Toolkit that works together with Tharga WPF.</Description>
-    <PackageIconUrl>http://thargelion.se/wp-content/uploads/2019/11/Thargelion-White-Icon-150.png</PackageIconUrl>
+    <PackageIconUrl>https://thargelion.net/assets/component-wpf.png</PackageIconUrl>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageProjectUrl>https://github.com/Tharga/Wpf</PackageProjectUrl>
