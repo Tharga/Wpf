@@ -40,7 +40,11 @@ internal class SingleInstanceService : IDisposable
         {
             using var client = new NamedPipeClientStream(".", pipeName, PipeDirection.Out);
             client.Connect(timeout: 2000);
-            using var writer = new StreamWriter(client) { AutoFlush = true };
+            // Assigned after the using declaration rather than in an object
+            // initializer, so the writer is tracked for disposal from the moment
+            // it is constructed.
+            using var writer = new StreamWriter(client);
+            writer.AutoFlush = true;
             writer.WriteLine(ShowCommand);
         }
         catch
