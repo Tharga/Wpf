@@ -6,7 +6,10 @@
              mc:Ignorable="d"
              d:DesignHeight="40" d:DesignWidth="800">
     <Grid>
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="1" Margin="5">
+        <!-- The Grid declares no RowDefinitions, so Grid.Row="1" pointed outside
+             the grid; WPF clamped it back to row 0. Dropped, since it never had
+             any effect. -->
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="5">
             <Button Content="OK" Width="80" IsDefault="True" Command="{Binding OkCommand}" />
             <Button Content="Cancel" Width="80" IsCancel="True" Command="{Binding CancelCommand}" Margin="5,0,0,0" />
         </StackPanel>
