@@ -78,7 +78,7 @@ There is no support for injecting services into the View directly. To use resour
 
 ## Single Instance
 
-Prevent multiple instances of the application from running. When a second instance is started, it signals the existing instance to show itself (even if hidden to the system tray) and then exits.
+Prevent multiple instances of the application from running. When a second instance is started, it signals the existing instance to show itself (even if hidden to the system tray) and then exits without constructing its own window.
 
 ```csharp
 protected override void Options(ThargaWpfOptions thargaWpfOptions)
@@ -86,6 +86,10 @@ protected override void Options(ThargaWpfOptions thargaWpfOptions)
     thargaWpfOptions.AllowMultipleApplications = false;
 }
 ```
+
+The lock is **machine-wide** and keyed off `ApplicationFullName`, so it holds across Windows sessions (fast user switching, RDP), while two builds with different full names can still run side by side.
+
+Two behaviour fixes landed in **2.4.0**: the lock was previously scoped to the Windows session rather than the machine, and a suppressed second instance still ran its main-window constructor. See [the single-instance article](https://wpf.tharga.net/articles/single-instance) for what changed and whether it affects you.
 
 This works with the Velopack update system — the single-instance lock is automatically released before an update restart.
 
