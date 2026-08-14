@@ -73,4 +73,73 @@ public class SingleInstanceServiceTests
         var service = new SingleInstanceService(name);
         service.Dispose(); // Should not throw.
     }
+
+    [Fact]
+    public void MutexName_Is_Machine_Scoped()
+    {
+        Assert.StartsWith(@"Global\", SingleInstanceService.BuildMutexName("Whatever"));
+    }
+
+    [Fact]
+    public void MutexName_Is_Not_Session_Scoped()
+    {
+        var mutexName = SingleInstanceService.BuildMutexName("Whatever");
+
+        // An unprefixed name resolves in Local\, which Windows scopes per Terminal Services
+        // session, so two signed-in users would each acquire their own lock.
+        Assert.DoesNotContain(@"Local\", mutexName);
+        Assert.NotEqual("Tharga.Wpf.Whatever", mutexName);
+    }
+
+    [Fact]
+    public void PipeName_Stays_Unprefixed()
+    {
+        // Named pipes are already machine-wide, so the show-signal path must NOT gain the
+        // Global\ prefix — prefixing it would break signalling rather than widen it.
+        Assert.Equal("Tharga.Wpf.Whatever", SingleInstanceService.BuildPipeName("Whatever"));
+    }
+
+    [Fact]
+    public void MutexName_And_PipeName_Are_Different()
+    {
+        // They were one shared field before; only the mutex is namespace-scoped.
+        var name = "Whatever";
+        Assert.NotEqual(SingleInstanceService.BuildPipeName(name), SingleInstanceService.BuildMutexName(name));
+    }
+
+    [Fact]
+    public void Instance_Exposes_The_Built_Names()
+    {
+        var name = TestAppName + nameof(Instance_Exposes_The_Built_Names);
+        using var service = new SingleInstanceService(name);
+
+        Assert.Equal(SingleInstanceService.BuildMutexName(name), service.MutexName);
+        Assert.Equal(SingleInstanceService.BuildPipeName(name), service.PipeName);
+    }
+
+    [Fact]
+    public void Acquired_Mutex_Is_Visible_Under_Its_Global_Name()
+    {
+        var name = TestAppName + nameof(Acquired_Mutex_Is_Visible_Under_Its_Global_Name);
+        using var service = new SingleInstanceService(name);
+        Assert.True(service.TryAcquire());
+
+        // Opening the same Global\ name from outside the service proves the lock really lives
+        // in the machine-wide namespace, not merely that the string starts with a prefix.
+        Assert.True(Mutex.TryOpenExisting(SingleInstanceService.BuildMutexName(name), out var existing));
+        existing?.Dispose();
+    }
+
+    [Fact]
+    public void Unprefixed_Name_Does_Not_Collide_With_The_Global_Lock()
+    {
+        var name = TestAppName + nameof(Unprefixed_Name_Does_Not_Collide_With_The_Global_Lock);
+        using var service = new SingleInstanceService(name);
+        Assert.True(service.TryAcquire());
+
+        // The old (session-scoped) name must be a genuinely different kernel object — this is
+        // the regression that made the guard per-session.
+        using var sessionScoped = new Mutex(true, SingleInstanceService.BuildPipeName(name), out var createdNew);
+        Assert.True(createdNew);
+    }
 }

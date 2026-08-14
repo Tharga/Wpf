@@ -211,6 +211,12 @@ public abstract class ApplicationBase : Application
                 if (!_singleInstanceService.TryAcquire())
                 {
                     SingleInstanceService.SignalExistingInstance(_options.ApplicationFullName);
+                    // Shutdown() only posts to the dispatcher, so WPF still runs DoStartup()
+                    // and would construct the window from StartupUri in a process that is
+                    // about to exit. DoStartup() skips loading when StartupUri is null, and
+                    // that is the only public hook — StartupEventArgs.PerformDefaultAction
+                    // is internal to PresentationFramework.
+                    StartupUri = null;
                     Shutdown();
                     return;
                 }
