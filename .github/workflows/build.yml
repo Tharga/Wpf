@@ -7,7 +7,7 @@ on:
     branches: [master]
 
 env:
-  MAJOR_MINOR: '2.3'
+  MAJOR_MINOR: '2.4'
 
 permissions:
   contents: write
@@ -107,12 +107,15 @@ jobs:
           fi
 
       - name: Test with coverage
-        run: dotnet test -c Release --no-build --verbosity normal --collect:"XPlat Code Coverage" --results-directory ./coverage
+        run: |
+          dotnet test Tharga.Wpf.Tests/Tharga.Wpf.Tests.csproj -c Release --no-build --results-directory ./coverage -- --coverage --coverage-output-format cobertura --coverage-output coverage.wpf.cobertura.xml
+          dotnet test Tharga.License.Tests/Tharga.License.Tests.csproj -c Release --no-build --results-directory ./coverage -- --coverage --coverage-output-format cobertura --coverage-output coverage.license.cobertura.xml
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
         with:
-          directory: ./coverage
+          files: ./coverage/coverage.wpf.cobertura.xml,./coverage/coverage.license.cobertura.xml
+          disable_search: true
           fail_ci_if_error: false
           token: ${{ secrets.CODECOV_TOKEN }}
 
