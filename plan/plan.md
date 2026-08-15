@@ -8,7 +8,8 @@
 - [x] 6. Bump `MAJOR_MINOR` 2.3 → 2.4 — ships as **2.4.0**. The tag-lookup `|| true` guard was already present in all three sites, so starting a new series is safe here. Workflow re-validated with the duplicate-key YAML loader.
 - [x] 7. Docs — corrected `ApplicationShortName` → `ApplicationFullName` in `docs/articles/single-instance.md`; added a "Scope of the lock" section and 2.4.0 change notes for both fixes; updated the `README.md` Single Instance section. Both doc surfaces done, per the Feature Workflow.
 - [x] 8. Verify — `dotnet build -c Release --no-incremental` succeeded (12 pre-existing warnings, 0 errors); `dotnet test -c Release` 152 passing, 0 skipped, 0 failed.
-- [~] 9. Close-out — archive `plan/feature.md`, `git rm -r plan`, final commit, PR
+- [x] 9. Close-out NuGet re-check — xunit.v3 and xunit.runner.visualstudio 3.2.2 → **4.0.0**, a major bump the user chose to take in this PR. xunit 4 **drops VSTest**, so `dotnet test` failed outright until the project opted in to Microsoft.Testing.Platform via a new root `global.json` (`test.runner`). No test source changed — all 152 still pass. The CI coverage step did break: `--collect:"XPlat Code Coverage"` is a VSTest data collector, and under MTP it ran zero tests and exited 5. Replaced `coverlet.collector` with `Microsoft.Testing.Extensions.CodeCoverage` 18.10.0 and switched the step to `-- --coverage --coverage-output-format cobertura`, which still writes `*.cobertura.xml` into `./coverage` for the unchanged Codecov action.
+- [~] 10. Close-out — archive `plan/feature.md`, `git rm -r plan`, final commit, PR
 
 ## Still needed from outside this branch
 
