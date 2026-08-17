@@ -136,4 +136,83 @@ public class LocationValidatorTests
 
         Assert.Equal(560, result.Left);
     }
+
+    [Fact]
+    public void Oversized_Rescued_Window_Clamped_To_Screen_Work_Area()
+    {
+        var location = new Location { Left = 2441, Top = 80, Width = 1455, Height = 865 };
+        var result = LocationValidator.Validate(location, [new ScreenBounds(0, 0, 1440, 852)]);
+
+        Assert.Equal(1440, result.Width);
+        Assert.Equal(852, result.Height);
+        Assert.Equal(0, result.Left);
+        Assert.Equal(0, result.Top);
+    }
+
+    [Fact]
+    public void Rescued_Window_Smaller_Than_Screen_Keeps_Its_Size()
+    {
+        var location = new Location { Left = 5000, Top = 100, Width = 800, Height = 450 };
+        var result = LocationValidator.Validate(location, [new ScreenBounds(0, 0, 1440, 852)]);
+
+        Assert.Equal(800, result.Width);
+        Assert.Equal(450, result.Height);
+        Assert.Equal(320, result.Left);
+        Assert.Equal(201, result.Top);
+    }
+
+    [Fact]
+    public void Rescue_Prefers_Primary_Screen()
+    {
+        var screens = new List<ScreenBounds>
+        {
+            new(1920, 0, 1920, 1080),
+            new(0, 0, 1920, 1080, IsPrimary: true)
+        };
+        var location = new Location { Left = -5000, Top = 100, Width = 800, Height = 450 };
+        var result = LocationValidator.Validate(location, screens);
+
+        Assert.Equal(560, result.Left);
+        Assert.Equal(315, result.Top);
+    }
+
+    [Fact]
+    public void Rescue_Falls_Back_To_First_Screen_When_None_Is_Primary()
+    {
+        var location = new Location { Left = -5000, Top = 100, Width = 800, Height = 450 };
+        var result = LocationValidator.Validate(location, DualScreen);
+
+        Assert.Equal(560, result.Left);
+        Assert.Equal(315, result.Top);
+    }
+
+    [Fact]
+    public void Negative_Coordinates_On_Monitor_Left_Of_Primary_Stay()
+    {
+        var screens = new List<ScreenBounds>
+        {
+            new(-1920, 0, 1920, 1080),
+            new(0, 0, 1920, 1080, IsPrimary: true)
+        };
+        var location = new Location { Left = -1800, Top = 100, Width = 800, Height = 450 };
+        var result = LocationValidator.Validate(location, screens);
+
+        Assert.Equal(-1800, result.Left);
+        Assert.Equal(100, result.Top);
+    }
+
+    [Fact]
+    public void Negative_Coordinates_On_Monitor_Above_Primary_Stay()
+    {
+        var screens = new List<ScreenBounds>
+        {
+            new(0, -1080, 1920, 1080),
+            new(0, 0, 1920, 1080, IsPrimary: true)
+        };
+        var location = new Location { Left = 100, Top = -900, Width = 800, Height = 450 };
+        var result = LocationValidator.Validate(location, screens);
+
+        Assert.Equal(100, result.Left);
+        Assert.Equal(-900, result.Top);
+    }
 }
