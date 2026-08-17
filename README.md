@@ -269,7 +269,7 @@ protected override void Options(ThargaWpfOptions thargaWpfOptions)
 ```
 
 ### Update behavior
-When an application update is detected, the splash screen stays open with a progress bar and the close button hidden, so the user knows an update is in progress. If the update fails, the close button reappears with an error message.
+When an application update is detected, the splash screen stays open with a progress bar and the close button hidden, so the user knows an update is in progress. With the Velopack update system the progress bar shows the actual download percentage, and the status message states whether a delta or a full package is downloaded — matching Velopack's own fallback decision. If the update fails, the close button reappears with an error message.
 
 ## ClickOnce application update
 This features uses [Velopack](https://www.nuget.org/packages/Velopack) for updates.
