@@ -9,6 +9,9 @@ namespace Tharga.Wpf.ApplicationUpdate;
 
 internal class VelopackApplicationUpdateStateService : ApplicationUpdateStateServiceBase
 {
+    // Velopack's own default. Set explicitly so the manager's fallback decision and the message shown to the user are guaranteed to agree.
+    private const int MaximumDeltasBeforeFallback = 10;
+
     private readonly ILogger<VelopackApplicationUpdateStateService> _logger;
 
     public VelopackApplicationUpdateStateService(IConfiguration configuration, ILoggerFactory loggerFactory, ILicenseClient licenseClient, IApplicationDownloadService applicationDownloadService, ITabNavigationStateService tabNavigationStateService, ThargaWpfOptions options, Window mainWindow)
@@ -21,7 +24,7 @@ internal class VelopackApplicationUpdateStateService : ApplicationUpdateStateSer
     {
         _logger.LogInformation("Velopack UpdateAsync start. clientLocation={ClientLocation}", clientLocation);
 
-        var mgr = new UpdateManager(clientLocation);
+        var mgr = new UpdateManager(clientLocation, new UpdateOptions { MaximumDeltasBeforeFallback = MaximumDeltasBeforeFallback });
         if (!mgr.IsInstalled)
         {
             var message = $"{_options.ApplicationShortName} is not installed.";
@@ -40,20 +43,12 @@ internal class VelopackApplicationUpdateStateService : ApplicationUpdateStateSer
             return;
         }
 
-        string msg;
-        if (newVersion.DeltasToTarget.Any())
-        {
-            var version = $"{newVersion.DeltasToTarget.Last().Version}";
-            var delta = newVersion.DeltasToTarget.Length == 1
-                ? "delta"
-                : $"{newVersion.DeltasToTarget.Length} deltas";
-
-            msg = $"version {version} ({delta})";
-        }
-        else
-        {
-            msg = $"version {newVersion.TargetFullRelease.Version} (full)";
-        }
+        var msg = VelopackUpdateMessage.Build(
+            $"{newVersion.TargetFullRelease.Version}",
+            newVersion.DeltasToTarget.Length,
+            newVersion.DeltasToTarget.Sum(x => (long)x.Size),
+            (long)newVersion.TargetFullRelease.Size,
+            MaximumDeltasBeforeFallback);
 
         _logger.LogInformation("Velopack UpdateAsync: update available - {Msg}.", msg);
 
@@ -70,7 +65,7 @@ internal class VelopackApplicationUpdateStateService : ApplicationUpdateStateSer
         OnUpdateInfoEvent(this, $"Downloading {msg}.");
         try
         {
-            await mgr.DownloadUpdatesAsync(newVersion);
+            await mgr.DownloadUpdatesAsync(newVersion, progress => _splash?.SetProgress(progress));
 
             OnUpdateInfoEvent(this, "Installing.");
             await BeforeRestartAsync();
