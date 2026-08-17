@@ -133,11 +133,11 @@ thargaWpfOptions.StartupWindowState = StartupWindowState.Last; // default
 
 ### Window size and position safety
 
-When restoring a saved window location, the framework validates that:
+Saved window locations are validated both when they are loaded and whenever the display setup changes (a monitor is connected, disconnected, or the resolution changes). The framework validates that:
 - Width and height are at least 200x150 pixels — smaller values are replaced with defaults
-- The window is visible on at least one connected monitor — if not, it is repositioned to the center of the primary screen
+- The window is visible on at least one connected monitor — if not, it is moved to the center of the primary screen, with its size clamped to that screen's work area so it is always fully on-screen
 
-This prevents issues when monitors are disconnected or the saved position is invalid.
+Windows left on a disconnected monitor are recovered automatically: display changes are picked up while the application is running (debounced, and only for windows in normal state — Windows re-places maximized and minimized windows itself), and the rescued position is persisted. Negative coordinates from monitors placed left of or above the primary are valid and preserved.
 
 ## Remember window location
 To remember the location of any window, simply add this statement in the constructor of the window.

@@ -42,10 +42,14 @@ options.StartupWindowState = StartupWindowState.Last; // default
 
 ## Safe location restore
 
-When restoring a saved window location, the framework guards against two failure modes:
+Saved window locations are validated both when they are loaded and whenever the display setup changes while the application is running. The framework guards against two failure modes:
 
 - **Too small** — width or height below 200x150 pixels are replaced with defaults. Prevents a misconfigured save from leaving the window invisible-but-present.
-- **Off-screen** — if the saved rectangle isn't on any currently connected monitor (laptop dock removed, second monitor disconnected, resolution changed), the window is repositioned to the center of the primary screen.
+- **Off-screen** — if the saved rectangle isn't on any currently connected monitor (laptop dock removed, second monitor disconnected, resolution changed), the window is moved to the center of the primary screen, with its size clamped to that screen's work area so it ends up fully on-screen.
+
+Display changes are picked up live: disconnect a monitor and any window stranded on it is pulled back onto the remaining screens automatically, and the rescued position is persisted. The revalidation is debounced (Windows fires several display events in a row) and only applies to windows in normal state — maximized and minimized windows are re-placed by Windows itself.
+
+Negative coordinates are valid — a monitor placed left of or above the primary produces them — and are saved and restored as-is; only positions that are actually unreachable are corrected.
 
 You don't have to opt into these guards — they apply automatically to any window monitored by `IWindowLocationService`.
 
