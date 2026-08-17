@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using Microsoft.Extensions.Logging;
+using Microsoft.Win32;
 using Tharga.Wpf.Framework;
 
 namespace Tharga.Wpf.WindowLocation;
@@ -49,8 +50,11 @@ internal class WindowLocationService : IWindowLocationService
         private readonly string _fileLocation;
         private readonly Location _loadLocation;
 
+        private static readonly TimeSpan DisplayChangeDebounce = TimeSpan.FromMilliseconds(750);
+
         private readonly bool _isMainWindow;
         private Location _lastLocation;
+        private Debouncer _displayChangeDebouncer;
 
         public MonitorEngine(string name, string environment, Window window, ILogger logger, ThargaWpfOptions options, bool isMainWindow = false)
         {
@@ -72,6 +76,12 @@ internal class WindowLocationService : IWindowLocationService
                 _window.SizeChanged -= OnWindowChanged;
                 _window.StateChanged -= OnWindowChanged;
                 SetLocation();
+            };
+
+            _window.Closed += (_, _) =>
+            {
+                SystemEvents.DisplaySettingsChanged -= OnDisplaySettingsChanged;
+                _displayChangeDebouncer?.Dispose();
             };
         }
 
@@ -123,6 +133,52 @@ internal class WindowLocationService : IWindowLocationService
             _window.LocationChanged += OnWindowChanged;
             _window.SizeChanged += OnWindowChanged;
             _window.StateChanged += OnWindowChanged;
+
+            _displayChangeDebouncer = new Debouncer(DisplayChangeDebounce, RevalidateLocation);
+            SystemEvents.DisplaySettingsChanged += OnDisplaySettingsChanged;
+        }
+
+        private void OnDisplaySettingsChanged(object sender, EventArgs e)
+        {
+            _displayChangeDebouncer?.Trigger();
+        }
+
+        private void RevalidateLocation()
+        {
+            try
+            {
+                _window.Dispatcher.Invoke(() =>
+                {
+                    // Windows re-places maximized and minimized windows itself.
+                    if (_window.WindowState != WindowState.Normal) return;
+
+                    var width = (int)(double.IsNaN(_window.Width) ? _window.ActualWidth : _window.Width);
+                    var height = (int)(double.IsNaN(_window.Height) ? _window.ActualHeight : _window.Height);
+                    var location = new Location
+                    {
+                        WindowState = _window.WindowState,
+                        Visibility = _window.Visibility,
+                        Left = (int)_window.Left,
+                        Top = (int)_window.Top,
+                        Width = width,
+                        Height = height
+                    };
+
+                    var validated = LocationValidator.Validate(location, GetScreenBounds(), defaultWidth: width, defaultHeight: height);
+                    if (ReferenceEquals(validated, location)) return;
+
+                    _logger?.LogInformation("Display setup changed. Window {Name} moved from ({Left}, {Top}, {Width}, {Height}) to ({NewLeft}, {NewTop}, {NewWidth}, {NewHeight}).", _name, location.Left, location.Top, location.Width, location.Height, validated.Left, validated.Top, validated.Width, validated.Height);
+
+                    _window.Left = validated.Left;
+                    _window.Top = validated.Top;
+                    _window.Width = validated.Width;
+                    _window.Height = validated.Height;
+                });
+            }
+            catch (Exception exception)
+            {
+                _logger?.LogError(exception, exception.Message);
+            }
         }
 
         private static IReadOnlyList<ScreenBounds> GetScreenBounds()
@@ -132,7 +188,8 @@ internal class WindowLocationService : IWindowLocationService
                     s.WorkingArea.Left,
                     s.WorkingArea.Top,
                     s.WorkingArea.Width,
-                    s.WorkingArea.Height))
+                    s.WorkingArea.Height,
+                    s.Primary))
                 .ToList();
         }
 
@@ -143,35 +200,7 @@ internal class WindowLocationService : IWindowLocationService
             try
             {
                 var fileData = File.ReadAllText(FileLocation);
-                var data = fileData.Split(";");
-                if (data[0] != _name) throw new NotImplementedException("Cannot handle other windows yet.");
-                if (data.Length <= 7) return null;
-
-                var location = new Location
-                {
-                    WindowState = Enum.Parse<WindowState>(data[1], false),
-                    Visibility = Enum.Parse<Visibility>(data[2], false),
-                    Left = int.Parse(data[3]),
-                    Top = int.Parse(data[4]),
-                    Width = int.Parse(data[5]),
-                    Height = int.Parse(data[6]),
-                };
-
-                if (data.Length > 6)
-                {
-                    var meta = data[6];
-                    var pairs = meta.Split('|');
-                    foreach (var pair in pairs)
-                    {
-                        var vals = pair.Split(":");
-                        if (vals.Length > 1)
-                        {
-                            location.Metadata.TryAdd(vals[0], vals[1]);
-                        }
-                    }
-                }
-
-                return location;
+                return LocationFormatter.Parse(_name, fileData);
             }
             catch (Exception exception)
             {
@@ -202,16 +231,24 @@ internal class WindowLocationService : IWindowLocationService
 
         private void SetLocation(Visibility? visibilityOverride = null)
         {
-            var lastLocation = _lastLocation ?? _loadLocation ?? new Location();
-            lastLocation = lastLocation with
+            var baseLocation = _lastLocation ?? _loadLocation ?? new Location();
+            var lastLocation = baseLocation with
             {
                 WindowState = _window.WindowState,
-                Visibility = visibilityOverride ?? _window.Visibility,
-                Left = _window.Left >= 0 ? (int)_window.Left : (_lastLocation?.Left ?? 0),
-                Top = _window.Top >= 0 ? (int)_window.Top : (_lastLocation?.Top ?? 0),
-                Width = _window.Width > 0 ? (int)_window.Width : (_lastLocation?.Width ?? -1),
-                Height = _window.Height > 0 ? (int)_window.Height : (_lastLocation?.Height ?? -1)
+                Visibility = visibilityOverride ?? _window.Visibility
             };
+
+            // Normal state only: minimized parks at -32000 and maximized must not overwrite the restore bounds; legitimately negative coordinates are saved as-is and validated on load.
+            if (_window.WindowState == WindowState.Normal)
+            {
+                lastLocation = lastLocation with
+                {
+                    Left = double.IsNaN(_window.Left) ? baseLocation.Left : (int)_window.Left,
+                    Top = double.IsNaN(_window.Top) ? baseLocation.Top : (int)_window.Top,
+                    Width = _window.Width > 0 ? (int)_window.Width : baseLocation.Width,
+                    Height = _window.Height > 0 ? (int)_window.Height : baseLocation.Height
+                };
+            }
 
             Exception e = null;
             try
@@ -220,8 +257,7 @@ internal class WindowLocationService : IWindowLocationService
                 {
                     _lastLocation = lastLocation;
                     Debug.WriteLine($"Save window location for {_name}. ({_lastLocation.WindowState}, {_lastLocation.Visibility}: {_lastLocation.Left}, {_lastLocation.Top}, {_lastLocation.Width}, {_lastLocation.Height})");
-                    var metadata = string.Join("|", _lastLocation.Metadata.Select(x => $"{x.Key}:{x.Value}"));
-                    File.WriteAllText(FileLocation, $"{_name};{_lastLocation.WindowState};{_lastLocation.Visibility};{_lastLocation.Left};{_lastLocation.Top};{_lastLocation.Width};{_lastLocation.Height};{metadata}");
+                    File.WriteAllText(FileLocation, LocationFormatter.Serialize(_name, _lastLocation));
                 }
             }
             catch (Exception exception)

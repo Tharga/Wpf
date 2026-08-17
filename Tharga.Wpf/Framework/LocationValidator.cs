@@ -5,7 +5,7 @@ namespace Tharga.Wpf.Framework;
 /// <summary>
 /// Represents the bounds of a screen/monitor.
 /// </summary>
-public record ScreenBounds(int Left, int Top, int Width, int Height);
+public record ScreenBounds(int Left, int Top, int Width, int Height, bool IsPrimary = false);
 
 /// <summary>
 /// Validates and corrects saved window locations.
@@ -18,6 +18,9 @@ public static class LocationValidator
 
     /// <summary>
     /// Validates a saved location against available screen bounds and returns a corrected location.
+    /// A location that overlaps no screen is rescued to the primary screen (or the first screen when
+    /// none is marked primary), with its size clamped to that screen's work area so the result is
+    /// always fully on-screen.
     /// </summary>
     /// <param name="location">The saved location to validate.</param>
     /// <param name="screens">Available screen bounds.</param>
@@ -49,9 +52,19 @@ public static class LocationValidator
 
         if (!IsOnAnyScreen(left, top, width, height, screens))
         {
-            var primary = screens[0];
-            left = primary.Left + (primary.Width - width) / 2;
-            top = primary.Top + (primary.Height - height) / 2;
+            var rescue = screens.FirstOrDefault(x => x.IsPrimary) ?? screens[0];
+            if (width > rescue.Width)
+            {
+                width = rescue.Width;
+            }
+
+            if (height > rescue.Height)
+            {
+                height = rescue.Height;
+            }
+
+            left = rescue.Left + (rescue.Width - width) / 2;
+            top = rescue.Top + (rescue.Height - height) / 2;
             corrected = true;
         }
 
