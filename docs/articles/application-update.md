@@ -25,7 +25,9 @@ protected override void Options(ThargaWpfOptions options)
 this.StartMainWindow<MainWindow>(showSplash: true, checkForUpdates: true);
 ```
 
-The splash appears, Velopack queries the update URL, and if a new release is available the splash stays open (close button hidden, progress bar shown) until the install completes. On success the application restarts into the new version. On failure the close button reappears with an error message so the user can dismiss the splash and continue running the current version.
+The splash appears, Velopack queries the update URL, and if a new release is available the splash stays open (close button hidden, progress bar shown) until the install completes. The progress bar shows the actual download percentage, and the "Downloading version …" message states whether the download is a delta or a full package — mirroring Velopack's own fallback rules (more than 10 deltas, or deltas larger than the full package, mean a full download), so the message matches what is actually downloaded. On success the application restarts into the new version. On failure the close button reappears with an error message so the user can dismiss the splash and continue running the current version.
+
+A custom `ISplash` implementation can override `SetProgress(int percent)` to receive the download percentage; the default implementation is a no-op, so existing implementations keep working unchanged.
 
 ## On-demand check
 

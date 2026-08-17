@@ -31,6 +31,12 @@ public interface ISplash
     /// <summary>Hides the progress bar.</summary>
     void HideProgress();
 
+    /// <summary>Reports determinate progress on the progress bar. The default implementation does nothing, so existing implementations keep working without change.</summary>
+    /// <param name="percent">The progress percentage, 0 to 100.</param>
+    void SetProgress(int percent)
+    {
+    }
+
     /// <summary>Closes and disposes the splash screen.</summary>
     void Close();
 

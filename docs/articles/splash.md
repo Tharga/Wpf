@@ -102,4 +102,4 @@ You lose the built-in update / license / progress UX — implement them yourself
 
 ## Update behaviour
 
-When an application update is detected, the splash stays open with a progress bar and the close button **hidden**, so the user knows an update is in progress. If the update fails, the close button reappears with an error message. See [Application update](application-update.md).
+When an application update is detected, the splash stays open with a progress bar and the close button **hidden**, so the user knows an update is in progress. With the Velopack update system the bar shows the actual download percentage (custom `ISplash` implementations receive it via `SetProgress`). If the update fails, the close button reappears with an error message. See [Application update](application-update.md).

@@ -165,14 +165,34 @@ public partial class Splash : ISplash
     public void ShowProgress()
     {
         _logger.LogInformation("Splash window action {action}.", nameof(ShowProgress));
-        DispatchIfRequired(() => UpdateProgressBar.Visibility = Visibility.Visible);
+        DispatchIfRequired(() =>
+        {
+            UpdateProgressBar.IsIndeterminate = true;
+            UpdateProgressBar.Value = 0;
+            UpdateProgressBar.Visibility = Visibility.Visible;
+        });
     }
 
     /// <inheritdoc />
     public void HideProgress()
     {
         _logger.LogInformation("Splash window action {action}.", nameof(HideProgress));
-        DispatchIfRequired(() => UpdateProgressBar.Visibility = Visibility.Collapsed);
+        DispatchIfRequired(() =>
+        {
+            UpdateProgressBar.Visibility = Visibility.Collapsed;
+            UpdateProgressBar.IsIndeterminate = true;
+            UpdateProgressBar.Value = 0;
+        });
+    }
+
+    /// <inheritdoc />
+    public void SetProgress(int percent)
+    {
+        DispatchIfRequired(() =>
+        {
+            UpdateProgressBar.IsIndeterminate = false;
+            UpdateProgressBar.Value = percent;
+        });
     }
 
     /// <inheritdoc />
