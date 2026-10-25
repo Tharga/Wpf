@@ -84,12 +84,12 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Fluent.Ribbon" Version="11.0.2" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.12" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.12" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.12" />
-    <PackageReference Include="System.Management" Version="10.0.12" />
-    <PackageReference Include="Tharga.Runtime" Version="1.0.4" />
-    <PackageReference Include="Velopack" Version="1.2.158" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.13" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.13" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.13" />
+    <PackageReference Include="System.Management" Version="10.0.13" />
+    <PackageReference Include="Tharga.Runtime" Version="1.0.5" />
+    <PackageReference Include="Velopack" Version="1.2.161" />
   </ItemGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="Tharga.Wpf.Tests" />
