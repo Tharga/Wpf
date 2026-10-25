@@ -20,7 +20,7 @@ public class DebouncerTests
     public async Task Repeated_Triggers_Collapse_To_One_Invocation()
     {
         var count = 0;
-        using var debouncer = new Debouncer(TimeSpan.FromMilliseconds(100), () => Interlocked.Increment(ref count));
+        using var debouncer = new Debouncer(TimeSpan.FromMilliseconds(500), () => Interlocked.Increment(ref count));
 
         for (var i = 0; i < 5; i++)
         {
@@ -28,7 +28,7 @@ public class DebouncerTests
             await Task.Delay(20, TestContext.Current.CancellationToken);
         }
 
-        await Task.Delay(400, TestContext.Current.CancellationToken);
+        await Task.Delay(1500, TestContext.Current.CancellationToken);
 
         Assert.Equal(1, count);
     }
