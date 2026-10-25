@@ -133,7 +133,17 @@ public class ObservableDictionary<TKey, TValue> : ObservableCollection<Observabl
     /// <inheritdoc />
     public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
     {
-        throw new NotImplementedException();
+        ArgumentNullException.ThrowIfNull(array);
+        ArgumentOutOfRangeException.ThrowIfNegative(arrayIndex);
+        if (array.Length - arrayIndex < Count)
+        {
+            throw new ArgumentException("The destination array does not have enough space from the index onward to hold every pair.");
+        }
+
+        foreach (var pair in ThisAsCollection())
+        {
+            array[arrayIndex++] = new KeyValuePair<TKey, TValue>(pair.Key, pair.Value);
+        }
     }
 
     /// <inheritdoc />

@@ -159,4 +159,85 @@ public class ObservableDictionaryTests
 
         Assert.Equal(new[] { new KeyValuePair<string, int>("a", 1), new KeyValuePair<string, int>("b", 2) }, pairs);
     }
+
+    private static readonly KeyValuePair<string, int>[] ExpectedPairs =
+    [
+        new KeyValuePair<string, int>("a", 1),
+        new KeyValuePair<string, int>("b", 2)
+    ];
+
+    private static ObservableDictionary<string, int> CreateTwoPairDictionary()
+    {
+        return new ObservableDictionary<string, int> { { "a", 1 }, { "b", 2 } };
+    }
+
+    [Fact]
+    public void ToList_Returns_Every_Pair()
+    {
+        var dictionary = CreateTwoPairDictionary();
+
+        var list = dictionary.ToList<KeyValuePair<string, int>>();
+
+        Assert.Equal(ExpectedPairs, list);
+    }
+
+    [Fact]
+    public void ToArray_Returns_Every_Pair()
+    {
+        var dictionary = CreateTwoPairDictionary();
+
+        var array = dictionary.ToArray<KeyValuePair<string, int>>();
+
+        Assert.Equal(ExpectedPairs, array);
+    }
+
+    [Fact]
+    public void List_Constructor_Copies_Every_Pair()
+    {
+        var dictionary = CreateTwoPairDictionary();
+
+        var list = new List<KeyValuePair<string, int>>(dictionary);
+
+        Assert.Equal(ExpectedPairs, list);
+    }
+
+    [Fact]
+    public void CopyTo_Copies_The_Pairs_From_The_Index()
+    {
+        ICollection<KeyValuePair<string, int>> collection = CreateTwoPairDictionary();
+        var array = new KeyValuePair<string, int>[4];
+
+        collection.CopyTo(array, 1);
+
+        Assert.Equal(new[] { default, ExpectedPairs[0], ExpectedPairs[1], default }, array);
+    }
+
+    [Fact]
+    public void CopyTo_Throws_For_A_Null_Array()
+    {
+        ICollection<KeyValuePair<string, int>> collection = CreateTwoPairDictionary();
+
+        Assert.Throws<ArgumentNullException>(() => collection.CopyTo(null!, 0));
+    }
+
+    [Fact]
+    public void CopyTo_Throws_For_A_Negative_Index()
+    {
+        ICollection<KeyValuePair<string, int>> collection = CreateTwoPairDictionary();
+
+        Assert.Throws<ArgumentOutOfRangeException>(() => collection.CopyTo(new KeyValuePair<string, int>[2], -1));
+    }
+
+    [Theory]
+    [InlineData(1, 0)]
+    [InlineData(2, 1)]
+    [InlineData(2, 3)]
+    public void CopyTo_Throws_When_The_Array_Has_Too_Little_Space_From_The_Index(int arrayLength, int arrayIndex)
+    {
+        ICollection<KeyValuePair<string, int>> collection = CreateTwoPairDictionary();
+        var array = new KeyValuePair<string, int>[arrayLength];
+
+        Assert.Throws<ArgumentException>(() => collection.CopyTo(array, arrayIndex));
+        Assert.All(array, pair => Assert.Equal(default, pair));
+    }
 }
