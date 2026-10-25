@@ -10,7 +10,7 @@ namespace Tharga.Wpf.WindowLocation;
 
 internal class WindowLocationService : IWindowLocationService
 {
-    private static ThargaWpfOptions _options;
+    private readonly ThargaWpfOptions _options;
     private readonly ILogger<WindowLocationService> _logger;
     private readonly ConcurrentDictionary<string, MonitorEngine> _monitors = new();
 
@@ -46,7 +46,7 @@ internal class WindowLocationService : IWindowLocationService
         private readonly string _environment;
         private readonly Window _window;
         private readonly ILogger _logger;
-        private readonly ThargaWpfOptions _options;
+        private readonly ThargaWpfOptions _wpfOptions;
         private readonly string _fileLocation;
         private readonly Location _loadLocation;
 
@@ -62,7 +62,7 @@ internal class WindowLocationService : IWindowLocationService
             _environment = environment;
             _window = window;
             _logger = logger;
-            _options = options;
+            _wpfOptions = options;
             _isMainWindow = isMainWindow;
 
             _fileLocation = GetFileLocation();
@@ -105,7 +105,7 @@ internal class WindowLocationService : IWindowLocationService
 
                 if (_isMainWindow)
                 {
-                    var startupState = _options.StartupWindowState;
+                    var startupState = _wpfOptions.StartupWindowState;
                     switch (startupState)
                     {
                         case StartupWindowState.Last:
@@ -213,7 +213,7 @@ internal class WindowLocationService : IWindowLocationService
         private string GetFileLocation()
         {
             var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            var yourAppDataPath = Path.Combine(appDataPath, _options.CompanyName ?? string.Empty, _options.ApplicationShortName.Replace(" ", "_"), _environment?.Replace("Production", string.Empty) ?? string.Empty);
+            var yourAppDataPath = Path.Combine(appDataPath, _wpfOptions.CompanyName ?? string.Empty, _wpfOptions.ApplicationShortName.Replace(" ", "_"), _environment?.Replace("Production", string.Empty) ?? string.Empty);
             if (!Directory.Exists(yourAppDataPath)) Directory.CreateDirectory(yourAppDataPath);
             var fileLocation = $"{yourAppDataPath}\\Window_{_name}.txt";
             return fileLocation;

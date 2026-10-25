@@ -1,5 +1,4 @@
 using Microsoft.Extensions.DependencyInjection;
-using Tharga.License;
 
 namespace Tharga.License.Tests;
 

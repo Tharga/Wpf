@@ -1,5 +1,4 @@
 using System.Security.Cryptography;
-using Tharga.License;
 
 namespace Tharga.License.Tests;
 
@@ -29,8 +28,8 @@ public class RsaPublicKeyTests
         Assert.NotNull(publicKey.Modulus);
         Assert.NotNull(publicKey.Exponent);
         // Verify they are valid base64
-        Convert.FromBase64String(publicKey.Modulus);
-        Convert.FromBase64String(publicKey.Exponent);
+        Assert.NotEmpty(Convert.FromBase64String(publicKey.Modulus));
+        Assert.NotEmpty(Convert.FromBase64String(publicKey.Exponent));
     }
 
     [Fact]

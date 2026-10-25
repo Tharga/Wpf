@@ -1,5 +1,3 @@
-using Tharga.Wpf;
-
 namespace Tharga.Wpf.Tests;
 
 public class CloseModeTests

@@ -11,8 +11,11 @@ namespace Tharga.Wpf;
 public class ObservableKeyValuePair<TKey, TValue> : INotifyPropertyChanged
 {
     #region properties
+    // [Serializable]: the field names are the serialized member names, so they are not renamed.
+    // ReSharper disable InconsistentNaming
     private TKey key;
     private TValue value;
+    // ReSharper restore InconsistentNaming
 
     /// <summary>Gets or sets the key.</summary>
     public TKey Key

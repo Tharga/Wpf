@@ -1,5 +1,3 @@
-using Tharga.License;
-
 namespace Tharga.License.Tests;
 
 public class SigningServiceTests

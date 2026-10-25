@@ -33,9 +33,9 @@ public class ObservableDictionary<TKey, TValue> : ObservableCollection<Observabl
         return !Equals(default(ObservableKeyValuePair<TKey, TValue>), r);
     }
 
-    bool Equals<TKey>(TKey a, TKey b)
+    bool Equals<T>(T a, T b)
     {
-        return EqualityComparer<TKey>.Default.Equals(a, b);
+        return EqualityComparer<T>.Default.Equals(a, b);
     }
 
     private ObservableCollection<ObservableKeyValuePair<TKey, TValue>> ThisAsCollection()

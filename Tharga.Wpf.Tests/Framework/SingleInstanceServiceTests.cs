@@ -47,13 +47,13 @@ public class SingleInstanceServiceTests
         service.StartListening(() => showCalled.TrySetResult(true));
 
         // Give the listener a moment to start.
-        await Task.Delay(100);
+        await Task.Delay(100, TestContext.Current.CancellationToken);
 
         SingleInstanceService.SignalExistingInstance(name);
 
-        var result = await Task.WhenAny(showCalled.Task, Task.Delay(3000));
+        await Task.WhenAny(showCalled.Task, Task.Delay(3000, TestContext.Current.CancellationToken));
         Assert.True(showCalled.Task.IsCompleted, "Show callback was not invoked within timeout.");
-        Assert.True(showCalled.Task.Result);
+        Assert.True(await showCalled.Task);
     }
 
     [Fact]
@@ -127,7 +127,7 @@ public class SingleInstanceServiceTests
         // Opening the same Global\ name from outside the service proves the lock really lives
         // in the machine-wide namespace, not merely that the string starts with a prefix.
         Assert.True(Mutex.TryOpenExisting(SingleInstanceService.BuildMutexName(name), out var existing));
-        existing?.Dispose();
+        existing.Dispose();
     }
 
     [Fact]

@@ -46,8 +46,8 @@ internal class VelopackApplicationUpdateStateService : ApplicationUpdateStateSer
         var msg = VelopackUpdateMessage.Build(
             $"{newVersion.TargetFullRelease.Version}",
             newVersion.DeltasToTarget.Length,
-            newVersion.DeltasToTarget.Sum(x => (long)x.Size),
-            (long)newVersion.TargetFullRelease.Size,
+            newVersion.DeltasToTarget.Sum(x => x.Size),
+            newVersion.TargetFullRelease.Size,
             MaximumDeltasBeforeFallback);
 
         _logger.LogInformation("Velopack UpdateAsync: update available - {Msg}.", msg);

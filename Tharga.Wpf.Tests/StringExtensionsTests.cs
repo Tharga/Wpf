@@ -7,7 +7,7 @@ public class StringExtensionsTests
     [Fact]
     public void NullIfEmpty_Returns_Null_For_Null()
     {
-        string input = null;
+        string? input = null;
 
         Assert.Null(input.NullIfEmpty());
     }

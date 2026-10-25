@@ -2,7 +2,4 @@
 
 internal class MyTabViewModel : IViewModel
 {
-    public MyTabViewModel()
-    {
-    }
 }

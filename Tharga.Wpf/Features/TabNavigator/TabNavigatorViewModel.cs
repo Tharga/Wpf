@@ -2,7 +2,6 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Controls;
-using Microsoft.Extensions.Configuration;
 
 namespace Tharga.Wpf.TabNavigator;
 
@@ -10,7 +9,7 @@ internal class TabNavigatorViewModel : INotifyPropertyChanged
 {
     private readonly ITabNavigationStateService _tabNavigationService;
 
-    public TabNavigatorViewModel(ITabNavigationStateService tabNavigationService, IConfiguration configuration)
+    public TabNavigatorViewModel(ITabNavigationStateService tabNavigationService)
     {
         _tabNavigationService = tabNavigationService;
     }

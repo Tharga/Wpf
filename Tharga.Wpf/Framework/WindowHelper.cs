@@ -1,11 +1,12 @@
 ﻿using System.Diagnostics;
-using System.IO;
 using System.Runtime.InteropServices;
 
 namespace Tharga.Wpf.Framework;
 
 internal static class WindowHelper
 {
+    // from winuser.h
+    // ReSharper disable once InconsistentNaming
     private const int SW_RESTORE = 9;
 
     [DllImport("user32.dll")]

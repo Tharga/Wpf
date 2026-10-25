@@ -22,11 +22,14 @@ public record RsaPrivateKey
     /// <summary>The base64-encoded RSA prime factor (Q).</summary>
     public required string Q { get; init; }
 
+    // DP and DQ are public API and mirror the RSAParameters field names.
+    // ReSharper disable InconsistentNaming
     /// <summary>The base64-encoded RSA CRT exponent (DP = D mod P-1).</summary>
     public required string DP { get; init; }
 
     /// <summary>The base64-encoded RSA CRT exponent (DQ = D mod Q-1).</summary>
     public required string DQ { get; init; }
+    // ReSharper restore InconsistentNaming
 
     /// <summary>The base64-encoded RSA CRT coefficient (InverseQ = Q^-1 mod P).</summary>
     public required string InverseQ { get; init; }
