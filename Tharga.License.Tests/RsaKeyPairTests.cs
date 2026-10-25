@@ -1,5 +1,4 @@
 using System.Security.Cryptography;
-using Tharga.License;
 
 namespace Tharga.License.Tests;
 

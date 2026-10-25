@@ -4,6 +4,8 @@ namespace Tharga.Wpf.Tests.Features.ExceptionHandling;
 
 public class HandleExceptionEventArgsTests
 {
+    private const string ParamName = "param";
+
     [Fact]
     public void Constructor_Sets_Exception()
     {
@@ -17,11 +19,11 @@ public class HandleExceptionEventArgsTests
     [Fact]
     public void Exception_Type_Is_Preserved()
     {
-        var exception = new ArgumentNullException("param");
+        var exception = new ArgumentNullException(ParamName);
 
         var args = new HandleExceptionEventArgs(exception);
 
         Assert.IsType<ArgumentNullException>(args.Exception);
-        Assert.Equal("param", ((ArgumentNullException)args.Exception).ParamName);
+        Assert.Equal(ParamName, ((ArgumentNullException)args.Exception).ParamName);
     }
 }

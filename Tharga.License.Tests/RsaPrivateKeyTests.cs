@@ -1,5 +1,4 @@
 using System.Security.Cryptography;
-using Tharga.License;
 
 namespace Tharga.License.Tests;
 
@@ -42,9 +41,9 @@ public class RsaPrivateKeyTests
         Assert.NotNull(privateKey.InverseQ);
 
         // All should be valid base64
-        Convert.FromBase64String(privateKey.Modulus);
-        Convert.FromBase64String(privateKey.D);
-        Convert.FromBase64String(privateKey.P);
+        Assert.NotEmpty(Convert.FromBase64String(privateKey.Modulus));
+        Assert.NotEmpty(Convert.FromBase64String(privateKey.D));
+        Assert.NotEmpty(Convert.FromBase64String(privateKey.P));
     }
 
     [Fact]

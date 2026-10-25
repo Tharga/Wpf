@@ -29,7 +29,7 @@ public class MinitorInfoTests
         var info = new MinitorInfo();
         var location = new Location { Left = 50 };
         var eventArgs = new LocationUpdatedEventArgs(location, null);
-        LocationUpdatedEventArgs received = null;
+        LocationUpdatedEventArgs? received = null;
         info.LocationUpdatedEvent += (_, e) => received = e;
 
         info.OnLocationUpdatedEvent(this, eventArgs);

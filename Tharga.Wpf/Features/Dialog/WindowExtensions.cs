@@ -7,7 +7,9 @@ namespace Tharga.Wpf.Dialog;
 internal static class WindowExtensions
 {
     // from winuser.h
+    // ReSharper disable InconsistentNaming
     private const int GWL_STYLE = -16, WS_MAXIMIZEBOX = 0x10000, WS_MINIMIZEBOX = 0x20000;
+    // ReSharper restore InconsistentNaming
 
     [DllImport("user32.dll")]
     private static extern int GetWindowLong(IntPtr hwnd, int index);

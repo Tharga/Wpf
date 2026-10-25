@@ -1,0 +1,26 @@
+root = true
+
+[*.cs]
+
+# Private static readonly fields hold values that are conceptually constants but
+# cannot be declared `const` (TimeSpan, arrays, ...). They are named in PascalCase
+# so they read alongside the real `const` members instead of looking like
+# mutable instance state. Without this, ReSharper's default rule asks for
+# `_camelCase`.
+# The severity is `warning`, not `suggestion`: ReSharper applies it to its whole
+# naming inspection, so `suggestion` would also demote every other naming rule.
+dotnet_naming_rule.static_readonly_fields_are_pascal_case.severity = warning
+dotnet_naming_rule.static_readonly_fields_are_pascal_case.symbols = static_readonly_fields
+dotnet_naming_rule.static_readonly_fields_are_pascal_case.style = pascal_case
+
+dotnet_naming_symbols.static_readonly_fields.applicable_kinds = field
+dotnet_naming_symbols.static_readonly_fields.applicable_accessibilities = *
+dotnet_naming_symbols.static_readonly_fields.required_modifiers = static,readonly
+
+dotnet_naming_style.pascal_case.capitalization = pascal_case
+
+# The options class and the icon-tray records are public API that consuming
+# applications set. ReSharper only sees this solution, so it reports their
+# setters and initialisers as unused.
+[Tharga.Wpf/{ThargaWpfOptions.cs,Features/IconTray/*.cs}]
+resharper_unused_auto_property_accessor_global_highlighting = none

@@ -1,5 +1,3 @@
-using Tharga.Wpf;
-
 namespace Tharga.Wpf.Tests;
 
 public class RelayCommandTests
@@ -7,7 +5,7 @@ public class RelayCommandTests
     [Fact]
     public void Execute_Invokes_Action()
     {
-        object receivedParam = null;
+        object? receivedParam = null;
         var command = new RelayCommand(p => receivedParam = p);
 
         command.Execute("test");

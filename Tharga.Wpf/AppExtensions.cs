@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using System.Windows;
+﻿using System.Windows;
 using Tharga.Wpf.ApplicationUpdate;
 using Tharga.Wpf.TabNavigator;
 using Tharga.Wpf.WindowLocation;

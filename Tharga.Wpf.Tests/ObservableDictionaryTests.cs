@@ -19,6 +19,7 @@ public class ObservableDictionaryTests
         var dictionary = new ObservableDictionary<string, int> { { "a", 1 } };
 
         Assert.Throws<ArgumentException>(() => dictionary.Add("a", 2));
+        Assert.Equal(1, dictionary["a"]);
     }
 
     [Fact]
@@ -67,7 +68,7 @@ public class ObservableDictionaryTests
     [Fact]
     public void Indexer_Get_Throws_For_A_Missing_Key()
     {
-        var dictionary = new ObservableDictionary<string, int>();
+        var dictionary = new ObservableDictionary<string, int> { { "a", 1 } };
 
         Assert.Throws<ArgumentException>(() => dictionary["missing"]);
     }

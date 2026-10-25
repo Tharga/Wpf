@@ -1,15 +1,12 @@
-using System.ComponentModel;
-using Tharga.Wpf;
-
 namespace Tharga.Wpf.Tests;
 
 public class ViewModelBaseTests
 {
     private class TestViewModel : ViewModelBase
     {
-        private string _name;
+        private string? _name;
 
-        public string Name
+        public string? Name
         {
             get => _name;
             set => SetField(ref _name, value);
@@ -20,7 +17,7 @@ public class ViewModelBaseTests
     public void SetField_Raises_PropertyChanged()
     {
         var vm = new TestViewModel();
-        string changedProperty = null;
+        string? changedProperty = null;
         vm.PropertyChanged += (_, e) => changedProperty = e.PropertyName;
 
         vm.Name = "test";
@@ -77,7 +74,7 @@ public class ViewModelBaseTests
     [Fact]
     public void Multiple_Properties_Raise_Correct_Names()
     {
-        var changedProperties = new List<string>();
+        var changedProperties = new List<string?>();
         var vm = new TestViewModel();
         vm.PropertyChanged += (_, e) => changedProperties.Add(e.PropertyName);
 

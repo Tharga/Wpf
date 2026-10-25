@@ -1,5 +1,4 @@
 using System.Reflection;
-using Tharga.Wpf;
 using Tharga.Wpf.ExceptionHandling;
 
 namespace Tharga.Wpf.Tests;

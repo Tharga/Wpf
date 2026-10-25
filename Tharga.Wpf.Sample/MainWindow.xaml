@@ -9,6 +9,7 @@
                      xmlns:tabNavigator="clr-namespace:Tharga.Wpf.TabNavigator;assembly=Tharga.Wpf"
                      xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
                      mc:Ignorable="d"
+                     d:DataContext="{d:DesignInstance Type=local:MainWindowViewModel}"
                      Title="Tharga Wpf Sample"
                      DataContext="{wpf:ViewModelProvider local:MainWindowViewModel}"
                      Loaded="MainWindow_OnLoaded"

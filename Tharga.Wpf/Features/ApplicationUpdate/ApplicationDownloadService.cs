@@ -21,7 +21,7 @@ internal class ApplicationDownloadService : IApplicationDownloadService
         return _options.UpdateSystem switch
         {
             UpdateSystem.None => throw new NotSupportedException(),
-            UpdateSystem.Velopack => Task.FromResult<(string, string)>((path, path)),
+            UpdateSystem.Velopack => Task.FromResult((path, path)),
             _ => throw new ArgumentOutOfRangeException(nameof(_options.UpdateSystem), @$"Unknown {nameof(_options.UpdateSystem)} {_options.UpdateSystem}")
         };
     }

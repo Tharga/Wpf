@@ -124,7 +124,7 @@ public abstract class ApplicationBase : Application
                 //    _ = new InactivityService(_options.Inactivity);
                 //}
 
-                StaticExceptionHandler.ErrorEvent += (s, e) =>
+                StaticExceptionHandler.ErrorEvent += (_, e) =>
                 {
                     try
                     {
@@ -226,8 +226,8 @@ public abstract class ApplicationBase : Application
                     Dispatcher.Invoke(() =>
                     {
                         MainWindow?.Show();
-                        if (MainWindow?.WindowState == System.Windows.WindowState.Minimized)
-                            MainWindow.WindowState = System.Windows.WindowState.Normal;
+                        if (MainWindow?.WindowState == WindowState.Minimized)
+                            MainWindow.WindowState = WindowState.Normal;
                         MainWindow?.Activate();
                     });
                 });
@@ -309,7 +309,7 @@ public abstract class ApplicationBase : Application
         var mainWindow = Current?.MainWindow;
         if (mainWindow == null) return;
 
-        foreach (var owned in mainWindow.OwnedWindows.Cast<System.Windows.Window>())
+        foreach (var owned in mainWindow.OwnedWindows.Cast<Window>())
         {
             owned.Hide();
         }

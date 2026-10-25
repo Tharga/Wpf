@@ -1,7 +1,6 @@
 ﻿<wpf:ApplicationBase x:Class="Tharga.Wpf.Sample.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:Tharga.Wpf.Sample"
              xmlns:wpf="clr-namespace:Tharga.Wpf;assembly=Tharga.Wpf"
              StartupUri="/MainWindow.xaml"
              ShutdownMode="OnMainWindowClose">
