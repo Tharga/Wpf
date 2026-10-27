@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using Tharga.Wpf.ApplicationUpdate;
+using Tharga.Wpf.Framework;
 using Tharga.Wpf.TabNavigator;
 using Tharga.Wpf.WindowLocation;
 
@@ -26,8 +27,12 @@ public static class AppExtensions
         var mainWindow = new T();
         mainWindow.RegisterMainWindow(showTrayIcon);
 
+        var closeGate = new AsyncCloseGate();
         mainWindow.Closing += async (_, e) =>
         {
+            // The close that follows tabs closing asynchronously has already been checked.
+            if (closeGate.TryConsumeConfirmed()) return;
+
             if (ApplicationBase.HandleClose(e)) return;
 
             var force = ApplicationBase.CloseMode == CloseMode.Force;
@@ -51,10 +56,7 @@ public static class AppExtensions
             }
 
             var tabNavigationStateService = ApplicationBase.GetService<ITabNavigationStateService>();
-            if (!await tabNavigationStateService.CloseAllTabsAsync(force))
-            {
-                e.Cancel = true;
-            }
+            await closeGate.RunAsync(e, () => tabNavigationStateService.CloseAllTabsAsync(force), null, mainWindow.Close);
         };
 
         Application.Current.Dispatcher.InvokeAsync(async () =>

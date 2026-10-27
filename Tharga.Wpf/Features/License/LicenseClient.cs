@@ -64,7 +64,9 @@ internal class LicenseClient : ILicenseClient
         var data = JsonSerializer.Deserialize<LicenseCheckResponse>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
         if (!_signingService.VerifySignature(json, signature, publicKey)) return (false, "Invalid signature.");
 
-        if (data.ResponseKey != requestKey) return (false, "Invalid response key.");
+        if (data?.ResponseKey != requestKey) return (false, "Invalid response key.");
+        if (!string.Equals(data.ApplicationName, request.ApplicationName, StringComparison.Ordinal)) return (false, "Invalid response application.");
+        if (!string.Equals(data.MachineFingerprint?.Value, request.MachineFingerprint.Value, StringComparison.Ordinal)) return (false, "Invalid response machine fingerprint.");
 
         return (true, "License is valid.");
     }

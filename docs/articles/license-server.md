@@ -17,6 +17,10 @@ protected override void Options(ThargaWpfOptions options)
 
 The delegate receives `IConfiguration` so the URL can be read from `appsettings.json` (or any other source you have wired into the host).
 
+## What the client accepts
+
+The signed `license/check` response must return the request's `RequestKey`, `ApplicationName` and `MachineFingerprint.Value` unchanged. Any other response is reported as not valid.
+
 ## Checking the license during splash
 
 Pass `checkForLicense: true` to the canonical startup helper or to `ShowSplashAsync`:
