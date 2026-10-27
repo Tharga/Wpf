@@ -58,8 +58,7 @@ internal class LicenseClient : ILicenseClient
         }
         var signature = signatures.Single();
 
-        var key = await client.GetStringAsync($"{address}/license/key");
-        var publicKey = JsonSerializer.Deserialize<RsaPublicKey>(key);
+        var publicKey = await GetPublicKeyAsync(client, address);
 
         var data = JsonSerializer.Deserialize<LicenseCheckResponse>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
         if (!_signingService.VerifySignature(json, signature, publicKey)) return (false, "Invalid signature.");
@@ -69,6 +68,17 @@ internal class LicenseClient : ILicenseClient
         if (!string.Equals(data.MachineFingerprint?.Value, request.MachineFingerprint.Value, StringComparison.Ordinal)) return (false, "Invalid response machine fingerprint.");
 
         return (true, "License is valid.");
+    }
+
+    private async Task<RsaPublicKey> GetPublicKeyAsync(HttpClient client, string address)
+    {
+        if (_options.LicensePublicKey != null)
+        {
+            return _options.LicensePublicKey.Invoke(_configuration) ?? throw new InvalidOperationException("No license public key found.");
+        }
+
+        var key = await client.GetStringAsync($"{address}/license/key");
+        return JsonSerializer.Deserialize<RsaPublicKey>(key);
     }
 
     private static (string MachineName, string Fingerprint) GetMachineFingerprint()

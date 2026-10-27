@@ -302,7 +302,7 @@ Checks for updates can also be made manually by calling *CheckForUpdateAsync* in
 Make api calls to a license server to check if the application has a valid license.
 
 #### LicenseServerLocation
-The endpoints that will be called are *license/check* and *license/key*. You can implement them yourself, or add *Tharga.License* in your API and inject into a controller.
+The endpoints that will be called are *license/check* and, unless *LicensePublicKey* is set, *license/key*. You can implement them yourself, or add *Tharga.License* in your API and inject into a controller.
 
 A license is accepted only when the signed *license/check* response returns the request's *RequestKey*, *ApplicationName* and *MachineFingerprint* value unchanged.
 
@@ -313,6 +313,25 @@ protected override void Options(ThargaWpfOptions thargaWpfOptions)
     thargaWpfOptions.LicenseServerLocation += _ => new Uri("https://server-address.com/api");
 }
 ```
+
+#### LicensePublicKey
+The public key that the license server signs its responses with. Setting it is recommended. When it is set, the client verifies the *license/check* response against this key and never calls *license/key*. When it is not set, the key is requested from *license/key*, as before.
+
+The server must then sign with a fixed key pair that it keeps between starts, not a new one each time it starts. The key has the same shape as the one returned by *license/key* (*Modulus* and *Exponent*, base64). If the delegate is set but returns no key, the license check fails.
+
+Example of registration.
+```
+protected override void Options(ThargaWpfOptions thargaWpfOptions)
+{
+    thargaWpfOptions.LicensePublicKey = config => new RsaPublicKey
+    {
+        Modulus = config["LicensePublicKey:Modulus"],
+        Exponent = config["LicensePublicKey:Exponent"]
+    };
+}
+```
+
+*LicensePublicKey* is optional in this version and will be required in the next major version.
 
 ## Custom Exception handling
 Custom exception handlers should implement `IExceptionHandler<T>` where T is an Exception.
