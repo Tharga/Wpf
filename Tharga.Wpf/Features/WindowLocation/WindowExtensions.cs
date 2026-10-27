@@ -1,5 +1,7 @@
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Windows;
+using Tharga.Wpf.Framework;
 using Tharga.Wpf.IconTray;
 using Tharga.Wpf.TabNavigator;
 
@@ -10,6 +12,8 @@ namespace Tharga.Wpf.WindowLocation;
 /// </summary>
 public static class WindowExtensions
 {
+    private static readonly ConditionalWeakTable<Window, AsyncCloseGate> CloseGates = new();
+
     /// <summary>
     /// Registers the main application window for position/size persistence, close behavior, and optional tray icon.
     /// <c>HideOnClose</c> and <c>StartupWindowState</c> options apply to this window.
@@ -53,18 +57,23 @@ public static class WindowExtensions
     /// <param name="window">The window being closed.</param>
     /// <param name="e">The closing event args.</param>
     /// <param name="baseOnClosing">Pass <c>base.OnClosing</c> to allow the framework to raise the Closing event.</param>
+    /// <remarks>
+    /// When a tab's <c>OnCloseAsync</c> does not complete synchronously, the close is cancelled while the tabs close,
+    /// and the window is closed again once every tab has agreed. That second close goes straight to <paramref name="baseOnClosing"/>.
+    /// </remarks>
     public static async Task HandleCloseAsync(this Window window, CancelEventArgs e, Action<CancelEventArgs> baseOnClosing)
     {
+        var gate = CloseGates.GetValue(window, _ => new AsyncCloseGate());
+        if (gate.TryConsumeConfirmed())
+        {
+            baseOnClosing(e);
+            return;
+        }
+
         if (ApplicationBase.HandleClose(e)) return;
 
         var tabNavigationStateService = ApplicationBase.GetService<ITabNavigationStateService>();
         var force = ApplicationBase.CloseMode == CloseMode.Force;
-        if (!await tabNavigationStateService.CloseAllTabsAsync(force))
-        {
-            e.Cancel = true;
-            return;
-        }
-
-        baseOnClosing(e);
+        await gate.RunAsync(e, () => tabNavigationStateService.CloseAllTabsAsync(force), () => baseOnClosing(e), window.Close);
     }
 }
