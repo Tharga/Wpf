@@ -304,6 +304,8 @@ Make api calls to a license server to check if the application has a valid licen
 #### LicenseServerLocation
 The endpoints that will be called are *license/check* and *license/key*. You can implement them yourself, or add *Tharga.License* in your API and inject into a controller.
 
+A license is accepted only when the signed *license/check* response returns the request's *RequestKey*, *ApplicationName* and *MachineFingerprint* value unchanged.
+
 Example of registration.
 ```
 protected override void Options(ThargaWpfOptions thargaWpfOptions)
