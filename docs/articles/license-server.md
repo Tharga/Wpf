@@ -17,6 +17,29 @@ protected override void Options(ThargaWpfOptions options)
 
 The delegate receives `IConfiguration` so the URL can be read from `appsettings.json` (or any other source you have wired into the host).
 
+## Public key
+
+The server signs every `license/check` response, and the client verifies that signature. Set `LicensePublicKey` to the server's public key; this is recommended:
+
+```csharp
+protected override void Options(ThargaWpfOptions options)
+{
+    options.LicenseServerLocation += config => config["LicenseServer"];
+    options.LicensePublicKey = config => new RsaPublicKey
+    {
+        Modulus = config["LicensePublicKey:Modulus"],
+        Exponent = config["LicensePublicKey:Exponent"]
+    };
+}
+```
+
+- **Set:** the response is verified against this key, and the client never calls `license/key`. If the delegate returns no key, the license check fails.
+- **Not set:** the client requests the key from `license/key`, as in earlier versions.
+
+When you set it, the server must sign with a fixed key pair that it keeps between starts, not a new one each time it starts. The key has the same shape as the one `license/key` returns: `Modulus` and `Exponent`, base64.
+
+`LicensePublicKey` is optional in this version and will be required in the next major version.
+
 ## What the client accepts
 
 The signed `license/check` response must return the request's `RequestKey`, `ApplicationName` and `MachineFingerprint.Value` unchanged. Any other response is reported as not valid.

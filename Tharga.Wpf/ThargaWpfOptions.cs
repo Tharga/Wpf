@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Reflection;
 using Microsoft.Extensions.Configuration;
+using Tharga.License;
 using Tharga.Wpf.ApplicationUpdate;
 using Tharga.Wpf.ExceptionHandling;
 using Tharga.Wpf.IconTray;
@@ -76,6 +77,15 @@ public class ThargaWpfOptions
     /// Set the location for a license server is you want to use one.
     /// </summary>
     public Func<IConfiguration, string> LicenseServerLocation { get; set; }
+
+    /// <summary>
+    /// The public key that the license server signs its responses with.
+    /// When set, license responses are verified against this key and the key is never requested from the server (<c>license/key</c>).
+    /// The server must then keep a fixed key pair, not create a new one each time it starts.
+    /// When not set, the key is requested from the license server.
+    /// Setting this is recommended; it will be required in the next major version.
+    /// </summary>
+    public Func<IConfiguration, RsaPublicKey> LicensePublicKey { get; set; }
 
     /// <summary>
     /// True if the application can be started several times. No for single application executions where the running application will be focused instead.
