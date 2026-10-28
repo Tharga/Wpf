@@ -80,10 +80,9 @@ public class ThargaWpfOptions
 
     /// <summary>
     /// The public key that the license server signs its responses with.
-    /// When set, license responses are verified against this key and the key is never requested from the server (<c>license/key</c>).
-    /// The server must then keep a fixed key pair, not create a new one each time it starts.
-    /// When not set, the key is requested from the license server.
-    /// Setting this is recommended; it will be required in the next major version.
+    /// Required when <see cref="LicenseServerLocation"/> is set: license responses are verified against this key only, and the key is never requested from the server.
+    /// When it is not set, or returns no key, the license check reports the license as not valid without contacting the server.
+    /// The server must sign with a fixed key pair, not create a new one each time it starts.
     /// </summary>
     public Func<IConfiguration, RsaPublicKey> LicensePublicKey { get; set; }
 
