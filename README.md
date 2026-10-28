@@ -302,22 +302,22 @@ Checks for updates can also be made manually by calling *CheckForUpdateAsync* in
 Make api calls to a license server to check if the application has a valid license.
 
 #### LicenseServerLocation
-The endpoints that will be called are *license/check* and, unless *LicensePublicKey* is set, *license/key*. You can implement them yourself, or add *Tharga.License* in your API and inject into a controller.
+The endpoint that will be called is *license/check*. You can implement it yourself, or use the models and *ISigningService* in *Tharga.License* to implement it in your API.
 
-A license is accepted only when the signed *license/check* response returns the request's *RequestKey*, *ApplicationName* and *MachineFingerprint* value unchanged.
+A license is accepted only when the *license/check* response is signed with the key set in *LicensePublicKey* and returns the request's *RequestKey*, *ApplicationName* and *MachineFingerprint* value unchanged.
 
 Example of registration.
 ```
 protected override void Options(ThargaWpfOptions thargaWpfOptions)
 {
-    thargaWpfOptions.LicenseServerLocation += _ => new Uri("https://server-address.com/api");
+    thargaWpfOptions.LicenseServerLocation += _ => "https://server-address.com/api";
 }
 ```
 
 #### LicensePublicKey
-The public key that the license server signs its responses with. Setting it is recommended. When it is set, the client verifies the *license/check* response against this key and never calls *license/key*. When it is not set, the key is requested from *license/key*, as before.
+The public key that the license server signs its responses with. It is required whenever *LicenseServerLocation* is set. The client verifies the *license/check* response against this key only and never requests a key from the server. If it is not set, or the delegate returns no key, the license is reported as not valid and the server is not called.
 
-The server must then sign with a fixed key pair that it keeps between starts, not a new one each time it starts. The key has the same shape as the one returned by *license/key* (*Modulus* and *Exponent*, base64). If the delegate is set but returns no key, the license check fails.
+The server must sign with a fixed key pair that it keeps between starts, not a new one each time it starts. The key is *Modulus* and *Exponent*, base64.
 
 Example of registration.
 ```
@@ -331,7 +331,12 @@ protected override void Options(ThargaWpfOptions thargaWpfOptions)
 }
 ```
 
-*LicensePublicKey* is optional in this version and will be required in the next major version.
+#### Upgrading to 3.0
+Version 3.0 no longer requests the public key from *license/key*. Before 3.0 that was the default, and a server that answered at the configured address, or anything that could redirect it, could hand out its own key and sign its own responses. To upgrade:
+1. Make the license server sign with a fixed key pair that it keeps between starts.
+2. Set *LicensePublicKey* in the client to that key pair's public key.
+
+Without step 2, every license check reports the license as not valid. See [GHSA-6q43-4qx5-7gqw](https://github.com/Tharga/Wpf/security/advisories/GHSA-6q43-4qx5-7gqw).
 
 ## Custom Exception handling
 Custom exception handlers should implement `IExceptionHandler<T>` where T is an Exception.

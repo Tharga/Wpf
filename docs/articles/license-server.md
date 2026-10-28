@@ -1,25 +1,12 @@
 # License server
 
-`Tharga.Wpf` can verify that the installed application has a valid license by calling a remote license server. The server-side endpoint is intentionally minimal so you can run it on top of any backend that exposes two routes: `license/check` and `license/key`.
+`Tharga.Wpf` can verify that the installed application has a valid license by calling a remote license server. The server-side endpoint is intentionally minimal so you can run it on top of any backend that exposes one route: `license/check`.
 
-The `Tharga.License` NuGet package contains a turn-key implementation for ASP.NET Core hosts. You can also implement the endpoints yourself.
+The `Tharga.License` NuGet package contains the request and response models and the signing service the endpoint needs. You implement the endpoint in your own API.
 
 ## Client configuration
 
-Set `LicenseServerLocation` in `Options`:
-
-```csharp
-protected override void Options(ThargaWpfOptions options)
-{
-    options.LicenseServerLocation += config => config["LicenseServer"];
-}
-```
-
-The delegate receives `IConfiguration` so the URL can be read from `appsettings.json` (or any other source you have wired into the host).
-
-## Public key
-
-The server signs every `license/check` response, and the client verifies that signature. Set `LicensePublicKey` to the server's public key; this is recommended:
+Set `LicenseServerLocation` and `LicensePublicKey` in `Options`:
 
 ```csharp
 protected override void Options(ThargaWpfOptions options)
@@ -33,16 +20,36 @@ protected override void Options(ThargaWpfOptions options)
 }
 ```
 
-- **Set:** the response is verified against this key, and the client never calls `license/key`. If the delegate returns no key, the license check fails.
-- **Not set:** the client requests the key from `license/key`, as in earlier versions.
+The delegates receive `IConfiguration` so the URL and the key can be read from `appsettings.json` (or any other source you have wired into the host).
 
-When you set it, the server must sign with a fixed key pair that it keeps between starts, not a new one each time it starts. The key has the same shape as the one `license/key` returns: `Modulus` and `Exponent`, base64.
+## Public key
 
-`LicensePublicKey` is optional in this version and will be required in the next major version.
+The server signs every `license/check` response, and the client verifies that signature against `LicensePublicKey`. The key is required whenever `LicenseServerLocation` is set:
+
+- The response is verified against this key only. The client never requests a key from the server.
+- If `LicensePublicKey` is not set, or the delegate returns no key, the license is reported as not valid with a message saying no public key is configured, and the server is not called.
+
+The server must sign with a fixed key pair that it keeps between starts, not a new one each time it starts. The key is `Modulus` and `Exponent`, base64.
 
 ## What the client accepts
 
-The signed `license/check` response must return the request's `RequestKey`, `ApplicationName` and `MachineFingerprint.Value` unchanged. Any other response is reported as not valid.
+The `license/check` response must be signed with the configured key and must return the request's `RequestKey`, `ApplicationName` and `MachineFingerprint.Value` unchanged. Any other response is reported as not valid.
+
+## Upgrading to 3.0
+
+Before 3.0, `LicensePublicKey` was optional, and when it was not set the client downloaded the key from `{LicenseServerLocation}/license/key` and verified the response with it. Whoever answered at that address (it comes from configuration, and the hosts file or a proxy can redirect it) could serve their own key, sign their own response, and have the license reported as valid. See [GHSA-6q43-4qx5-7gqw](https://github.com/Tharga/Wpf/security/advisories/GHSA-6q43-4qx5-7gqw).
+
+3.0 removes that download. To upgrade:
+
+1. Make the license server sign with a fixed key pair that it keeps between starts. A server that builds a new key pair when it starts has to store one instead.
+2. Set `LicensePublicKey` in the client to that key pair's public key.
+
+Without step 2, every license check reports the license as not valid.
+
+The fixes that came before it:
+
+- **2.5.6:** the response must return the request's application name and machine fingerprint.
+- **2.6.0:** `LicensePublicKey` was added as an option.
 
 ## Checking the license during splash
 
@@ -78,21 +85,20 @@ var isValid = await update.CheckForLicenseAsync();
 
 Returns the boolean directly; subscribe to `LicenseInfoEvent` if you also want the human-readable message.
 
-## Server side — `Tharga.License` for ASP.NET Core
+## Server side — `Tharga.License`
 
-The `Tharga.License` package wraps the two endpoints in a controller-friendly shape. Wire it into your API project; the WPF host's calls to `license/check` and `license/key` resolve to the package's implementation, which in turn delegates the actual license lookup to your `ILicenseClient`.
-
-`ILicenseClient`:
+`license/check` receives a `LicenseCheckRequest` and answers with a `LicenseCheckResponse` as JSON, with its signature in a `Signature` response header. Register the signing service with `services.AddThargaLicense()` and sign the JSON body with `ISigningService.Sign`:
 
 ```csharp
-public interface ILicenseClient
-{
-    Task<(bool IsValid, string Message)> CheckLicenseAsync();
-}
+var json = JsonSerializer.Serialize(response, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+Response.Headers["Signature"] = signingService.Sign(json, keyPair.Private);
+return Content(json, "application/json");
 ```
 
-Implement it however your product handles licenses (per-tenant flag in MongoDB, KV in Azure, a third-party service, etc.) and Tharga.License's controller plumbing routes the WPF host's request to your implementation.
+`ISigningService.BuildKeyPair` creates a key pair. Create it once, store the private key with the server's secrets, and give the public key to the client through `LicensePublicKey`.
+
+A `license/key` route is no longer called by the client. A server can keep one to hand out the public key, for example to copy into the client's configuration, but the client only ever trusts the key it is configured with.
 
 ## Disabling the license check
 
-Leave `LicenseServerLocation` unset (the default). The client never makes the call, `checkForLicense` becomes a no-op, and `CheckForLicenseAsync` returns `true`.
+Leave `LicenseServerLocation` unset (the default) and do not pass `checkForLicense: true`.

@@ -50,20 +50,7 @@ public class LicenseClientTests
     }
 
     [Fact]
-    public async Task Without_Public_Key_Option_The_Key_Is_Requested_From_The_Server()
-    {
-        var signingService = CreateSigningService();
-        var handler = new LicenseServerHandler(signingService, signingService.BuildKeyPair(), request => request);
-        var sut = CreateClient(signingService, handler);
-
-        var result = await sut.CheckLicenseAsync();
-
-        Assert.True(result.IsValid, result.Message);
-        Assert.Equal(1, handler.KeyRequestCount);
-    }
-
-    [Fact]
-    public async Task With_Public_Key_Option_Response_Signed_By_That_Key_Is_Valid()
+    public async Task Response_Signed_By_The_Configured_Key_Is_Valid_Without_Requesting_The_Key_From_The_Server()
     {
         var signingService = CreateSigningService();
         var serverKeyPair = signingService.BuildKeyPair();
@@ -77,39 +64,58 @@ public class LicenseClientTests
     }
 
     [Fact]
-    public async Task With_Public_Key_Option_Response_Signed_By_Another_Key_Is_Not_Valid()
+    public async Task Response_Signed_By_A_Key_The_Server_Publishes_Instead_Of_The_Configured_Key_Is_Not_Valid()
     {
         var signingService = CreateSigningService();
         var configuredKeyPair = signingService.BuildKeyPair();
-        var otherKeyPair = signingService.BuildKeyPair();
-        var handler = new LicenseServerHandler(signingService, otherKeyPair, request => request);
+        var serverKeyPair = signingService.BuildKeyPair();
+        var handler = new LicenseServerHandler(signingService, serverKeyPair, request => request);
         var sut = CreateClient(signingService, handler, _ => configuredKeyPair.Public);
 
         var result = await sut.CheckLicenseAsync();
 
         Assert.False(result.IsValid);
+        Assert.Equal("Invalid signature.", result.Message);
         Assert.Equal(0, handler.KeyRequestCount);
     }
 
     [Fact]
-    public async Task With_Public_Key_Option_Returning_No_Key_The_Key_Is_Not_Requested_From_The_Server()
+    public async Task Without_Public_Key_Option_The_License_Is_Not_Valid_And_The_Server_Is_Not_Called()
+    {
+        var signingService = CreateSigningService();
+        var handler = new LicenseServerHandler(signingService, signingService.BuildKeyPair(), request => request);
+        var sut = CreateClient(signingService, handler, null);
+
+        var result = await sut.CheckLicenseAsync();
+
+        Assert.False(result.IsValid);
+        Assert.Equal(LicenseClient.NoPublicKeyMessage, result.Message);
+        Assert.Equal(0, handler.RequestCount);
+    }
+
+    [Fact]
+    public async Task With_Public_Key_Option_Returning_No_Key_The_License_Is_Not_Valid_And_The_Server_Is_Not_Called()
     {
         var signingService = CreateSigningService();
         var handler = new LicenseServerHandler(signingService, signingService.BuildKeyPair(), request => request);
         var sut = CreateClient(signingService, handler, _ => null);
 
-        await Assert.ThrowsAsync<InvalidOperationException>(() => sut.CheckLicenseAsync());
-        Assert.Equal(0, handler.KeyRequestCount);
+        var result = await sut.CheckLicenseAsync();
+
+        Assert.False(result.IsValid);
+        Assert.Equal(LicenseClient.NoPublicKeyMessage, result.Message);
+        Assert.Equal(0, handler.RequestCount);
     }
 
     private static LicenseClient CreateClient(Func<LicenseCheckRequest, LicenseCheckRequest> respondFor)
     {
         var signingService = CreateSigningService();
-        var handler = new LicenseServerHandler(signingService, signingService.BuildKeyPair(), respondFor);
-        return CreateClient(signingService, handler);
+        var serverKeyPair = signingService.BuildKeyPair();
+        var handler = new LicenseServerHandler(signingService, serverKeyPair, respondFor);
+        return CreateClient(signingService, handler, _ => serverKeyPair.Public);
     }
 
-    private static LicenseClient CreateClient(ISigningService signingService, LicenseServerHandler handler, Func<IConfiguration, RsaPublicKey?>? licensePublicKey = null)
+    private static LicenseClient CreateClient(ISigningService signingService, LicenseServerHandler handler, Func<IConfiguration, RsaPublicKey?>? licensePublicKey)
     {
         var clientFactory = new Mock<IHttpClientFactory>();
         clientFactory.Setup(x => x.CreateClient(It.IsAny<string>())).Returns(() => new HttpClient(handler, false));
@@ -144,10 +150,12 @@ public class LicenseClientTests
             _respondFor = respondFor;
         }
 
+        public int RequestCount { get; private set; }
         public int KeyRequestCount { get; private set; }
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
+            RequestCount++;
             var path = request.RequestUri!.AbsolutePath;
 
             if (request.Method == HttpMethod.Get && path == "/license/key")
