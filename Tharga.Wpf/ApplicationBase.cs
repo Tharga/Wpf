@@ -37,20 +37,7 @@ public abstract class ApplicationBase : Application
     /// </summary>
     protected ApplicationBase()
     {
-        DispatcherUnhandledException += async (_, e) =>
-        {
-            try
-            {
-                var ess = GetService<IExceptionStateService>();
-                await ess.FallbackHandlerInternalAsync(e.Exception);
-                e.Handled = true;
-            }
-            catch (Exception exception)
-            {
-                Trace.TraceError($"{exception.Message} @{exception.StackTrace}");
-                Debugger.Break();
-            }
-        };
+        DispatcherUnhandledException += new DispatcherUnhandledExceptionHandler(GetService<IExceptionStateService>).Handle;
 
         var assemblyName = Assembly.GetEntryAssembly()?.GetName();
         _cs = new CancellationService();
