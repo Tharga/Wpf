@@ -65,6 +65,24 @@ public class ApplicationUpdateStateServiceTests
         Assert.Equal(2, sut.UpdateCount);
     }
 
+    [Fact]
+    public async Task BeforeRestartAsync_Waits_Until_Every_Tab_Has_Closed()
+    {
+        var tabsClosed = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var tabNavigation = new Mock<ITabNavigationStateService>();
+        tabNavigation.Setup(x => x.CloseAllTabsAsync(true)).Returns(tabsClosed.Task);
+        var sut = CreateService(tabNavigation: tabNavigation.Object);
+
+        var beforeRestart = sut.BeforeRestartForTestAsync();
+
+        Assert.False(beforeRestart.IsCompleted);
+
+        tabsClosed.SetResult(true);
+        await beforeRestart.WaitAsync(Timeout, TestContext.Current.CancellationToken);
+
+        tabNavigation.Verify(x => x.CloseAllTabsAsync(true), Times.Once);
+    }
+
     private static TestUpdateStateService CreateService(Func<Task>? update = null, ITabNavigationStateService? tabNavigation = null)
     {
         var downloadService = new Mock<IApplicationDownloadService>();
@@ -89,6 +107,8 @@ public class ApplicationUpdateStateServiceTests
         }
 
         public int UpdateCount => Volatile.Read(ref _updateCount);
+
+        public Task BeforeRestartForTestAsync() => BeforeRestartAsync();
 
         protected override Task UpdateAsync(string clientLocation)
         {

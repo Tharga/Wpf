@@ -112,8 +112,7 @@ internal abstract class ApplicationUpdateStateServiceBase : IApplicationUpdateSt
     protected async Task BeforeRestartAsync()
     {
         _logger.LogInformation("BeforeRestartAsync — closing all tabs and releasing single-instance lock.");
-        await Application.Current.Dispatcher.InvokeAsync(async () =>
-            await _tabNavigationStateService.CloseAllTabsAsync(true));
+        await _tabNavigationStateService.CloseAllTabsAsync(true);
         ApplicationBase.ReleaseSingleInstanceLock();
     }
 
