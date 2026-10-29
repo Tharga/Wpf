@@ -184,12 +184,14 @@ internal class WindowLocationService : IWindowLocationService
         private static IReadOnlyList<ScreenBounds> GetScreenBounds()
         {
             return System.Windows.Forms.Screen.AllScreens
-                .Select(s => new ScreenBounds(
-                    s.WorkingArea.Left,
-                    s.WorkingArea.Top,
-                    s.WorkingArea.Width,
-                    s.WorkingArea.Height,
-                    s.Primary))
+                .Select(s => ScreenScaling.ToDeviceIndependent(
+                    new ScreenBounds(
+                        s.WorkingArea.Left,
+                        s.WorkingArea.Top,
+                        s.WorkingArea.Width,
+                        s.WorkingArea.Height,
+                        s.Primary),
+                    ScreenScaling.GetDpi(s.Bounds)))
                 .ToList();
         }
 

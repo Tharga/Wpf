@@ -3,7 +3,8 @@ using Tharga.Wpf.WindowLocation;
 namespace Tharga.Wpf.Framework;
 
 /// <summary>
-/// Represents the bounds of a screen/monitor.
+/// Represents the work area of a screen/monitor, in the same unit as the <see cref="Location"/> it is validated against.
+/// For saved window locations that is device-independent units (1/96 inch), not pixels.
 /// </summary>
 public record ScreenBounds(int Left, int Top, int Width, int Height, bool IsPrimary = false);
 
@@ -23,7 +24,7 @@ public static class LocationValidator
     /// always fully on-screen.
     /// </summary>
     /// <param name="location">The saved location to validate.</param>
-    /// <param name="screens">Available screen bounds.</param>
+    /// <param name="screens">Available screen work areas, in the same unit as <paramref name="location"/>.</param>
     /// <param name="defaultWidth">Default width to use when saved width is invalid.</param>
     /// <param name="defaultHeight">Default height to use when saved height is invalid.</param>
     /// <returns>A corrected location, or the original if valid.</returns>
