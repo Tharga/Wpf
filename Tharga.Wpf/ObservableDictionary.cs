@@ -8,6 +8,10 @@ namespace Tharga.Wpf;
 /// </summary>
 /// <typeparam name="TKey">The type of dictionary keys.</typeparam>
 /// <typeparam name="TValue">The type of dictionary values.</typeparam>
+/// <remarks>
+/// Every lookup compares keys with <see cref="EqualityComparer{T}.Default"/>.
+/// Unlike <see cref="Dictionary{TKey,TValue}"/>, a <c>null</c> key is allowed when <typeparamref name="TKey"/> is a reference type, and it can be looked up, replaced and removed like any other key.
+/// </remarks>
 [Serializable]
 public class ObservableDictionary<TKey, TValue> : ObservableCollection<ObservableKeyValuePair<TKey, TValue>>, IDictionary<TKey, TValue>
 {
@@ -75,7 +79,7 @@ public class ObservableDictionary<TKey, TValue> : ObservableCollection<Observabl
 
     private ObservableKeyValuePair<TKey, TValue> GetKvpByTheKey(TKey key)
     {
-        return ThisAsCollection().FirstOrDefault((i) => i.Key.Equals(key));
+        return ThisAsCollection().FirstOrDefault((i) => Equals(key, i.Key));
     }
 
     /// <inheritdoc />
