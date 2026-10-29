@@ -107,6 +107,136 @@ public class LicenseClientTests
         Assert.Equal(0, handler.RequestCount);
     }
 
+    [Fact]
+    public async Task Signed_Response_Missing_A_Required_Field_Is_Not_Valid()
+    {
+        var sut = CreateRawClient(requestKey => SignedJson($$"""{"responseKey":"{{requestKey}}","applicationName":"{{ApplicationName}}","approvedAt":"2026-01-01T00:00:00Z"}"""));
+
+        var result = await sut.CheckLicenseAsync();
+
+        Assert.False(result.IsValid);
+        Assert.StartsWith(LicenseClient.InvalidResponseMessage, result.Message);
+    }
+
+    [Fact]
+    public async Task Signed_Response_With_A_Field_Of_The_Wrong_Type_Is_Not_Valid()
+    {
+        var sut = CreateRawClient(requestKey => SignedJson($$"""{"responseKey":"{{requestKey}}","applicationName":"{{ApplicationName}}","machineFingerprint":{"name":"m","value":"v"},"approvedAt":"not a date"}"""));
+
+        var result = await sut.CheckLicenseAsync();
+
+        Assert.False(result.IsValid);
+        Assert.StartsWith(LicenseClient.InvalidResponseMessage, result.Message);
+    }
+
+    [Fact]
+    public async Task Signed_Response_That_Is_Not_Json_Is_Not_Valid()
+    {
+        var sut = CreateRawClient(_ => SignedJson("not json"));
+
+        var result = await sut.CheckLicenseAsync();
+
+        Assert.False(result.IsValid);
+        Assert.StartsWith(LicenseClient.InvalidResponseMessage, result.Message);
+    }
+
+    [Theory]
+    [InlineData("{}")]
+    [InlineData("{\"message\":42}")]
+    [InlineData("[]")]
+    [InlineData("")]
+    [InlineData("<html>Bad gateway</html>")]
+    public async Task Unsigned_Response_Without_A_Message_Reports_The_Missing_Signature(string body)
+    {
+        var sut = CreateRawClient(_ => Response(body));
+
+        var result = await sut.CheckLicenseAsync();
+
+        Assert.False(result.IsValid);
+        Assert.Equal(LicenseClient.NoSignatureMessage, result.Message);
+    }
+
+    [Fact]
+    public async Task Unsigned_Response_Reports_The_Server_Message()
+    {
+        var sut = CreateRawClient(_ => Response("""{"message":"No license for this machine."}"""));
+
+        var result = await sut.CheckLicenseAsync();
+
+        Assert.False(result.IsValid);
+        Assert.Equal("No license for this machine.", result.Message);
+    }
+
+    [Theory]
+    [InlineData("not base64!")]
+    [InlineData("")]
+    public async Task Response_With_A_Malformed_Signature_Is_Not_Valid(string signature)
+    {
+        var sut = CreateRawClient(requestKey =>
+        {
+            var response = Response(CompleteResponseJson(requestKey));
+            response.Headers.TryAddWithoutValidation(SignatureHeader, signature);
+            return response;
+        });
+
+        var result = await sut.CheckLicenseAsync();
+
+        Assert.False(result.IsValid);
+        Assert.Equal(LicenseClient.InvalidSignatureMessage, result.Message);
+    }
+
+    [Fact]
+    public async Task Response_With_Two_Signatures_Is_Not_Valid()
+    {
+        var sut = CreateRawClient(requestKey =>
+        {
+            var json = CompleteResponseJson(requestKey);
+            var response = SignedJson(json);
+            response.Headers.Add(SignatureHeader, RawKeyPair.SigningService.Sign(json, RawKeyPair.KeyPair.Private));
+            return response;
+        });
+
+        var result = await sut.CheckLicenseAsync();
+
+        Assert.False(result.IsValid);
+        Assert.Equal(LicenseClient.InvalidSignatureMessage, result.Message);
+    }
+
+    private const string SignatureHeader = "Signature";
+
+    private static readonly (ISigningService SigningService, RsaKeyPair KeyPair) RawKeyPair = CreateRawKeyPair();
+
+    private static (ISigningService SigningService, RsaKeyPair KeyPair) CreateRawKeyPair()
+    {
+        var signingService = CreateSigningService();
+        return (signingService, signingService.BuildKeyPair());
+    }
+
+    private static LicenseClient CreateRawClient(Func<string, HttpResponseMessage> respond)
+    {
+        return CreateClient(RawKeyPair.SigningService, new RawLicenseServerHandler(respond), _ => RawKeyPair.KeyPair.Public);
+    }
+
+    private static string CompleteResponseJson(string requestKey)
+    {
+        return $$"""{"responseKey":"{{requestKey}}","applicationName":"{{ApplicationName}}","machineFingerprint":{"name":"m","value":"v"},"approvedAt":"2026-01-01T00:00:00Z"}""";
+    }
+
+    private static HttpResponseMessage Response(string body)
+    {
+        return new HttpResponseMessage(HttpStatusCode.OK)
+        {
+            Content = new StringContent(body, Encoding.UTF8, "application/json")
+        };
+    }
+
+    private static HttpResponseMessage SignedJson(string json)
+    {
+        var response = Response(json);
+        response.Headers.Add(SignatureHeader, RawKeyPair.SigningService.Sign(json, RawKeyPair.KeyPair.Private));
+        return response;
+    }
+
     private static LicenseClient CreateClient(Func<LicenseCheckRequest, LicenseCheckRequest> respondFor)
     {
         var signingService = CreateSigningService();
@@ -115,7 +245,7 @@ public class LicenseClientTests
         return CreateClient(signingService, handler, _ => serverKeyPair.Public);
     }
 
-    private static LicenseClient CreateClient(ISigningService signingService, LicenseServerHandler handler, Func<IConfiguration, RsaPublicKey?>? licensePublicKey)
+    private static LicenseClient CreateClient(ISigningService signingService, HttpMessageHandler handler, Func<IConfiguration, RsaPublicKey?>? licensePublicKey)
     {
         var clientFactory = new Mock<IHttpClientFactory>();
         clientFactory.Setup(x => x.CreateClient(It.IsAny<string>())).Returns(() => new HttpClient(handler, false));
@@ -190,6 +320,22 @@ public class LicenseClientTests
             }
 
             return new HttpResponseMessage(HttpStatusCode.NotFound);
+        }
+    }
+
+    private class RawLicenseServerHandler : HttpMessageHandler
+    {
+        private readonly Func<string, HttpResponseMessage> _respond;
+
+        public RawLicenseServerHandler(Func<string, HttpResponseMessage> respond)
+        {
+            _respond = respond;
+        }
+
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            var checkRequest = await request.Content!.ReadFromJsonAsync<LicenseCheckRequest>(cancellationToken);
+            return _respond(checkRequest!.RequestKey);
         }
     }
 }

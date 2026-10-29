@@ -240,4 +240,54 @@ public class ObservableDictionaryTests
         Assert.Throws<ArgumentException>(() => collection.CopyTo(array, arrayIndex));
         Assert.All(array, pair => Assert.Equal(default, pair));
     }
+
+    private static ObservableDictionary<string?, int> CreateDictionaryWithNullKeyFirst()
+    {
+        return new ObservableDictionary<string?, int> { { null, 1 }, { "a", 2 } };
+    }
+
+    [Fact]
+    public void TryGetValue_Finds_A_Null_Key()
+    {
+        var dictionary = CreateDictionaryWithNullKeyFirst();
+
+        var found = dictionary.TryGetValue(null, out var value);
+
+        Assert.True(found);
+        Assert.Equal(1, value);
+    }
+
+    [Fact]
+    public void Lookups_Of_Other_Keys_Pass_A_Stored_Null_Key()
+    {
+        var dictionary = CreateDictionaryWithNullKeyFirst();
+
+        Assert.True(dictionary.TryGetValue("a", out var value));
+        Assert.Equal(2, value);
+        Assert.Equal(2, dictionary["a"]);
+        Assert.False(dictionary.TryGetValue("missing", out _));
+    }
+
+    [Fact]
+    public void Indexer_Gets_And_Replaces_The_Value_Of_A_Null_Key()
+    {
+        var dictionary = CreateDictionaryWithNullKeyFirst();
+
+        dictionary[null] = 3;
+
+        Assert.Equal(3, dictionary[null]);
+        Assert.Equal(2, dictionary.Count);
+    }
+
+    [Fact]
+    public void Contains_And_Remove_Pair_Handle_A_Null_Key()
+    {
+        var dictionary = CreateDictionaryWithNullKeyFirst();
+
+        Assert.True(dictionary.Contains(new KeyValuePair<string?, int>(null, 1)));
+        Assert.False(dictionary.Contains(new KeyValuePair<string?, int>(null, 2)));
+        Assert.True(dictionary.Remove(new KeyValuePair<string?, int>(null, 1)));
+        Assert.False(dictionary.ContainsKey(null));
+        Assert.True(dictionary.ContainsKey("a"));
+    }
 }

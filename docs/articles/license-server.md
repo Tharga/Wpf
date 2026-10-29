@@ -35,6 +35,10 @@ The server must sign with a fixed key pair that it keeps between starts, not a n
 
 The `license/check` response must be signed with the configured key and must return the request's `RequestKey`, `ApplicationName` and `MachineFingerprint.Value` unchanged. Any other response is reported as not valid.
 
+That includes a response that is not JSON, misses a required field or has a field of the wrong type, and one whose `Signature` header is malformed or repeated. The signature is checked before the body is read, and the message says which check failed.
+
+> **Changed in 3.1.0.** Before that, such a response threw an exception instead of reporting the license as not valid.
+
 ## Upgrading to 3.0
 
 Before 3.0, `LicensePublicKey` was optional, and when it was not set the client downloaded the key from `{LicenseServerLocation}/license/key` and verified the response with it. Whoever answered at that address (it comes from configuration, and the hosts file or a proxy can redirect it) could serve their own key, sign their own response, and have the license reported as valid. See [GHSA-6q43-4qx5-7gqw](https://github.com/Tharga/Wpf/security/advisories/GHSA-6q43-4qx5-7gqw).

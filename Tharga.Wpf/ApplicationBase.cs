@@ -37,20 +37,7 @@ public abstract class ApplicationBase : Application
     /// </summary>
     protected ApplicationBase()
     {
-        DispatcherUnhandledException += async (_, e) =>
-        {
-            try
-            {
-                var ess = GetService<IExceptionStateService>();
-                await ess.FallbackHandlerInternalAsync(e.Exception);
-                e.Handled = true;
-            }
-            catch (Exception exception)
-            {
-                Trace.TraceError($"{exception.Message} @{exception.StackTrace}");
-                Debugger.Break();
-            }
-        };
+        DispatcherUnhandledException += new DispatcherUnhandledExceptionHandler(GetService<IExceptionStateService>).Handle;
 
         var assemblyName = Assembly.GetEntryAssembly()?.GetName();
         _cs = new CancellationService();
@@ -150,7 +137,7 @@ public abstract class ApplicationBase : Application
     /// </summary>
     public IHost AppHost { get; protected init; }
 
-    private static void RegisterExceptionHandler(ThargaWpfOptions options, IServiceCollection services)
+    internal static void RegisterExceptionHandler(ThargaWpfOptions options, IServiceCollection services)
     {
         var exceptionHandlers = options.GetExceptionTypes();
         foreach (var exceptionHandler in exceptionHandlers)
@@ -161,6 +148,7 @@ public abstract class ApplicationBase : Application
         foreach (var exceptionHandlerServices in options.GetExceptionHandlerServices())
         {
             services.AddTransient(exceptionHandlerServices.Value);
+            services.AddTransient(typeof(IExceptionHandlerService), exceptionHandlerServices.Value);
         }
 
         services.AddSingleton<IExceptionStateService>(s =>
@@ -244,21 +232,21 @@ public abstract class ApplicationBase : Application
     }
 
     /// <inheritdoc />
-    protected override async void OnExit(ExitEventArgs args)
+    protected override void OnExit(ExitEventArgs args)
     {
-        try
-        {
-            await _cs.CancelAsync();
-            _singleInstanceService?.Dispose();
-            await AppHost.StopAsync();
-            AppHost.Dispose();
-            base.OnExit(args);
-        }
-        catch (Exception e)
+        ShutdownRunner.Run(StopAsync, () => base.OnExit(args), e =>
         {
             Debugger.Break();
             Trace.TraceError($"{e.Message} @{e.StackTrace}");
-        }
+        });
+    }
+
+    private async Task StopAsync()
+    {
+        await _cs.CancelAsync();
+        _singleInstanceService?.Dispose();
+        await AppHost.StopAsync();
+        AppHost.Dispose();
     }
 
     /// <summary>

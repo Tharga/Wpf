@@ -51,14 +51,20 @@ update.UpdateInfoEvent += (_, args) =>
 
 When `UpdateIntervalCheck` is set, a background timer calls `UpdateClientApplication` with `silent: true`. The check runs without UI; the splash appears only when an actual update needs to download. If you do not want timer-driven updates, leave `UpdateIntervalCheck` at `TimeSpan.Zero` (or `null`) and use `CheckForUpdateAsync` from your menu.
 
+Only one check runs at a time. A check that starts while another is still running, for example a timer tick during a long download, is skipped and leaves the running check and its splash alone.
+
+> **Changed in 3.1.0.** Before that, a skipped check closed the splash the running check was showing progress in, raised `SplashCompleteEvent`, and released a lock it had never taken. A third check could then run alongside the first, and the first later failed with `SemaphoreFullException`.
+
 ## Pre-restart cleanup
 
 Before a Velopack restart, Tharga.Wpf does two things automatically:
 
-1. **Closes all open tabs** via `ITabNavigationStateService.CloseAllTabsAsync`. Tabs that override `OnCloseAsync` get to run their close handlers before the restart. The dispatch happens on the UI thread.
+1. **Closes all open tabs** via `ITabNavigationStateService.CloseAllTabsAsync`. The restart waits until every tab's `OnCloseAsync` has completed, so asynchronous close work such as saving state finishes first. The dispatch happens on the UI thread.
 2. **Releases the single-instance lock** if `AllowMultipleApplications = false` so the updated process can acquire it cleanly.
 
 You don't have to wire either step manually — `ApplicationUpdateStateServiceBase.BeforeRestartAsync` handles both.
+
+> **Changed in 3.1.0.** Before that, the restart waited only until tab closing had started. An `OnCloseAsync` that awaited was cut off when the process exited for the restart.
 
 ## About menu pattern
 

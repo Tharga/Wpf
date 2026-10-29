@@ -31,7 +31,6 @@ internal abstract class ApplicationUpdateStateServiceBase : IApplicationUpdateSt
     private string _applicationLocation;
     private string _applicationLocationSource;
     private string _logFileName;
-    private bool _checkingForUpdate;
     private bool _isUpdating;
     /// <summary>
     /// True when the splash was opened with an explicit user-visible close button
@@ -113,8 +112,7 @@ internal abstract class ApplicationUpdateStateServiceBase : IApplicationUpdateSt
     protected async Task BeforeRestartAsync()
     {
         _logger.LogInformation("BeforeRestartAsync — closing all tabs and releasing single-instance lock.");
-        await Application.Current.Dispatcher.InvokeAsync(async () =>
-            await _tabNavigationStateService.CloseAllTabsAsync(true));
+        await _tabNavigationStateService.CloseAllTabsAsync(true);
         ApplicationBase.ReleaseSingleInstanceLock();
     }
 
@@ -223,21 +221,18 @@ internal abstract class ApplicationUpdateStateServiceBase : IApplicationUpdateSt
 
     private async Task UpdateClientApplication(string source, bool silent = false)
     {
+        if (!_lock.Wait(0))
+        {
+            AddLogString($"Ignore {nameof(UpdateClientApplication)} since it is already running. (source: {source})");
+            _logger.LogInformation("UpdateClientApplication ignored - already running. source={Source}", source);
+            return;
+        }
+
         string clientLocation = null;
         var hadException = false;
 
         try
         {
-            if (_checkingForUpdate)
-            {
-                AddLogString($"Ignore {nameof(UpdateClientApplication)} since it is already running. (source: {source})");
-                _logger.LogInformation("UpdateClientApplication ignored - already running. source={Source}", source);
-                return;
-            }
-
-            await _lock.WaitAsync();
-            _checkingForUpdate = true;
-
             AddLogString($"--- Start {nameof(UpdateClientApplication)} (source: {source}, silent: {silent}) ---");
             _logger.LogInformation("UpdateClientApplication start. source={Source}, silent={Silent}, persistentCloseButton={Persistent}", source, silent, _persistentCloseButton);
 
@@ -335,7 +330,6 @@ internal abstract class ApplicationUpdateStateServiceBase : IApplicationUpdateSt
 
             AddLogString($"--- End {nameof(UpdateClientApplication)} ---");
             _isUpdating = false;
-            _checkingForUpdate = false;
             _lock.Release();
         }
     }

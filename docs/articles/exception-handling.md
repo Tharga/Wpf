@@ -61,7 +61,11 @@ For more control than `IExceptionHandler<T>` provides — for example, batching,
 options.RegisterExceptionHandler<MyExceptionHandlerService>();
 ```
 
-The service's `HandleAsync` runs after typed handlers and before the fallback. Returning `true` (handled) suppresses the fallback dialog; returning `false` lets it run.
+The service's `HandleExceptionAsync` runs after typed handlers and before the fallback. Returning `true` (handled) suppresses the fallback dialog; returning `false` lets it run.
+
+For an exception on the dispatcher, the exception is marked handled before `HandleExceptionAsync` starts. The method can await, for example to send telemetry or show an asynchronous dialog, and the application keeps running.
+
+> **Changed in 3.1.0.** Before that, `RegisterExceptionHandler<TService>()` registered the service under its own type only. The framework asks the container for `IExceptionHandlerService`, so the service was never called and every exception went to the built-in dialog. A service registered as `IExceptionHandlerService` in `Register` was called, but if its `HandleExceptionAsync` awaited, the dispatcher exception was marked handled too late and the application terminated. If you registered the interface yourself as a workaround, that registration is no longer needed.
 
 ## Threading
 

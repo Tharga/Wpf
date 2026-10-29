@@ -13,16 +13,16 @@ public record Location
     /// <summary>The window visibility.</summary>
     public Visibility Visibility { get; init; }
 
-    /// <summary>The left position of the window in pixels.</summary>
+    /// <summary>The left position of the window in device-independent units (1/96 inch), as <see cref="Window.Left"/> reports it.</summary>
     public int Left { get; init; }
 
-    /// <summary>The top position of the window in pixels.</summary>
+    /// <summary>The top position of the window in device-independent units (1/96 inch), as <see cref="Window.Top"/> reports it.</summary>
     public int Top { get; init; }
 
-    /// <summary>The width of the window in pixels.</summary>
+    /// <summary>The width of the window in device-independent units (1/96 inch), as <see cref="FrameworkElement.Width"/> of the window reports it.</summary>
     public int Width { get; init; }
 
-    /// <summary>The height of the window in pixels.</summary>
+    /// <summary>The height of the window in device-independent units (1/96 inch), as <see cref="FrameworkElement.Height"/> of the window reports it.</summary>
     public int Height { get; init; }
 
     /// <summary>Custom metadata associated with the window location.</summary>

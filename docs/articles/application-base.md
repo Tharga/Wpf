@@ -37,6 +37,12 @@ var orderService = ApplicationBase.GetService<IOrderService>();
 
 If the requested type was not registered, `GetService<T>` throws `TypeNotRegisteredException`. The accessor is safe to call from any thread; the underlying provider is the same instance that was built during startup.
 
+## Shutdown
+
+When the application exits, `ApplicationBase.OnExit` cancels `ICancellationService.Token`, releases the single-instance lock, stops and disposes the host, and then raises the application's `Exit` event. Stopping the host stops your hosted services and flushes logging providers. All of this finishes before `OnExit` returns, so exit takes as long as your hosted services need to stop. Once the host's `ShutdownTimeout` has passed, the token given to their `StopAsync` is cancelled. `Exit` is raised even if a step before it fails.
+
+> **Changed in 3.1.0.** Before that, `OnExit` returned at the first step that did not complete at once, for example cancelling a token that a pending `Task.Delay` was using. WPF then shut the dispatcher down, and the remaining steps were skipped: hosted services were not stopped, the last log entries could be lost, and the `Exit` event was not raised.
+
 ## MVVM binding helper — `ViewModelProvider`
 
 Wire a `View` to its `ViewModel` declaratively in XAML without manually constructing or setting `DataContext`:
