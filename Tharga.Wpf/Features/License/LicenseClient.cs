@@ -14,6 +14,10 @@ namespace Tharga.Wpf.License;
 internal class LicenseClient : ILicenseClient
 {
     internal const string NoPublicKeyMessage = "No license public key is configured. Set LicensePublicKey in ThargaWpfOptions to the public key the license server signs with.";
+    internal const string NoSignatureMessage = "Cannot find signature.";
+    internal const string InvalidSignatureMessage = "Invalid signature.";
+    internal const string InvalidResponseMessage = "Invalid license response.";
+    private const string SignatureHeader = "Signature";
 
     private readonly IHttpClientFactory _clientFactory;
     private readonly IConfiguration _configuration;
@@ -54,23 +58,59 @@ internal class LicenseClient : ILicenseClient
         if (!response.IsSuccessStatusCode) return (false, $"{response.ReasonPhrase}. (Status code: {(int)response.StatusCode})");
 
         var json = await response.Content.ReadAsStringAsync();
-        using var doc = JsonDocument.Parse(json);
 
-        if (!response.Headers.TryGetValues("Signature", out var signatures))
+        if (!response.Headers.TryGetValues(SignatureHeader, out var signatures))
         {
-            doc.RootElement.TryGetProperty("message", out var message);
-            return (false, message.GetString() ?? "Cannot find signature.");
+            return (false, ReadServerMessage(json) ?? NoSignatureMessage);
         }
-        var signature = signatures.Single();
 
-        var data = JsonSerializer.Deserialize<LicenseCheckResponse>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-        if (!_signingService.VerifySignature(json, signature, publicKey)) return (false, "Invalid signature.");
+        var signatureValues = signatures.ToArray();
+        if (signatureValues.Length != 1 || !IsSignatureValid(json, signatureValues[0], publicKey)) return (false, InvalidSignatureMessage);
+
+        LicenseCheckResponse data;
+        try
+        {
+            data = JsonSerializer.Deserialize<LicenseCheckResponse>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        }
+        catch (JsonException e)
+        {
+            return (false, $"{InvalidResponseMessage} {e.Message}");
+        }
 
         if (data?.ResponseKey != requestKey) return (false, "Invalid response key.");
         if (!string.Equals(data.ApplicationName, request.ApplicationName, StringComparison.Ordinal)) return (false, "Invalid response application.");
         if (!string.Equals(data.MachineFingerprint?.Value, request.MachineFingerprint.Value, StringComparison.Ordinal)) return (false, "Invalid response machine fingerprint.");
 
         return (true, "License is valid.");
+    }
+
+    private bool IsSignatureValid(string json, string signature, RsaPublicKey publicKey)
+    {
+        try
+        {
+            return _signingService.VerifySignature(json, signature, publicKey);
+        }
+        catch (FormatException)
+        {
+            return false;
+        }
+    }
+
+    private static string ReadServerMessage(string json)
+    {
+        try
+        {
+            using var doc = JsonDocument.Parse(json);
+            return doc.RootElement.ValueKind == JsonValueKind.Object
+                   && doc.RootElement.TryGetProperty("message", out var message)
+                   && message.ValueKind == JsonValueKind.String
+                ? message.GetString()
+                : null;
+        }
+        catch (JsonException)
+        {
+            return null;
+        }
     }
 
     private static (string MachineName, string Fingerprint) GetMachineFingerprint()
