@@ -44,8 +44,12 @@ options.StartupWindowState = StartupWindowState.Last; // default
 
 Saved window locations are validated both when they are loaded and whenever the display setup changes while the application is running. The framework guards against two failure modes:
 
-- **Too small** — width or height below 200x150 pixels are replaced with defaults. Prevents a misconfigured save from leaving the window invisible-but-present.
+- **Too small** — width or height below 200x150 are replaced with defaults. Prevents a misconfigured save from leaving the window invisible-but-present.
 - **Off-screen** — if the saved rectangle isn't on any currently connected monitor (laptop dock removed, second monitor disconnected, resolution changed), the window is moved to the center of the primary screen, with its size clamped to that screen's work area so it ends up fully on-screen.
+
+Saved locations are in WPF device-independent units (1/96 inch), the unit of `Window.Left` and `Window.Width`. Each monitor's work area is converted to the same unit with that monitor's DPI before the comparison, so both guards hold on displays scaled above 100%.
+
+> **Changed in 3.1.0.** Before that, saved locations were compared with the monitors' work areas in physical pixels. On a display scaled above 100%, a window left on a disconnected monitor could be kept and restored off-screen, and a rescued window was centred and sized as if pixels were device-independent units, so it ended up offset and could still extend off-screen. At 100% scaling nothing changes.
 
 Display changes are picked up live: disconnect a monitor and any window stranded on it is pulled back onto the remaining screens automatically, and the rescued position is persisted. The revalidation is debounced (Windows fires several display events in a row) and only applies to windows in normal state — maximized and minimized windows are re-placed by Windows itself.
 
