@@ -232,21 +232,21 @@ public abstract class ApplicationBase : Application
     }
 
     /// <inheritdoc />
-    protected override async void OnExit(ExitEventArgs args)
+    protected override void OnExit(ExitEventArgs args)
     {
-        try
-        {
-            await _cs.CancelAsync();
-            _singleInstanceService?.Dispose();
-            await AppHost.StopAsync();
-            AppHost.Dispose();
-            base.OnExit(args);
-        }
-        catch (Exception e)
+        ShutdownRunner.Run(StopAsync, () => base.OnExit(args), e =>
         {
             Debugger.Break();
             Trace.TraceError($"{e.Message} @{e.StackTrace}");
-        }
+        });
+    }
+
+    private async Task StopAsync()
+    {
+        await _cs.CancelAsync();
+        _singleInstanceService?.Dispose();
+        await AppHost.StopAsync();
+        AppHost.Dispose();
     }
 
     /// <summary>
