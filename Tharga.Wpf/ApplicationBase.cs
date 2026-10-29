@@ -150,7 +150,7 @@ public abstract class ApplicationBase : Application
     /// </summary>
     public IHost AppHost { get; protected init; }
 
-    private static void RegisterExceptionHandler(ThargaWpfOptions options, IServiceCollection services)
+    internal static void RegisterExceptionHandler(ThargaWpfOptions options, IServiceCollection services)
     {
         var exceptionHandlers = options.GetExceptionTypes();
         foreach (var exceptionHandler in exceptionHandlers)
@@ -161,6 +161,7 @@ public abstract class ApplicationBase : Application
         foreach (var exceptionHandlerServices in options.GetExceptionHandlerServices())
         {
             services.AddTransient(exceptionHandlerServices.Value);
+            services.AddTransient(typeof(IExceptionHandlerService), exceptionHandlerServices.Value);
         }
 
         services.AddSingleton<IExceptionStateService>(s =>
