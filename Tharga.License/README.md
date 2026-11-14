@@ -1,6 +1,8 @@
 ﻿# Tharga License
 This package is the service part that works with Tharga Wpf.
 
+**Supported frameworks:** `net10.0` and `net11.0`.
+
 ## Features
 - Helper service for Tharga Wpf License Check
 
