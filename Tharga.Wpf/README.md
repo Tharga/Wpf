@@ -1,6 +1,8 @@
 # Tharga Wpf
 This package is a basic toolset for WPF applications.
 
+**Supported frameworks:** `net10.0-windows` and `net11.0-windows`.
+
 ## Features
 - MVVM binding helper
 - Built in .NET IOC

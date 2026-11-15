@@ -8,6 +8,8 @@
 
 This package is a basic toolset for WPF applications.
 
+**Supported frameworks:** `net10.0-windows` and `net11.0-windows` (`Tharga.License`: `net10.0` and `net11.0`).
+
 ## Features
 - [MVVM binding helper](#mvvm-binding-helper)
 - [Built in .NET IOC](#built-in-net-ioc)
