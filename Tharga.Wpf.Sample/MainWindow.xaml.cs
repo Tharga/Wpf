@@ -30,14 +30,7 @@ public partial class MainWindow
     {
         try
         {
-            var success = await _dataContext.CloseTabs();
-            if (!success)
-            {
-                e.Cancel = true;
-                return;
-            }
-
-            base.OnClosing(e);
+            await this.HandleCloseAsync(e, base.OnClosing);
         }
         catch (Exception ex)
         {
