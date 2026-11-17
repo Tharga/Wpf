@@ -313,7 +313,7 @@ public abstract class ApplicationBase : Application
     /// Closes the application with the specified close mode.
     /// </summary>
     /// <param name="closeMode">The close mode to use.</param>
-    /// <returns><c>true</c> if the close was successful; <c>false</c> if it was cancelled.</returns>
+    /// <returns><c>true</c> if the application was hidden to the tray or the main window closed; <c>false</c> if the close was cancelled, or deferred while tabs close asynchronously and the window was still open when the call returned.</returns>
     public static bool Close(CloseMode closeMode = CloseMode.Default)
     {
         try
@@ -333,7 +333,10 @@ public abstract class ApplicationBase : Application
             BeforeCloseEvent?.Invoke(null, beforeCloseEventArgs);
             if (beforeCloseEventArgs.Cancel) return false;
 
-            Current?.MainWindow?.Close();
+            var mainWindow = Current?.MainWindow;
+            if (mainWindow == null) return true;
+
+            return WindowCloser.Close(mainWindow);
         }
         catch (Exception e)
         {
@@ -345,8 +348,6 @@ public abstract class ApplicationBase : Application
         {
             CloseMode = CloseMode.Default;
         }
-
-        return true;
     }
 
     /// <summary>

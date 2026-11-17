@@ -96,7 +96,7 @@ public class ObservableDictionary<TKey, TValue> : ObservableCollection<Observabl
             TValue result;
             if (!TryGetValue(key, out result))
             {
-                throw new ArgumentException("Key not found");
+                throw new KeyNotFoundException("Key not found");
             }
             return result;
         }

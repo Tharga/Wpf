@@ -67,16 +67,6 @@ public class MainWindowViewModel : ViewModelBase
         set => SetField(ref _message, value);
     }
 
-    public async Task<bool> CloseTabs()
-    {
-        if (!await _tabNavigationStateService.CloseAllTabsAsync(ApplicationBase.CloseMode == CloseMode.Force))
-        {
-            return false;
-        }
-
-        return true;
-    }
-
     public void Startup()
     {
         _applicationUpdateStateService.ShowSplashAsync(true, false, true);
