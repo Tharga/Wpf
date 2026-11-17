@@ -70,7 +70,7 @@ public class ObservableDictionaryTests
     {
         var dictionary = new ObservableDictionary<string, int> { { "a", 1 } };
 
-        Assert.Throws<ArgumentException>(() => dictionary["missing"]);
+        Assert.Throws<KeyNotFoundException>(() => dictionary["missing"]);
     }
 
     [Fact]
